@@ -28,6 +28,10 @@ class App(Cmd):
         # Create a cache object to save url information to
         self._ioc_cache: List = self._get_iocs_from_history()
 
+    def _add_ioc_to_cache(self, ioc: str) -> None:
+        if ioc not in self._ioc_cache:
+            self._ioc_cache.append(ioc)
+
     def _get_iocs_from_history(self) -> List[str]:
         return [
             h.statement.args for h in self.history if h.statement.command in ["enrich", ]

@@ -1,1 +1,1 @@
-__all__ = ["enrichment"]
+__all__ = ["enrich", "score"]

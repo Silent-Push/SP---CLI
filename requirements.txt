@@ -4,6 +4,7 @@ cmd2-ext-test==2.0.0
 gnureadline==8.1.2
 iniconfig==2.0.0
 packaging==23.2
+pandas==2.2.0
 pluggy==1.4.0
 py==1.11.0
 pyparsing==3.1.1
