@@ -31,6 +31,11 @@ class EnrichCommandSet(BaseCommandSet):
 
     @with_argparser(enrich_parser)
     def do_enrich(self, params: Statement):
+        """
+        Enriches a domain, IP or URL
+        :param params:
+        :return:
+        """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
             return

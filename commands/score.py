@@ -1,3 +1,4 @@
+import argparse
 import json
 import requests
 
@@ -25,6 +26,11 @@ class ScoreCommandSet(BaseCommandSet):
 
     @with_argparser(_score_parser)
     def do_score(self, params: Statement):
+        """
+        Scores a domain, IP or URL
+        :param params:
+        :return:
+        """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
             return
