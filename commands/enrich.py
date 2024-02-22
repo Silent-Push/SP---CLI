@@ -7,8 +7,8 @@ from cmd2 import (
     with_default_category,
 )
 
-from common.BaseCommand import BaseCommand
-from common.BaseCommandSet import BaseCommandSet
+from commands.base.BaseCommand import BaseCommand
+from commands.base.BaseCommandSet import BaseCommandSet
 from common.parse_ioc import IOCUtils
 from settings import CRLF, API_URL, API_KEY
 
@@ -33,8 +33,6 @@ class EnrichCommandSet(BaseCommandSet):
     def do_enrich(self, params: Statement):
         """
         Enriches a domain, IP or URL
-        :param params:
-        :return:
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
