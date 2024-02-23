@@ -23,10 +23,10 @@ class EnrichCommandSet(BaseCommandSet):
         help="IoC to enrich"
     )
     enrich_parser.add_argument(
-        "-explain", type=int, choices=[0, 1], default=0
+        "-e", "--explain", action="store_true"
     )
     enrich_parser.add_argument(
-        "-scan_data", type=int, choices=[0, 1], default=0
+        "-s", "--scan_data", action="store_true"
     )
 
     @with_argparser(enrich_parser)
@@ -45,8 +45,8 @@ class EnrichCommandSet(BaseCommandSet):
 
         def __enter__(self):
             self._URL = self._URL.format(
-                self._params.explain,
-                self._params.scan_data,
+                1 if self._params.explain else 0,
+                1 if self._params.scan_data else 0,
                 type=IOCUtils(self._params.ioc).type,
                 ioc=self._params.ioc
             )

@@ -1,4 +1,3 @@
-import argparse
 import json
 import requests
 
@@ -29,6 +28,8 @@ class PADNS(BaseCommand):
             qtype=self._qtype,
             ioc=self._params.ioc
         )
+        if self._params.params:
+            self._URL += "?" + "&".join(self._params.params)
         self._feedback = f"{self._URL[self._URL.index('lookup/') + 7:]}"
         self._commandSet._cmd.pfeedback(f"\t{self._feedback}...")
         return self

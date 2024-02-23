@@ -10,7 +10,8 @@ from common.parse_ioc import IOCUtils
 
 
 @with_default_category("PADNS")
-class PADNSQueryCommandSet(BaseCommandSet):
+class PADNSAnswerCommandSet(BaseCommandSet):
+
     _answer_parser = Cmd2ArgumentParser()
     _answer_parser.add_subparsers(
         title="answer",
