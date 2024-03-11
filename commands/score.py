@@ -18,12 +18,6 @@ from settings import CRLF, API_URL, API_KEY
 class ScoreCommandSet(BaseCommandSet):
 
     _score_parser = BaseCommandSet._get_arg_parser()
-    _score_parser.add_argument(
-        "ioc",
-        choices_provider=(lambda self: self._cmd._ioc_cache),
-        type=str,
-        help="IoC to score"
-    )
 
     @with_argparser(_score_parser)
     def do_score(self, params: Statement):
@@ -37,23 +31,24 @@ class ScoreCommandSet(BaseCommandSet):
             scoring.score()
 
     class Scoring(BaseCommand):
-        __URL = API_URL + "explore/{type}/riskscore/{ioc}/"
+        _URL = API_URL + "explore/{type}/riskscore/{ioc}/"
 
         def __enter__(self):
-            self.__URL = self.__URL.format(
+            self._URL = self._URL.format(
                 type=IOCUtils(self._params.ioc).type,
                 ioc=self._params.ioc
             )
+            self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
+            super().__enter__()
             return self
 
         def score(self):
             response = requests.get(
-                self.__URL,
+                self._URL,
                 headers={"x-api-key": API_KEY}
             )
             self._response = json.loads(response.content).get("response")
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             super().__exit__(exc_type, exc_val, exc_tb)
-            self._commandSet._cmd.poutput(self._output)
             self._commandSet._cmd._add_ioc_to_cache(self._params.ioc)

@@ -1,8 +1,23 @@
+from __future__ import annotations
+
 import json
+from typing import Callable
+
 import pandas
+from pandas import DataFrame
 
 from common.utils import flatten_dict
 from settings import CRLF
+
+
+class PandasDataFrameTSV(pandas.DataFrame):
+
+    def to_tsv(self, *args, **kwargs) -> str | None:
+        return self.transpose().to_string()
+
+    @property
+    def _constructor(self) -> Callable[..., DataFrame]:
+        return PandasDataFrameTSV
 
 
 class BaseCommand:
@@ -15,12 +30,29 @@ class BaseCommand:
         self._commandSet = command_set
         self._params = params
 
+    def __enter__(self):
+        if self._params.params:
+            self._URL += "?" + "&".join(self._params.params)
+        self._commandSet._cmd.pfeedback(f"\t{self._feedback}...")
+
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self._output = json.dumps(self._response, indent=2) + CRLF
-        if self._params.csv:
+        if self._params.json:
+            self._output = json.dumps(self._response, indent=2) + CRLF
+        elif self._params.csv:
             dataframe = pandas.DataFrame(
                 flatten_dict(self._response),
                 index=[0]
             )
             dataframe = dataframe.transpose()
             self._output = dataframe.to_csv() + CRLF
+        elif self._params.tsv:
+            dataframe = PandasDataFrameTSV(
+                flatten_dict(self._response),
+                index=[0]
+            )
+            self._output = dataframe.to_tsv() + CRLF
+        else:
+            self._output = json.dumps(self._response, indent=2) + CRLF
+        self._commandSet._cmd.poutput(self._output)
+        self._commandSet._cmd.pfeedback(f"\t*{self._feedback}")
+

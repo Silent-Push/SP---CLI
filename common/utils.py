@@ -20,33 +20,37 @@ class AppFileManager:
 
 
 def flatten_dict(data, prefix=""):
-        flatten_merged = {}
-        if not isinstance(data, dict):
-            flatten_merged[f"{prefix}"] = data
-            return flatten_merged
-        for field, value in data.items():
-            if isinstance(value, list):
-                try:
-                    if isinstance(value[0], dict):
-                        for _k, d in enumerate(value):
+    flatten_merged = {}
+    if not isinstance(data, dict):
+        flatten_merged[f"{prefix}"] = data
+        return flatten_merged
+    for field, value in data.items():
+        if isinstance(value, list):
+            try:
+                if isinstance(value[0], dict):
+                    iterator = enumerate(value) if len(value) > 1 else value[0].items()
+                    for _k, d in iterator:
+                        if isinstance(d, dict):
                             merged_dict_keys = {
                                 field + "_" + k + "_" + str(_k): v for k, v in d.items()
                             }
-                            flatten_merged = {
-                                **flatten_merged,
-                                **flatten_dict(merged_dict_keys, prefix),
-                            }
-                        continue
-                    else:
-                        value = ", ".join(str(v) for v in value)
-                except IndexError:
+                        elif isinstance(d, str):
+                            merged_dict_keys = {field + "_" + str(_k): d}
+                    flatten_merged = {
+                        **flatten_merged,
+                        **flatten_dict(merged_dict_keys, prefix),
+                    }
                     continue
-            if isinstance(value, dict):
-                merged_dict_keys = {field + "_" + k: v for k, v in value.items()}
-                flatten_merged = {
-                    **flatten_merged,
-                    **flatten_dict(merged_dict_keys, prefix),
-                }
+                else:
+                    value = ", ".join(str(v) for v in value)
+            except IndexError:
                 continue
-            flatten_merged[f"{prefix}_{field}"] = value
-        return flatten_merged
+        if isinstance(value, dict):
+            merged_dict_keys = {field + "_" + k: v for k, v in value.items()}
+            flatten_merged = {
+                **flatten_merged,
+                **flatten_dict(merged_dict_keys, prefix),
+            }
+            continue
+        flatten_merged[f"{prefix}{field}"] = value
+    return flatten_merged

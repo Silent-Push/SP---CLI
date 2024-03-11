@@ -18,11 +18,6 @@ class EnrichCommandSet(BaseCommandSet):
 
     enrich_parser = BaseCommandSet._get_arg_parser()
     enrich_parser.add_argument(
-        "ioc",
-        choices_provider=(lambda self: self._cmd._ioc_cache),
-        help="IoC to enrich"
-    )
-    enrich_parser.add_argument(
         "-e", "--explain", action="store_true"
     )
     enrich_parser.add_argument(
@@ -41,15 +36,19 @@ class EnrichCommandSet(BaseCommandSet):
             enrichment.enrich()
 
     class Enrichment(BaseCommand):
-        _URL = API_URL + "explore/enrich/{type}/{ioc}/?explain={}&scan_data={}"
+        _URL = API_URL + "explore/enrich/{type}/{ioc}/"
 
         def __enter__(self):
             self._URL = self._URL.format(
-                1 if self._params.explain else 0,
-                1 if self._params.scan_data else 0,
                 type=IOCUtils(self._params.ioc).type,
                 ioc=self._params.ioc
             )
+            self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
+            if self._params.explain:
+                self._params.params.append("explain=1")
+            if self._params.scan_data:
+                self._params.params.append("scan_data=1")
+            super().__enter__()
             return self
 
         def enrich(self):
@@ -61,5 +60,4 @@ class EnrichCommandSet(BaseCommandSet):
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             super().__exit__(exc_type, exc_val, exc_tb)
-            self._commandSet._cmd.poutput(self._output)
             self._commandSet._cmd._add_ioc_to_cache(self._params.ioc)
