@@ -42,16 +42,19 @@ class App(Cmd):
         self.poutput(self.intro)
 
 
-def main():
+def main(argv=None):
     app_man = AppFileManager(__app_name__)
     app_man.create_hist_dir()  # Create history and cache directories
     app = App(application_manager=app_man)
     parser = argparse.ArgumentParser(prog="SP-CLI")
-    parser.add_argument("command", nargs='*')
-    args = parser.parse_args()
+    command_help = 'optional command to run, if no command given, enter an interactive shell'
+    parser.add_argument("command", nargs='?', help=command_help)
+    arg_help = 'optional arguments for command'
+    parser.add_argument('command_args', nargs=argparse.REMAINDER, help=arg_help)
+    args = parser.parse_args(argv)
     exit_code = 0
     if args.command:
-        app.onecmd_plus_hooks(' '.join(args.command))
+        app.onecmd_plus_hooks('{} {}'.format(args.command, ' '.join(args.command_args)))
     else:
         exit_code = app.cmdloop()
     return exit_code
@@ -60,3 +63,5 @@ def main():
 if __name__ == '__main__':
     import sys
     sys.exit(main())
+
+# @TODO: save command, config file, batch commands (sp < file), daemon

@@ -36,10 +36,10 @@ def flatten_dict(data, prefix=""):
                             }
                         elif isinstance(d, str):
                             merged_dict_keys = {field + "_" + str(_k): d}
-                    flatten_merged = {
-                        **flatten_merged,
-                        **flatten_dict(merged_dict_keys, prefix),
-                    }
+                        flatten_merged = {
+                            **flatten_merged,
+                            **flatten_dict(merged_dict_keys, prefix),
+                        }
                     continue
                 else:
                     value = ", ".join(str(v) for v in value)
