@@ -9,6 +9,7 @@ from cmd2 import (
 
 from commands.base.BaseCommand import BaseCommand
 from commands.base.BaseCommandSet import BaseCommandSet
+from common.decorators import targeted_command, validate_ioc
 from common.parse_ioc import IOCUtils
 from settings import CRLF, API_URL, API_KEY
 
@@ -24,14 +25,13 @@ class EnrichCommandSet(BaseCommandSet):
         "-s", "--scan_data", action="store_true"
     )
 
+    @targeted_command
+    @validate_ioc
     @with_argparser(enrich_parser)
     def do_enrich(self, params: Statement):
         """
         Enriches a domain, IP or URL
         """
-        if not IOCUtils(params.ioc).validate():
-            self._cmd.perror("Not a valid IoC")
-            return
         with self.Enrichment(params, self) as enrichment:
             enrichment.enrich()
 

@@ -8,6 +8,7 @@ class BaseCommandSet(CommandSet):
         base_arg_parser = Cmd2ArgumentParser()
         base_arg_parser.add_argument(
             "ioc",
+            nargs="?",
             choices_provider=(lambda self: self._cmd._ioc_cache),
             help="IoC to enrich"
         )

@@ -6,6 +6,7 @@ from cmd2 import Statement, Cmd2ArgumentParser, with_argparser, with_default_cat
 from commands.base.padns import PADNS
 from commands.base.BaseCmd2ArgumentParser import subcommand_parser
 from commands.base.BaseCommandSet import BaseCommandSet
+from common.decorators import targeted_command, validate_ioc
 from common.parse_ioc import IOCUtils
 
 
@@ -28,14 +29,14 @@ class PADNSQueryCommandSet(BaseCommandSet):
             handler(ns)
         else:
             self._cmd.do_help('query')
+
+    @targeted_command
+    @validate_ioc
     @cmd2.as_subcommand_to('query', 'a', subcommand_parser)
     def query_a(self, params: Statement):
         """
         Forward A lookup
         """
-        if not IOCUtils(params.ioc).validate():
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNS(params, self, qtype="a") as padns:
             padns.lookup()
 

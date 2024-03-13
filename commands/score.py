@@ -10,6 +10,7 @@ from cmd2 import (
 
 from commands.base.BaseCommand import BaseCommand
 from commands.base.BaseCommandSet import BaseCommandSet
+from common.decorators import targeted_command, validate_ioc
 from common.parse_ioc import IOCUtils
 from settings import CRLF, API_URL, API_KEY
 
@@ -19,14 +20,13 @@ class ScoreCommandSet(BaseCommandSet):
 
     _score_parser = BaseCommandSet._get_arg_parser()
 
+    @targeted_command
+    @validate_ioc
     @with_argparser(_score_parser)
     def do_score(self, params: Statement):
         """
         Scores a domain, IP or URL
         """
-        if not IOCUtils(params.ioc).validate():
-            self._cmd.perror("Not a valid IoC")
-            return
         with self.Scoring(params, self) as scoring:
             scoring.score()
 

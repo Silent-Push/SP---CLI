@@ -1,7 +1,11 @@
-from collections.abc import MutableMapping
-from pathlib import Path
+from __future__ import annotations
 
-from xdg import XDG_CACHE_HOME, XDG_DATA_HOME
+from pathlib import Path
+from typing import Callable
+
+import pandas
+from pandas import DataFrame
+from xdg import XDG_DATA_HOME
 
 
 class AppFileManager:
@@ -17,6 +21,23 @@ class AppFileManager:
 
     def create_hist_dir(self) -> Path:
         XDG_DATA_HOME.joinpath(self.app_name).mkdir(parents=True, exist_ok=True)
+
+
+class PandasDataFrameTSV(pandas.DataFrame):
+
+    def to_tsv(self, *args, **kwargs) -> str | None:
+        return self.transpose().to_string()
+
+    @property
+    def _constructor(self) -> Callable[..., DataFrame]:
+        return PandasDataFrameTSV
+
+
+def strip_command_options(command_set, args):
+    for action in command_set._get_arg_parser()._get_optional_actions():
+        for option in action.option_strings:
+            args = args.strip(option)
+    return args.strip()
 
 
 def flatten_dict(data, prefix=""):

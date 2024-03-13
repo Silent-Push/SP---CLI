@@ -1,23 +1,9 @@
-from __future__ import annotations
-
 import json
-from typing import Callable
 
 import pandas
-from pandas import DataFrame
 
-from common.utils import flatten_dict
+from common.utils import flatten_dict, PandasDataFrameTSV
 from settings import CRLF
-
-
-class PandasDataFrameTSV(pandas.DataFrame):
-
-    def to_tsv(self, *args, **kwargs) -> str | None:
-        return self.transpose().to_string()
-
-    @property
-    def _constructor(self) -> Callable[..., DataFrame]:
-        return PandasDataFrameTSV
 
 
 class BaseCommand:
