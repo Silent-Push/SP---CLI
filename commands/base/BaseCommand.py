@@ -54,5 +54,7 @@ class BaseCommand:
         else:
             self._output = json.dumps(self._response, indent=2) + CRLF
         self._commandSet._cmd.poutput(self._output)
+        # used by the run_script and run_pyscript command
+        self._commandSet._cmd.last_result = self._output
         self._commandSet._cmd.pfeedback(f"\t*{self._feedback}")
 

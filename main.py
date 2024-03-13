@@ -23,7 +23,7 @@ class App(Cmd):
         super().__init__(
             persistent_history_file=hist_file,
             persistent_history_length=500,
-            allow_cli_args=False
+            allow_cli_args=False  # we use our own argparse
         )
         # Create a cache object to save url information to
         self._ioc_cache: List = self._get_iocs_from_history()
@@ -47,9 +47,9 @@ def main(argv=None):
     app_man.create_hist_dir()  # Create history and cache directories
     app = App(application_manager=app_man)
     parser = argparse.ArgumentParser(prog="SP-CLI")
-    command_help = 'optional command to run, if no command given, enter an interactive shell'
+    command_help = 'command: score/enrich/query/answer (if none, enter interactive shell)'
     parser.add_argument("command", nargs='?', help=command_help)
-    arg_help = 'optional arguments for command'
+    arg_help = 'optional arguments for command: -j/-c/-t'
     parser.add_argument('command_args', nargs=argparse.REMAINDER, help=arg_help)
     args = parser.parse_args(argv)
     exit_code = 0
