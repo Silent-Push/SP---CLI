@@ -6,8 +6,8 @@ from cmd2 import (
     with_default_category, Cmd2ArgumentParser,
 )
 
-from commands.base.BaseCommandSet import BaseCommandSet
-from common.parse_ioc import IOCUtils
+from sp.commands.base.BaseCommandSet import BaseCommandSet
+from sp.common.parse_ioc import IOCUtils
 
 
 @with_default_category("Target Context")

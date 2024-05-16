@@ -2,3 +2,6 @@
 .env
 /script.txt
 /script.py
+/build/
+/dist/
+/sp.egg-info/

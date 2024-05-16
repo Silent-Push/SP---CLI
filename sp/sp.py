@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 # coding=utf-8
 import argparse
+import cmd2
 from typing import List
-
-from cmd2 import with_category, Cmd
 
 __app_name__ = "SP-CLI"
 
-from common.utils import AppFileManager
-from commands import *
+from sp.common.utils import AppFileManager
+from sp.commands import *
 
 
-class App(Cmd):
+class App(cmd2.Cmd):
 
     intro = "Silent Push - CLI"
     prompt = "SP# "
@@ -64,4 +63,6 @@ if __name__ == '__main__':
     import sys
     sys.exit(main())
 
-# @TODO: save command, config file, batch commands (sp < file), daemon
+# @TODO: save command, config file, batch commands (sp < file), daemon, -o (to save output)
+
+# pyinstaller --paths=. --hidden-import commands sp.py

@@ -7,10 +7,10 @@ from cmd2 import (
     with_default_category, Cmd2ArgumentParser,
 )
 
-from commands.base.BaseCommand import BaseCommand
-from commands.base.BaseCommandSet import BaseCommandSet
-from common.parse_ioc import IOCUtils
-from settings import CRLF, API_URL, API_KEY
+from sp.commands.base.BaseCommand import BaseCommand
+from sp.commands.base.BaseCommandSet import BaseCommandSet
+from sp.common.parse_ioc import IOCUtils
+from sp.settings import CRLF, API_URL, API_KEY
 
 
 @with_default_category("History")

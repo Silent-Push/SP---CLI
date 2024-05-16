@@ -3,11 +3,11 @@ import argparse
 import cmd2
 from cmd2 import Statement, Cmd2ArgumentParser, with_argparser, with_default_category
 
-from commands.base.padns import PADNS
-from commands.base.BaseCmd2ArgumentParser import subcommand_parser
-from commands.base.BaseCommandSet import BaseCommandSet
-from common.decorators import targeted_command, validate_ioc
-from common.parse_ioc import IOCUtils
+from sp.commands.base.padns import PADNS
+from sp.commands.base.BaseCmd2ArgumentParser import subcommand_parser
+from sp.commands.base.BaseCommandSet import BaseCommandSet
+from sp.common.decorators import targeted_command, validate_ioc
+from sp.common.parse_ioc import IOCUtils
 
 
 @with_default_category("PADNS")
@@ -30,8 +30,8 @@ class PADNSQueryCommandSet(BaseCommandSet):
         else:
             self._cmd.do_help('query')
 
-    @targeted_command
-    @validate_ioc
+    # @targeted_command
+    # @validate_ioc
     @cmd2.as_subcommand_to('query', 'a', subcommand_parser)
     def query_a(self, params: Statement):
         """

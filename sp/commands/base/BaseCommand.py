@@ -2,8 +2,8 @@ import json
 
 import pandas
 
-from common.utils import flatten_dict, PandasDataFrameTSV
-from settings import CRLF
+from sp.common.utils import flatten_dict, PandasDataFrameTSV
+from sp.settings import CRLF
 
 
 class BaseCommand:

@@ -1,8 +1,8 @@
 import json
 import requests
 
-from commands.base.BaseCommand import BaseCommand
-from settings import CRLF, API_URL, API_KEY
+from sp.commands.base.BaseCommand import BaseCommand
+from sp.settings import CRLF, API_URL, API_KEY
 
 
 class PADNS(BaseCommand):
@@ -35,7 +35,10 @@ class PADNS(BaseCommand):
     def lookup(self):
         response = requests.get(
             self._URL,
-            headers={"x-api-key": API_KEY}
+            headers={
+                "x-api-key": API_KEY,
+                "User-Agent": "SP-CLI"
+            },
         )
         self._response = json.loads(response.content).get("response")
 

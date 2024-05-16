@@ -3,10 +3,10 @@ import argparse
 import cmd2
 from cmd2 import Statement, with_default_category, Cmd2ArgumentParser, with_argparser
 
-from commands.base.padns import PADNS
-from commands.base.BaseCmd2ArgumentParser import subcommand_parser
-from commands.base.BaseCommandSet import BaseCommandSet
-from common.parse_ioc import IOCUtils
+from sp.commands.base.padns import PADNS
+from sp.commands.base.BaseCmd2ArgumentParser import subcommand_parser
+from sp.commands.base.BaseCommandSet import BaseCommandSet
+from sp.common.parse_ioc import IOCUtils
 
 
 @with_default_category("PADNS")

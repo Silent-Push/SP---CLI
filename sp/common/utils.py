@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from pathlib import Path
 from typing import Callable
 
@@ -25,7 +23,7 @@ class AppFileManager:
 
 class PandasDataFrameTSV(pandas.DataFrame):
 
-    def to_tsv(self, *args, **kwargs) -> str | None:
+    def to_tsv(self, *args, **kwargs) -> str:
         return self.transpose().to_string()
 
     @property
@@ -42,6 +40,7 @@ def strip_command_options(command_set, args):
 
 def flatten_dict(data, prefix=""):
     flatten_merged = {}
+    merged_dict_keys = {}
     if not isinstance(data, dict):
         flatten_merged[f"{prefix}"] = data
         return flatten_merged

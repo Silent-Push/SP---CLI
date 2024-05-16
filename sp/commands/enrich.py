@@ -7,11 +7,11 @@ from cmd2 import (
     with_default_category,
 )
 
-from commands.base.BaseCommand import BaseCommand
-from commands.base.BaseCommandSet import BaseCommandSet
-from common.decorators import targeted_command, validate_ioc
-from common.parse_ioc import IOCUtils
-from settings import CRLF, API_URL, API_KEY
+from sp.commands.base.BaseCommand import BaseCommand
+from sp.commands.base.BaseCommandSet import BaseCommandSet
+from sp.common.decorators import targeted_command, validate_ioc
+from sp.common.parse_ioc import IOCUtils
+from sp.settings import CRLF, API_URL, API_KEY
 
 
 @with_default_category("Enrichment")
@@ -25,8 +25,8 @@ class EnrichCommandSet(BaseCommandSet):
         "-s", "--scan_data", action="store_true"
     )
 
-    @targeted_command
-    @validate_ioc
+    # @targeted_command
+    # @validate_ioc
     @with_argparser(enrich_parser)
     def do_enrich(self, params: Statement):
         """

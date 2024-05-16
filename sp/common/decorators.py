@@ -1,8 +1,8 @@
 import functools
 import os
 
-from common.parse_ioc import IOCUtils
-from common.utils import strip_command_options
+from sp.common.parse_ioc import IOCUtils
+from sp.common.utils import strip_command_options
 
 
 def validate_ioc(func):
