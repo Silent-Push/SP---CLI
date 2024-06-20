@@ -36,7 +36,7 @@ class EnrichCommandSet(BaseCommandSet):
             enrichment.enrich()
 
     class Enrichment(BaseCommand):
-        _URL = API_URL + "explore/enrich/{type}/{ioc}/"
+        _URL = API_URL + "explore/enrich/{type}/{ioc}/?format=json"
 
         def __enter__(self):
             self._URL = self._URL.format(
@@ -52,11 +52,12 @@ class EnrichCommandSet(BaseCommandSet):
             return self
 
         def enrich(self):
-            response = requests.get(
+            self._response = requests.get(
                 self._URL,
                 headers={"x-api-key": API_KEY}
             )
-            self._response = json.loads(response.content).get("response")
+            self.check_error()
+            self._response = json.loads(self._response.content).get("response")
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             super().__exit__(exc_type, exc_val, exc_tb)

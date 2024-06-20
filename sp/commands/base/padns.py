@@ -6,7 +6,7 @@ from sp.settings import CRLF, API_URL, API_KEY
 
 
 class PADNS(BaseCommand):
-    _URL = API_URL + "explore/padns/lookup/{type}/{qtype}/{ioc}/"
+    _URL = API_URL + "explore/padns/lookup/{type}/{qtype}/{ioc}/?format=json"
     _type: str = "query"
     _qtype: str = "any"
     _feedback: str = ""
@@ -28,19 +28,23 @@ class PADNS(BaseCommand):
             qtype=self._qtype,
             ioc=self._params.ioc
         )
-        self._feedback = f"{self._URL[self._URL.index('lookup/') + 7:]}"
         super().__enter__()
+        self._feedback = f"{self._URL[self._URL.index('lookup/') + 7:]}"
         return self
 
     def lookup(self):
-        response = requests.get(
+        if not self._params.ioc:
+            self._commandSet._cmd.perror("You need to pass the IoC")
+            return
+        self._response = requests.get(
             self._URL,
             headers={
                 "x-api-key": API_KEY,
                 "User-Agent": "SP-CLI"
             },
         )
-        self._response = json.loads(response.content).get("response")
+        self.check_error()
+        self._response = json.loads(self._response.content).get("response")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         super().__exit__(exc_type, exc_val, exc_tb)

@@ -18,7 +18,8 @@ class BaseCommand:
 
     def __enter__(self):
         if self._params.params:
-            self._URL += "?" + "&".join(self._params.params)
+            self._URL += "&" + "&".join(self._params.params)
+        # self._commandSet._cmd.poutput(self._URL)
         self._commandSet._cmd.pfeedback(f"\t{self._feedback}...")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -43,4 +44,26 @@ class BaseCommand:
         # used by the run_script and run_pyscript command
         self._commandSet._cmd.last_result = self._output
         self._commandSet._cmd.pfeedback(f"\t*{self._feedback}")
+
+    def check_error(self):
+        if not self._response.status_code == 200:
+            import re
+            import json
+
+            # try to extract the error from the API response
+            content = self._response.content.decode()
+            try:
+                json_error = json.loads(content).get("errors")
+            except (json.JSONDecodeError, TypeError):
+                json_error = ''
+            strip = re.compile('<.*?>|\n')
+            error = re.sub(strip, '', content[content.find('<body'):])
+            error += json_error.__str__()
+            self._commandSet._cmd.perror("Something went wrong :(")
+            self._commandSet._cmd.perror(
+                f"Status Code {self._response.status_code}: "
+                f"{error[:100]}..."
+            )
+            self._commandSet._cmd.pwarning("Is your API key correct?")
+            return
 

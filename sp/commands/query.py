@@ -20,15 +20,12 @@ class PADNSQueryCommandSet(BaseCommandSet):
     )
 
     @with_argparser(_query_parser)
+    @cmd2.as_subcommand_to('padns', 'query', subcommand_parser)
     def do_query(self, ns: argparse.Namespace):
         """
         PADNS Forward Lookup
         """
-        handler = ns.cmd2_handler.get()
-        if handler is not None:
-            handler(ns)
-        else:
-            self._cmd.do_help('query')
+        self._cmd.do_help('query')
 
     # @targeted_command
     # @validate_ioc

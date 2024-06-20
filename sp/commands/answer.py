@@ -18,17 +18,13 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         help="specify an answer lookup, i.e.: ns"
     )
 
-
     @with_argparser(_answer_parser)
+    @cmd2.as_subcommand_to('padns', 'answer', subcommand_parser)
     def do_answer(self, ns: argparse.Namespace):
         """
         PADNS Reverse Lookup
         """
-        handler = ns.cmd2_handler.get()
-        if handler is not None:
-            handler(ns)
-        else:
-            self._cmd.do_help('answer')
+        self._cmd.do_help('answer')
 
     @cmd2.as_subcommand_to('answer', 'a', subcommand_parser)
     def answer_a(self, params: Statement):
