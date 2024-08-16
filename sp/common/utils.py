@@ -7,11 +7,16 @@ from xdg import XDG_DATA_HOME
 
 
 class AppFileManager:
-    """Application file manager used to abstract location and usage of persistent history file."""
+    """
+    Application file manager used to abstract location and usage of
+    persistent history file.
+    """
 
     def __init__(self, app_name: str):
         self.app_name = app_name
-        self._hist_file = XDG_DATA_HOME.joinpath(self.app_name, "persistent_history.cmd2")
+        self._hist_file = XDG_DATA_HOME.joinpath(
+            self.app_name, "persistent_history.cmd2"
+        )
 
     @property
     def hist_file(self) -> Path:
@@ -22,7 +27,6 @@ class AppFileManager:
 
 
 class PandasDataFrameTSV(pandas.DataFrame):
-
     def to_tsv(self, *args, **kwargs) -> str:
         return self.transpose().to_string()
 

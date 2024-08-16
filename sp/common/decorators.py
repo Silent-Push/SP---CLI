@@ -30,10 +30,12 @@ def targeted_command(func):
         if not ioc:
             if os.environ.get("_sp_target"):
                 list_args = list(args)
-                list_args[1] = os.environ.get("_sp_target") + ' ' + list_args[1]
+                list_args[1] = os.environ.get("_sp_target") + " " + list_args[1]
                 args = tuple(list_args)
             else:
-                command_set._cmd.perror("Not a valid IoC, try the command 'target <your_ioc>'")
+                command_set._cmd.perror(
+                    "Not a valid IoC, try the command 'target <your_ioc>'"
+                )
                 return
         return func(*args, **kwargs)
 

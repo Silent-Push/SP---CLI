@@ -9,21 +9,16 @@ from cmd2 import (
 
 from sp.commands.base.BaseCommand import BaseCommand
 from sp.commands.base.BaseCommandSet import BaseCommandSet
-from sp.common.decorators import targeted_command, validate_ioc
 from sp.common.parse_ioc import IOCUtils
-from sp.settings import CRLF, API_URL, API_KEY
+from sp.settings import API_URL, API_KEY
 
 
 @with_default_category("Enrichment")
 class EnrichCommandSet(BaseCommandSet):
 
     enrich_parser = BaseCommandSet._get_arg_parser()
-    enrich_parser.add_argument(
-        "-e", "--explain", action="store_true"
-    )
-    enrich_parser.add_argument(
-        "-s", "--scan_data", action="store_true"
-    )
+    enrich_parser.add_argument("-e", "--explain", action="store_true")
+    enrich_parser.add_argument("-s", "--scan_data", action="store_true")
 
     # @targeted_command
     # @validate_ioc
@@ -40,22 +35,22 @@ class EnrichCommandSet(BaseCommandSet):
 
         def __enter__(self):
             self._URL = self._URL.format(
-                type=IOCUtils(self._params.ioc).type,
-                ioc=self._params.ioc
+                type=IOCUtils(self._params.ioc).type, ioc=self._params.ioc
             )
             self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
             if self._params.explain:
                 self._params.params.append("explain=1")
+            else:
+                self._params.params.append("explain=0")
             if self._params.scan_data:
                 self._params.params.append("scan_data=1")
+            else:
+                self._params.params.append("scan_data=0")
             super().__enter__()
             return self
 
         def enrich(self):
-            self._response = requests.get(
-                self._URL,
-                headers={"x-api-key": API_KEY}
-            )
+            self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
             self.check_error()
             self._response = json.loads(self._response.content).get("response")
 

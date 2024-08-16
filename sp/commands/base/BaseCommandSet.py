@@ -2,7 +2,6 @@ from cmd2 import CommandSet, Cmd2ArgumentParser
 
 
 class BaseCommandSet(CommandSet):
-
     @staticmethod
     def _get_arg_parser():
         base_arg_parser = Cmd2ArgumentParser()
@@ -10,30 +9,24 @@ class BaseCommandSet(CommandSet):
             "ioc",
             nargs="?",
             choices_provider=(lambda self: self._cmd._ioc_cache),
-            help="IoC to enrich"
+            help="IoC to target command",
         )
         base_arg_parser.add_argument(
             "params",
             nargs="*",
             help="parameters to be sent, i.e.: skip=100 limit=10",
-            type=str
+            type=str,
         )
         base_arg_parser.add_argument(
-            "-j",
-            "--json",
-            help="Output as JSON",
-            action="store_true"
+            "-j", "--json", help="Output as JSON", action="store_true"
         )
         base_arg_parser.add_argument(
-            "-c",
-            "--csv",
-            help="Output as CSV",
-            action="store_true"
+            "-c", "--csv", help="Output as CSV", action="store_true"
         )
         base_arg_parser.add_argument(
             "-t",
             "--tsv",
             help="Output as TSV (tab-separated values)",
-            action="store_true"
+            action="store_true",
         )
         return base_arg_parser

@@ -1,4 +1,3 @@
-import argparse
 import json
 import requests
 
@@ -10,18 +9,18 @@ from cmd2 import (
 
 from sp.commands.base.BaseCommand import BaseCommand
 from sp.commands.base.BaseCommandSet import BaseCommandSet
-from sp.common.decorators import targeted_command, validate_ioc
 from sp.common.parse_ioc import IOCUtils
-from sp.settings import CRLF, API_URL, API_KEY
+from sp.settings import API_URL, API_KEY
 
 
+# @TODO: rename to riskscore
 @with_default_category("Scoring")
 class ScoreCommandSet(BaseCommandSet):
 
     _score_parser = BaseCommandSet._get_arg_parser()
 
-    @targeted_command
-    @validate_ioc
+    # @targeted_command
+    # @validate_ioc
     @with_argparser(_score_parser)
     def do_score(self, params: Statement):
         """
@@ -35,18 +34,14 @@ class ScoreCommandSet(BaseCommandSet):
 
         def __enter__(self):
             self._URL = self._URL.format(
-                type=IOCUtils(self._params.ioc).type,
-                ioc=self._params.ioc
+                type=IOCUtils(self._params.ioc).type, ioc=self._params.ioc
             )
             self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
             super().__enter__()
             return self
 
         def score(self):
-            self._response = requests.get(
-                self._URL,
-                headers={"x-api-key": API_KEY}
-            )
+            self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
             self.check_error()
             self._response = json.loads(self._response.content).get("response")
 

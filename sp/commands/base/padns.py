@@ -2,7 +2,7 @@ import json
 import requests
 
 from sp.commands.base.BaseCommand import BaseCommand
-from sp.settings import CRLF, API_URL, API_KEY
+from sp.settings import API_URL, API_KEY
 
 
 class PADNS(BaseCommand):
@@ -24,9 +24,7 @@ class PADNS(BaseCommand):
 
     def __enter__(self):
         self._URL = self._URL.format(
-            type=self._type,
-            qtype=self._qtype,
-            ioc=self._params.ioc
+            type=self._type, qtype=self._qtype, ioc=self._params.ioc
         )
         super().__enter__()
         self._feedback = f"{self._URL[self._URL.index('lookup/') + 7:]}"
@@ -38,10 +36,7 @@ class PADNS(BaseCommand):
             return
         self._response = requests.get(
             self._URL,
-            headers={
-                "x-api-key": API_KEY,
-                "User-Agent": "SP-CLI"
-            },
+            headers={"x-api-key": API_KEY, "User-Agent": "SP-CLI"},
         )
         self.check_error()
         self._response = json.loads(self._response.content).get("response")

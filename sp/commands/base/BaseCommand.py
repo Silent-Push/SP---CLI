@@ -1,6 +1,7 @@
 import json
 
 import pandas
+from cmd2.ansi import style_success
 
 from sp.common.utils import flatten_dict, PandasDataFrameTSV
 from sp.settings import CRLF
@@ -20,30 +21,25 @@ class BaseCommand:
         if self._params.params:
             self._URL += "&" + "&".join(self._params.params)
         # self._commandSet._cmd.poutput(self._URL)
-        self._commandSet._cmd.pfeedback(f"\t{self._feedback}...")
+        # self._commandSet._cmd.pfeedback(f"\t{self._feedback}...")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self._params.json:
             self._output = json.dumps(self._response, indent=2) + CRLF
         elif self._params.csv:
-            dataframe = pandas.DataFrame(
-                flatten_dict(self._response),
-                index=[0]
-            )
+            # @TODO: there's a weird ",0" in the 1st line output
+            dataframe = pandas.DataFrame(flatten_dict(self._response), index=[0])
             dataframe = dataframe.transpose()
             self._output = dataframe.to_csv() + CRLF
         elif self._params.tsv:
-            dataframe = PandasDataFrameTSV(
-                flatten_dict(self._response),
-                index=[0]
-            )
+            dataframe = PandasDataFrameTSV(flatten_dict(self._response), index=[0])
             self._output = dataframe.to_tsv() + CRLF
         else:
             self._output = json.dumps(self._response, indent=2) + CRLF
-        self._commandSet._cmd.poutput(self._output)
+        self._commandSet._cmd.poutput(style_success(self._output))
         # used by the run_script and run_pyscript command
         self._commandSet._cmd.last_result = self._output
-        self._commandSet._cmd.pfeedback(f"\t*{self._feedback}")
+        # self._commandSet._cmd.pfeedback(f"\t*{self._feedback}")
 
     def check_error(self):
         if not self._response.status_code == 200:
@@ -55,15 +51,13 @@ class BaseCommand:
             try:
                 json_error = json.loads(content).get("errors")
             except (json.JSONDecodeError, TypeError):
-                json_error = ''
-            strip = re.compile('<.*?>|\n')
-            error = re.sub(strip, '', content[content.find('<body'):])
+                json_error = ""
+            strip = re.compile("<.*?>|\n")
+            error = re.sub(strip, "", content[content.find("<body") :])
             error += json_error.__str__()
             self._commandSet._cmd.perror("Something went wrong :(")
             self._commandSet._cmd.perror(
-                f"Status Code {self._response.status_code}: "
-                f"{error[:100]}..."
+                f"Status Code {self._response.status_code}: " f"{error[:100]}..."
             )
             self._commandSet._cmd.pwarning("Is your API key correct?")
             return
-

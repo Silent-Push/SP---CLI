@@ -77,11 +77,7 @@ class IOCUtils(ABC):
         if not self.valid:
             return ""
         return (
-            (
-                str(self.ip_parsed)
-                if str(self.ip_parsed) != "0.0.0.0"
-                else False
-            )
+            (str(self.ip_parsed) if str(self.ip_parsed) != "0.0.0.0" else False)
             or self.tld_extracted.fqdn
             or self.tld_extracted.ipv4
             or self.tld_extracted.domain

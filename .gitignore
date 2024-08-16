@@ -5,3 +5,6 @@
 /build/
 /dist/
 /sp.egg-info/
+/results.txt
+/ibm_investigation.txt
+/results2.txt

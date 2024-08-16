@@ -1,4 +1,7 @@
 """A setuptools based setup module.
+The wheel filename format is:
+    {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-
+    {platform tag}.whl
 
 See:
 https://packaging.python.org/guides/distributing-packages-using-setuptools/
@@ -6,7 +9,7 @@ https://github.com/pypa/sampleproject
 """
 
 # Always prefer setuptools over distutils
-from setuptools import setup, find_namespace_packages
+from setuptools import setup
 import pathlib
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -17,7 +20,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 with open("./requirements.txt") as fd:
     required = fd.read().splitlines()
 
-for not_required in ['pytest', 'packaging', 'tomli', 'cx_Freeze']:
+for not_required in ["pytest", "packaging", "tomli", "cx_Freeze"]:
     required = list(
         set(required) - set(r for r in required if r.find(not_required) > -1)
     )
@@ -127,10 +130,7 @@ setup(
     # the `py_modules` argument instead as follows, which will expect a file
     # called `my_module.py` to exist:
     #
-    py_modules=[
-        "sp.sp",
-        "sp.settings"
-    ],
+    py_modules=["sp.sp", "sp.settings"],
     #
     packages=[
         "sp",
