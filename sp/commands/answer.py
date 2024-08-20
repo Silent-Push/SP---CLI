@@ -4,7 +4,6 @@ import cmd2
 from cmd2 import Statement, with_default_category, Cmd2ArgumentParser, with_argparser
 
 from sp.commands.base.padns import PADNS
-from sp.commands.base.BaseCmd2ArgumentParser import subcommand_parser
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.common.parse_ioc import IOCUtils
 
@@ -16,6 +15,7 @@ class PADNSAnswerCommandSet(BaseCommandSet):
     _answer_parser.add_subparsers(
         title="answer", help="specify an answer lookup, i.e.: ns"
     )
+    subcommand_parser = BaseCommandSet._get_padns_arg_parser()
 
     @with_argparser(_answer_parser)
     @cmd2.as_subcommand_to("padns", "answer", subcommand_parser)

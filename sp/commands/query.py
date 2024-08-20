@@ -4,7 +4,6 @@ import cmd2
 from cmd2 import Statement, Cmd2ArgumentParser, with_argparser, with_default_category
 
 from sp.commands.base.padns import PADNS
-from sp.commands.base.BaseCmd2ArgumentParser import subcommand_parser
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.common.parse_ioc import IOCUtils
 
@@ -14,6 +13,7 @@ class PADNSQueryCommandSet(BaseCommandSet):
 
     _query_parser = Cmd2ArgumentParser()
     _query_parser.add_subparsers(title="query", help="specify a query lookup, i.e.: ns")
+    subcommand_parser = BaseCommandSet._get_padns_arg_parser()
 
     @with_argparser(_query_parser)
     @cmd2.as_subcommand_to("padns", "query", subcommand_parser)

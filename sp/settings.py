@@ -21,3 +21,16 @@ if API_KEY is None:
         "Please set your Silent Push API key in your environment.\n"
         '\texport SILENT_PUSH_API_KEY="YOUR-API-KEY"'
     )
+
+
+def get_initial_commands():
+    from sp.commands import (
+        EnrichCommandSet,
+        ScoreCommandSet,
+    )
+
+    # the available initial commands
+    return {
+        EnrichCommandSet(),
+        ScoreCommandSet(),
+    }

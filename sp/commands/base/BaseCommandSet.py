@@ -3,20 +3,24 @@ from cmd2 import CommandSet, Cmd2ArgumentParser
 
 class BaseCommandSet(CommandSet):
     @staticmethod
-    def _get_arg_parser():
-        base_arg_parser = Cmd2ArgumentParser()
-        base_arg_parser.add_argument(
-            "ioc",
-            nargs="?",
-            choices_provider=(lambda self: self._cmd._ioc_cache),
-            help="IoC to target command",
-        )
-        base_arg_parser.add_argument(
+    def __set_common_enrich_options(enrich_parser):
+        enrich_parser.add_argument("-e", "--explain", action="store_true")
+        enrich_parser.add_argument("-s", "--scan_data", action="store_true")
+        return enrich_parser
+
+    @staticmethod
+    def __set__common_options(parser):
+        parser.add_argument(
             "params",
             nargs="*",
             help="parameters to be sent, i.e.: skip=100 limit=10",
             type=str,
         )
+        return parser
+
+    @staticmethod
+    def _get_arg_parser():
+        base_arg_parser = Cmd2ArgumentParser()
         base_arg_parser.add_argument(
             "-j", "--json", help="Output as JSON", action="store_true"
         )
@@ -30,3 +34,51 @@ class BaseCommandSet(CommandSet):
             action="store_true",
         )
         return base_arg_parser
+
+    @staticmethod
+    def _get_ioc_arg_parser():
+        ioc_parser = BaseCommandSet._get_arg_parser()
+        ioc_parser.add_argument(
+            "ioc",
+            nargs="?",
+            choices_provider=(lambda self: self._cmd._ioc_cache),
+            help="IoC to target command",
+        )
+        return ioc_parser
+
+    @staticmethod
+    def _get_score_arg_parser():
+        score_parser = BaseCommandSet._get_ioc_arg_parser()
+        return BaseCommandSet.__set__common_options(score_parser)
+
+    @staticmethod
+    def _get_enrich_arg_parser():
+        enrich_parser = BaseCommandSet._get_ioc_arg_parser()
+        enrich_parser = BaseCommandSet.__set_common_enrich_options(enrich_parser)
+        return BaseCommandSet.__set__common_options(enrich_parser)
+
+    @staticmethod
+    def _get_bulk_enrich_arg_parser():
+        bulk_enrich_parser = BaseCommandSet._get_arg_parser()
+        bulk_enrich_parser.add_argument(
+            "iocs",
+            nargs="*",
+            choices_provider=(lambda self: self._cmd._ioc_cache),
+            help="the list of IoCs to enrich, separated by space, i.e.: "
+            "ig.com ibm.com paypal.com",
+        )
+        bulk_enrich_parser = BaseCommandSet.__set_common_enrich_options(
+            bulk_enrich_parser
+        )
+        return BaseCommandSet.__set__common_options(bulk_enrich_parser)
+
+    @staticmethod
+    def _get_padns_arg_parser():
+        padns_parser = BaseCommandSet._get_arg_parser()
+        padns_parser.add_argument(
+            "ioc",
+            nargs="?",
+            choices_provider=(lambda self: self._cmd._ioc_cache),
+            help="IoC to target command",
+        )
+        return BaseCommandSet.__set__common_options(padns_parser)

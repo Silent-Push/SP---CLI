@@ -17,7 +17,7 @@ from sp.settings import API_URL, API_KEY
 @with_default_category("Scoring")
 class ScoreCommandSet(BaseCommandSet):
 
-    _score_parser = BaseCommandSet._get_arg_parser()
+    _score_parser = BaseCommandSet._get_score_arg_parser()
 
     # @targeted_command
     # @validate_ioc

@@ -1,3 +1,4 @@
+import functools
 from typing import List
 
 from cmd2 import CommandSetRegistrationError, Fg, style
@@ -5,11 +6,11 @@ from cmd2 import CommandSetRegistrationError, Fg, style
 from sp.commands import (
     PADNSQueryCommandSet,
     PADNSAnswerCommandSet,
-    EnrichCommandSet,
-    ScoreCommandSet,
 )
 
 import cmd2
+
+from sp.settings import get_initial_commands
 
 
 class BaseCmdApp(cmd2.Cmd):
@@ -24,6 +25,7 @@ class BaseCmdApp(cmd2.Cmd):
         super().__init__(
             persistent_history_file=hist_file,
             persistent_history_length=500,
+            command_sets=get_initial_commands(),
             auto_load_commands=False,
             allow_cli_args=False,  # we use our own argparse,
         )
@@ -32,9 +34,6 @@ class BaseCmdApp(cmd2.Cmd):
         self._ioc_cache: List = self._get_iocs_from_history()
         self._query = PADNSQueryCommandSet()
         self._answer = PADNSAnswerCommandSet()
-        self.register_command_set(EnrichCommandSet())
-        # self.register_command_set(HistoryCommandSet())
-        self.register_command_set(ScoreCommandSet())
         self.register_postparsing_hook(self.prepend_padns_main_command_hook)
 
     def prepend_padns_main_command_hook(
@@ -71,9 +70,14 @@ class BaseCmdApp(cmd2.Cmd):
             data.statement = self.statement_parser.parse(new_command)
         return data
 
+    @functools.singledispatch
     def _add_ioc_to_cache(self, ioc: str) -> None:
         if ioc not in self._ioc_cache:
             self._ioc_cache.append(ioc)
+
+    @_add_ioc_to_cache.register(list)
+    def _(self, iocs: list):  # _add_ioc_to_cache overloaded method
+        self._ioc_cache.extend(iocs)
 
     def _get_iocs_from_history(self) -> List[str]:
         return [

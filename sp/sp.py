@@ -46,6 +46,7 @@ class App(BaseCmdApp):
         title="PADNS command", help="query/answer or any PADNS available command"
     )
 
+    @with_category("PADNS")
     @with_argparser(padns_parser)
     def do_padns(self, ns: argparse.Namespace):
         # Call handler for whatever subcommand was selected
