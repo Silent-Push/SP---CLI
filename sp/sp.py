@@ -3,6 +3,8 @@
 
 __app_name__ = "SP-CLI"
 
+import argparse
+
 from cmd2 import with_category, CommandSetRegistrationError, style, Fg
 
 from sp.commands.base.BaseCmdApp import BaseCmdApp
@@ -13,7 +15,7 @@ from sp.commands import *
 class App(BaseCmdApp):
 
     load_parser = cmd2.Cmd2ArgumentParser()
-    load_parser.add_argument("cmds", choices=["padns"])  # 'query', 'answer'])
+    load_parser.add_argument("cmds", choices=["padns", "spql"])
 
     @with_argparser(load_parser)
     @with_category("Command Loading")
@@ -30,6 +32,16 @@ class App(BaseCmdApp):
                 self.poutput("PADNS loaded")
             except (ValueError, CommandSetRegistrationError):
                 self.poutput("PADNS already loaded")
+        elif ns.cmds == "spql":
+            self.prompt = style(
+                "SP (SPQL)# ", fg=Fg[Fg.LIGHT_GRAY.name.upper()], bold=True
+            )
+            self.LOADED_COMMAND = "spql"
+            try:
+                self.register_command_set(self._webscan)
+                self.poutput("SPQL loaded")
+            except (ValueError, CommandSetRegistrationError):
+                self.poutput("SPQL already loaded")
 
     @with_argparser(load_parser)
     @with_category("Command Loading")
@@ -40,6 +52,11 @@ class App(BaseCmdApp):
             self.unregister_command_set(self._answer)
             self.LOADED_COMMAND = ""
             self.poutput("PADNS unloaded")
+        elif ns.cmds == "spql":
+            self.prompt = style("SP# ", fg=Fg[Fg.LIGHT_GRAY.name.upper()], bold=True)
+            self.unregister_command_set(self._webscan)
+            self.LOADED_COMMAND = ""
+            self.poutput("SPQL unloaded")
 
     padns_parser = cmd2.Cmd2ArgumentParser()
     padns_parser.add_subparsers(

@@ -20,6 +20,7 @@ class BaseCommand:
     def __enter__(self):
         if self._params.params:
             self._URL += "&" + "&".join(self._params.params)
+        return self
         # self._commandSet._cmd.poutput(self._URL)
         # self._commandSet._cmd.pfeedback(f"\t{self._feedback}...")
 

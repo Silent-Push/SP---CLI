@@ -6,6 +6,7 @@ from cmd2 import CommandSetRegistrationError, Fg, style
 from sp.commands import (
     PADNSQueryCommandSet,
     PADNSAnswerCommandSet,
+    SPQLWebscanCommandSet,
 )
 
 import cmd2
@@ -16,7 +17,7 @@ from sp.settings import get_initial_commands
 class BaseCmdApp(cmd2.Cmd):
     intro = "Silent Push - CLI"
     prompt = style("SP# ", fg=Fg[Fg.LIGHT_GRAY.name.upper()], bold=True)
-    PREPEND_COMMANDS = ["padns", "query", "answer"]
+    PREPEND_COMMANDS = ["padns", "query", "answer", "spql", "webscan"]
     LOADED_COMMAND = ""
 
     def __init__(self, **kwargs):
@@ -34,6 +35,7 @@ class BaseCmdApp(cmd2.Cmd):
         self._ioc_cache: List = self._get_iocs_from_history()
         self._query = PADNSQueryCommandSet()
         self._answer = PADNSAnswerCommandSet()
+        self._webscan = SPQLWebscanCommandSet()
         self.register_postparsing_hook(self.prepend_padns_main_command_hook)
 
     def prepend_padns_main_command_hook(
@@ -56,18 +58,23 @@ class BaseCmdApp(cmd2.Cmd):
                 self.register_command_set(self._answer)
             elif command == "query" or rest_args.startswith("query"):
                 # self.poutput("prepend query hook")
+                command = f"padns {command}"
                 self.register_command_set(self._query)
             elif command == "answer" or rest_args.startswith("answer"):
                 # self.poutput("prepend answer hook")
+                command = f"padns {command}"
                 self.register_command_set(self._answer)
+            elif command == "spql":
+                self.register_command_set(self._webscan)
+            elif command == "webscan" or rest_args.startswith("webscan"):
+                command = f"spql {command}"
+                self.register_command_set(self._webscan)
         except CommandSetRegistrationError:
             pass  # command already registered
-        if not command.startswith("padns"):
-            command = f"padns {command}"
-            new_command = f"{command} {rest_args} {post_command}"
-            # if not self.LOADED_COMMAND == "padns":
-            #     self.pwarning(f"Rewriting as: '{new_command}'")
-            data.statement = self.statement_parser.parse(new_command)
+        new_command = f"{command} {rest_args} {post_command}"
+        # if not self.LOADED_COMMAND == "padns":
+        #     self.pwarning(f"Rewriting as: '{new_command}'")
+        data.statement = self.statement_parser.parse(new_command)
         return data
 
     @functools.singledispatch
@@ -86,6 +93,9 @@ class BaseCmdApp(cmd2.Cmd):
             if h.statement.command
             in [
                 "enrich",
+                "score",
+                "query",
+                "answer"
             ]
         ]
 

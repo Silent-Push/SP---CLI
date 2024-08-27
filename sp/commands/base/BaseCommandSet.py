@@ -82,3 +82,41 @@ class BaseCommandSet(CommandSet):
             help="IoC to target command",
         )
         return BaseCommandSet.__set__common_options(padns_parser)
+
+    @staticmethod
+    def _get_spql_webscan_arg_parser():
+        from sp.settings import WEBSCAN_FIELDS, SPQL_DATASOURCES
+
+        spql_webscan_parser = BaseCommandSet._get_arg_parser()
+        spql_webscan_parser.add_argument(
+            "query",
+            nargs="?",
+            # choices_provider=(lambda field: WEBSCAN_FIELDS),
+            help='the query to run, i.e.: "\"domain\"=\"ig.com\""',
+        )
+        spql_webscan_parser = BaseCommandSet.__set__common_options(
+            spql_webscan_parser
+        )
+        spql_webscan_parser.add_argument(
+            "-f",
+            "--fields",
+            nargs="*",
+            choices_provider=(lambda field: WEBSCAN_FIELDS),
+            help="the fields to be output",
+        )
+        spql_webscan_parser.add_argument(
+            "-s",
+            "--sort",
+            nargs="*",
+            choices_provider=(lambda field: WEBSCAN_FIELDS),
+            help="the sort order (multiple for nested sorting),"
+                 "i.e.: scan_date/desc domain/asc",
+        )
+        spql_webscan_parser.add_argument(
+            "-d",
+            "--datasource",
+            nargs="?",
+            choices_provider=(lambda datasource: SPQL_DATASOURCES),
+            help="the datasource to query",
+        )
+        return spql_webscan_parser
