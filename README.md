@@ -1,6 +1,34 @@
 # SP - CLI
 The Silent Push Command Line Interface
 
+- [Installation](#Installation)
+
+- [Usage](#Usage)
+
+  - [Supported commands and sub-commands so far](#supported-commands-and-sub-commands-so-far)
+
+  - [Options](#options)
+
+- [Interactive mode](#interactive-mode)
+
+  - [The load/unload command](#the-load-and-unload-command)
+
+- [Scripting](#scripting)
+
+  - [run_pyscript command](#runpyscript-command)
+
+  - [run_script command](#runscript-command)
+
+  - [Batch execution tips](#batch-execution-tips)
+
+- [For Devs](#for-devs)
+
+  - [Using the library](#using-the-library)
+
+  - [Extending the commands - Guidelines](#extending-the-commands---Guidelines)
+
+- [Support](#support)
+
 ## Installation
 Download the python wheel from https://labs.silentpush.com/jorgeley/
 and then install it with pip:
@@ -95,7 +123,7 @@ SP# padns query a ig.com limit=1
 SP#
 ```
 
-### The load/unload command
+### The load and unload command
 This command gives you the ability of switching the console to a specific context and loading that group of commands.
 As an example, 'padns' contains various sub-commands, so you can do like:
 ```shell
