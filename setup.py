@@ -40,7 +40,7 @@ setup(
     # There are some restrictions on what makes a valid project name
     # specification here:
     # https://packaging.python.org/specifications/core-metadata/#name
-    name="sp",  # Required
+    name="SilentPushCLI",  # Required
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
     #
@@ -76,7 +76,7 @@ setup(
     #
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    # url="https://github.com/pypa/sampleproject",  # Optional
+    url="https://www.silentpush.com",  # Optional
     # This should be your name or the name of the organization which owns the
     # project.
     author="Jorgeley",  # Optional
@@ -130,7 +130,7 @@ setup(
     # the `py_modules` argument instead as follows, which will expect a file
     # called `my_module.py` to exist:
     #
-    py_modules=["sp.sp", "sp.settings"],
+    py_modules=["sp.main", "sp.settings"],
     #
     packages=[
         "sp",
@@ -142,7 +142,7 @@ setup(
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. See
     # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-    python_requires=">=3.6, <4",
+    python_requires=">=3.6, <=3.11",
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
     # installed, so they must be valid existing projects.
@@ -171,7 +171,10 @@ setup(
     # executes the function `main` from this package when invoked:
     entry_points={  # Optional
         "console_scripts": [
-            "sp=sp.sp:main",
+            "sp=sp.main:main",
+        ],
+        "gui_scripts": [
+            "sp=sp.main:main",
         ],
     },
     # List additional URLs that are relevant to your project as a dict.

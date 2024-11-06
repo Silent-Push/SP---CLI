@@ -2,10 +2,14 @@ attrs>=22.2.0
 cmd2==2.4.3
 cmd2-ext-test==2.0.0
 cx_Freeze>=6.13.2
-gnureadline==8.1.2
+gnureadline==8.1.2; sys_platform!='win32'
+# Windows requires this package
+pyreadline3>=3.4.1; sys_platform=='win32'
 iniconfig>=1.1.1
 packaging>=21.3
-pandas>=1.1.5
+pandas>=2.0.3; sys_platform!='win32'
+pandas==2.0.0; sys_platform=='win32'
+numpy==1.26.4; sys_platform=='win32'
 pluggy>=1.0.0
 py==1.11.0
 pyparsing==3.1.1
