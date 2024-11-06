@@ -5,7 +5,7 @@ The Silent Push Command Line Interface
 Download the python wheel from https://labs.silentpush.com/jorgeley/
 and then install it with pip:
 ```shell
-python3 -m pip install sp-0.0.1-py3-none-any.whl
+python3 -m pip install SilentPushCLI-0.0.1-py3-none-linux.whl
 ```
 After installed, export your Silent Push API key to your terminal:
 ```shell
@@ -180,14 +180,14 @@ since the command will depend on the type of enrichment being executed.
 ### Using the library
 I you need to use the library on your own, here some examples:
 ```python
-from sp.sp import main as sp
+from sp.main import main as sp
 
 sp(['enrich ig.com'])
 sp(['padns query ns ig.com limit=2'])
 ```
 another way of doing the same
 ```python
-from sp.sp import App
+from sp.main import App
 from sp.common.utils import AppFileManager
 
 app = App(application_manager=AppFileManager('my app'))
