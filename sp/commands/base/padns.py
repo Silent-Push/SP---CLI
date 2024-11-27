@@ -1,36 +1,61 @@
 import json
 import requests
+from cmd2 import Statement, CommandSet
 
 from sp.commands.base.BaseCommand import BaseCommand
 from sp.settings import API_URL, API_KEY
 
 
 class PADNS(BaseCommand):
+    """
+    PADNS main command
+    """
     _URL = API_URL + "explore/padns/lookup/{type}/{qtype}/{ioc}/?format=json"
+    """The PADNS endpoint URL"""
     _type: str = "query"
+    """The type of the PADNS query"""
     _qtype: str = "any"
-    _feedback: str = ""
+    """The sub type of the query"""
 
     def __init__(
         self,
-        params,
-        command_set,
+        params: Statement,
+        command_set: CommandSet,
         type: str = "query",
         qtype: str = "any",
     ):
+        """
+        Context manager class for the PADNS sub commands,
+        it's used by the sub commands i.e.: query
+
+        :param params: The passed command options
+        :param command_set: The CommandSet object related to the command
+        :param type: A PADNS query type, i.e.: query
+        :param qtype: The sub type of the query, i.e.: any
+        """
         self._type = type
         self._qtype = qtype
         super().__init__(params, command_set)
 
     def __enter__(self):
+        """
+        The logic before executing the command
+
+        :return: PADNS
+        """
         self._URL = self._URL.format(
             type=self._type, qtype=self._qtype, ioc=self._params.ioc
         )
         super().__enter__()
-        self._feedback = f"{self._URL[self._URL.index('lookup/') + 7:]}"
+        # self._feedback = f"{self._URL[self._URL.index('lookup/') + 7:]}"
         return self
 
     def lookup(self):
+        """
+        The PADNS main command logic
+
+        :return: None
+        """
         if not self._params.ioc:
             self._commandSet._cmd.perror("You need to pass the IoC")
             return
@@ -42,5 +67,12 @@ class PADNS(BaseCommand):
         self._response = json.loads(self._response.content).get("response")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        The logic after executing the command
+
+        :param exc_type: Exception type, if need to catch
+        :param exc_val: Exception value
+        :param exc_tb: Exception traceback
+        """
         super().__exit__(exc_type, exc_val, exc_tb)
         self._commandSet._cmd._add_ioc_to_cache(self._params.ioc)

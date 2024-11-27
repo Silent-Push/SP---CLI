@@ -10,25 +10,39 @@ from sp.common.parse_ioc import IOCUtils
 
 @with_default_category("PADNS")
 class PADNSQueryCommandSet(BaseCommandSet):
+    """
+    PADNS Query (Forward Lookup) Command Set, structured as:
+        - **padns**: main command
+            - **query**: sub command of padns command
+                - **a**: sub command of query sub command
+                - **aaaa**: sub command of query sub command
+                - ... (more)
+    """
 
     _query_parser = Cmd2ArgumentParser()
+    """The argument parser for the PADNS Query command, contains a 'sub parser'"""
     _query_parser.add_subparsers(title="query", help="specify a query lookup, i.e.: ns")
     subcommand_parser = BaseCommandSet._get_padns_arg_parser()
+    """The argument parser for the PADNS Query sub commands (a, aaaa, ...)"""
 
     @with_argparser(_query_parser)
     @cmd2.as_subcommand_to("padns", "query", subcommand_parser)
     def do_query(self, ns: argparse.Namespace):
         """
-        PADNS Forward Lookup
+        PADNS Query (Forward Lookup) sub command, also contains it's own sub commands
+
+        :param ns: The argument passed to the query command
+        :return: None
         """
         self._cmd.do_help("query")
 
-    # @targeted_command
-    # @validate_ioc
     @cmd2.as_subcommand_to("query", "a", subcommand_parser)
     def query_a(self, params: Statement):
         """
-        Forward A lookup
+        Forward A lookup sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         with PADNS(params, self, qtype="a") as padns:
             padns.lookup()
@@ -36,7 +50,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     @cmd2.as_subcommand_to("query", "aaaa", subcommand_parser)
     def query_aaaa(self, params: Statement):
         """
-        Forward AAAA lookup
+        Forward AAAA lookup sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
@@ -47,7 +64,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     @cmd2.as_subcommand_to("query", "cname", subcommand_parser)
     def query_cname(self, params: Statement):
         """
-        Forward CNAME lookup
+        Forward CNAME lookup sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
@@ -58,7 +78,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     @cmd2.as_subcommand_to("query", "mx", subcommand_parser)
     def query_mx(self, params: Statement):
         """
-        Forward MX lookup
+        Forward MX lookup sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
@@ -69,7 +92,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     @cmd2.as_subcommand_to("query", "ns", subcommand_parser)
     def query_ns(self, params: Statement):
         """
-        Forward NS lookup
+        Forward NS lookup sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
@@ -80,7 +106,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     @cmd2.as_subcommand_to("query", "ptr4", subcommand_parser)
     def query_ptr4(self, params: Statement):
         """
-        Forward PTR4 lookup
+        Forward PTR4 lookup sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
@@ -91,7 +120,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     @cmd2.as_subcommand_to("query", "ptr6", subcommand_parser)
     def query_ptr6(self, params: Statement):
         """
-        Forward PTR6 lookup
+        Forward PTR6 lookup sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
@@ -103,6 +135,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     def query_any(self, params: Statement):
         """
         Forward Any lookup (combination of A, AAAA, CNAME, PTR, MX and NS)
+        sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
@@ -114,6 +150,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     def query_anyipv4(self, params: Statement):
         """
         Forward Any IPV4 lookup (combination of PTR and A)
+        sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
@@ -125,6 +165,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     def query_anyipv6(self, params: Statement):
         """
         Forward Any IPV6 lookup (combination of PTR and AAAA)
+        sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
@@ -135,7 +179,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     @cmd2.as_subcommand_to("query", "soa", subcommand_parser)
     def query_soa(self, params: Statement):
         """
-        Forward SOA lookup
+        Forward SOA lookup sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")
@@ -146,7 +193,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
     @cmd2.as_subcommand_to("query", "txt", subcommand_parser)
     def query_txt(self, params: Statement):
         """
-        Forward TXT lookup
+        Forward TXT lookup sub command of query sub command
+
+        :param params: The passed command parameters
+        :return: None
         """
         if not IOCUtils(params.ioc).validate():
             self._cmd.perror("Not a valid IoC")

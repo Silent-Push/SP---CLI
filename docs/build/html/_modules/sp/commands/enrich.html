@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sp.commands.enrich &#8212; Silent Push - SDK</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css?v=501c1f32" />
+    
+    <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="icon" href="../../../_static/favicon.ico"/>
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Silent Push - SDK</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">sp.commands.enrich</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sp.commands.enrich</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">from</span> <span class="nn">cmd2</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Statement</span><span class="p">,</span>
+    <span class="n">with_argparser</span><span class="p">,</span>
+    <span class="n">with_default_category</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">sp.commands.base.BaseCommand</span> <span class="kn">import</span> <span class="n">BaseCommand</span>
+<span class="kn">from</span> <span class="nn">sp.commands.base.BaseCommandSet</span> <span class="kn">import</span> <span class="n">BaseCommandSet</span>
+<span class="kn">from</span> <span class="nn">sp.common.parse_ioc</span> <span class="kn">import</span> <span class="n">IOCUtils</span>
+<span class="kn">from</span> <span class="nn">sp.settings</span> <span class="kn">import</span> <span class="n">API_URL</span><span class="p">,</span> <span class="n">API_KEY</span>
+
+
+<div class="viewcode-block" id="EnrichCommandSet">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet">[docs]</a>
+<span class="nd">@with_default_category</span><span class="p">(</span><span class="s2">&quot;Enrichment&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">EnrichCommandSet</span><span class="p">(</span><span class="n">BaseCommandSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Enrich Command Set</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">enrich_parser</span> <span class="o">=</span> <span class="n">BaseCommandSet</span><span class="o">.</span><span class="n">_get_enrich_arg_parser</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument parser for the enrich command&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EnrichCommandSet.do_enrich">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet.do_enrich">[docs]</a>
+    <span class="nd">@with_argparser</span><span class="p">(</span><span class="n">enrich_parser</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">do_enrich</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Statement</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enriches a domain, IP or URL</span>
+
+<span class="sd">        :param params: The passed command parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">Enrich</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">enrichment</span><span class="p">:</span>
+            <span class="n">enrichment</span><span class="o">.</span><span class="n">enrich</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="EnrichCommandSet.Enrich">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet.Enrich">[docs]</a>
+    <span class="k">class</span> <span class="nc">Enrich</span><span class="p">(</span><span class="n">BaseCommand</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enrich command</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_URL</span> <span class="o">=</span> <span class="n">API_URL</span> <span class="o">+</span> <span class="s2">&quot;explore/enrich/</span><span class="si">{type}</span><span class="s2">/</span><span class="si">{ioc}</span><span class="s2">/?format=json&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The enrich endpoint URL&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EnrichCommandSet.Enrich.__enter__">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet.Enrich.__enter__">[docs]</a>
+        <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            The logic before executing the command</span>
+
+<span class="sd">            :return: Enrich</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_URL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_URL</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">IOCUtils</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">ioc</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">ioc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">ioc</span>
+            <span class="p">)</span>
+            <span class="c1"># self._feedback = f&quot;{self._URL[self._URL.index(&#39;explore/&#39;) + 7:]}&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">explain</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;explain=1&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;explain=0&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">scan_data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;scan_data=1&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;scan_data=0&quot;</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__enter__</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="EnrichCommandSet.Enrich.enrich">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet.Enrich.enrich">[docs]</a>
+        <span class="k">def</span> <span class="nf">enrich</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            The command main logic</span>
+
+<span class="sd">            :return: None</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_URL</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;x-api-key&quot;</span><span class="p">:</span> <span class="n">API_KEY</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_error</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_response</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;response&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EnrichCommandSet.Enrich.__exit__">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet.Enrich.__exit__">[docs]</a>
+        <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            The logic after executing the command</span>
+
+<span class="sd">            :param exc_type: Exception type, if need to catch</span>
+<span class="sd">            :param exc_val: Exception value</span>
+<span class="sd">            :param exc_tb: Exception trac</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__exit__</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_commandSet</span><span class="o">.</span><span class="n">_cmd</span><span class="o">.</span><span class="n">_add_ioc_to_cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">ioc</span><span class="p">)</span></div>
+</div>
+
+
+    <span class="n">bulk_enrich_parser</span> <span class="o">=</span> <span class="n">BaseCommandSet</span><span class="o">.</span><span class="n">_get_bulk_enrich_arg_parser</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument parser for the bulk_enrich command&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EnrichCommandSet.do_bulk_enrich">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet.do_bulk_enrich">[docs]</a>
+    <span class="nd">@with_argparser</span><span class="p">(</span><span class="n">bulk_enrich_parser</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">do_bulk_enrich</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Statement</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        | Enriches domains or IPs (ipv4 or ipv6) in a bulk</span>
+<span class="sd">        | You can also use a file as input, i.e.:</span>
+<span class="sd">        |   ``cat to_enrich.txt | xargs sp bulk_enrich``</span>
+
+<span class="sd">        :param params: The passed command parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">BulkEnrich</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">bulk_enrichment</span><span class="p">:</span>
+            <span class="n">bulk_enrichment</span><span class="o">.</span><span class="n">enrich</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="EnrichCommandSet.BulkEnrich">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet.BulkEnrich">[docs]</a>
+    <span class="k">class</span> <span class="nc">BulkEnrich</span><span class="p">(</span><span class="n">BaseCommand</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Bulk Enrich command</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_URL</span> <span class="o">=</span> <span class="n">API_URL</span> <span class="o">+</span> <span class="s2">&quot;explore/bulk/summary/</span><span class="si">{type}</span><span class="s2">?format=json&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The bulk enrich endpoint URL&quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The post payload for the endpoint&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EnrichCommandSet.BulkEnrich.__enter__">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet.BulkEnrich.__enter__">[docs]</a>
+        <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            The logic before executing the command</span>
+
+<span class="sd">            :return: BulkEnrich</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">ioc_type</span> <span class="o">=</span> <span class="n">IOCUtils</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">iocs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_URL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_URL</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">ioc_type</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># self._feedback = f&quot;{self._URL[self._URL.index(&#39;explore/&#39;) + 7:]}&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">iocs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;domains&quot;</span>
+                    <span class="k">if</span> <span class="n">ioc_type</span> <span class="o">==</span> <span class="s2">&quot;domain&quot;</span>
+                    <span class="k">else</span> <span class="s2">&quot;ips&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">iocs</span><span class="p">))</span>
+                <span class="p">}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">explain</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;explain=1&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;explain=0&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">scan_data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;scan_data=1&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;scan_data=0&quot;</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__enter__</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="EnrichCommandSet.BulkEnrich.enrich">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet.BulkEnrich.enrich">[docs]</a>
+        <span class="k">def</span> <span class="nf">enrich</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            The command main logic</span>
+
+<span class="sd">            :return: None</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">payload</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_URL</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;x-api-key&quot;</span><span class="p">:</span> <span class="n">API_KEY</span><span class="p">}</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_error</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_response</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;response&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EnrichCommandSet.BulkEnrich.__exit__">
+<a class="viewcode-back" href="../../../sp/enrich.html#sp.commands.enrich.EnrichCommandSet.BulkEnrich.__exit__">[docs]</a>
+        <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            The logic after executing the command</span>
+
+<span class="sd">            :param exc_type: Exception type, if need to catch</span>
+<span class="sd">            :param exc_val: Exception value</span>
+<span class="sd">            :param exc_tb: Exception traceback</span>
+<span class="sd">            :return: None</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__exit__</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_commandSet</span><span class="o">.</span><span class="n">_cmd</span><span class="o">.</span><span class="n">_add_ioc_to_cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">iocs</span><span class="p">)</span></div>
+</div>
+</div>
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/logo.svg" alt="Logo of SP - SDK"/>
+            </a></p>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Silent Push - SDK</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">sp.commands.enrich</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Silent Push.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

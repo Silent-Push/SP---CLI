@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cmd2.argparse_custom &#8212; Silent Push - SDK</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=501c1f32" />
+    
+    <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Silent Push - SDK</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">cmd2.argparse_custom</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cmd2.argparse_custom</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding=utf-8</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module adds capabilities to argparse by patching a few of its functions.</span>
+<span class="sd">It also defines a parser class called Cmd2ArgumentParser which improves error</span>
+<span class="sd">and help output over normal argparse. All cmd2 code uses this parser and it is</span>
+<span class="sd">recommended that developers of cmd2-based apps either use it or write their own</span>
+<span class="sd">parser that inherits from it. This will give a consistent look-and-feel between</span>
+<span class="sd">the help/error output of built-in cmd2 commands and the app-specific commands.</span>
+<span class="sd">If you wish to override the parser used by cmd2&#39;s built-in commands, see</span>
+<span class="sd">override_parser.py example.</span>
+
+<span class="sd">Since the new capabilities are added by patching at the argparse API level,</span>
+<span class="sd">they are available whether or not Cmd2ArgumentParser is used. However, the help</span>
+<span class="sd">and error output of Cmd2ArgumentParser is customized to notate nargs ranges</span>
+<span class="sd">whereas any other parser class won&#39;t be as explicit in their output.</span>
+
+
+<span class="sd">**Added capabilities**</span>
+
+<span class="sd">Extends argparse nargs functionality by allowing tuples which specify a range</span>
+<span class="sd">(min, max). To specify a max value with no upper bound, use a 1-item tuple</span>
+<span class="sd">(min,)</span>
+
+<span class="sd">Example::</span>
+
+<span class="sd">    # -f argument expects at least 3 values</span>
+<span class="sd">    parser.add_argument(&#39;-f&#39;, nargs=(3,))</span>
+
+<span class="sd">    # -f argument expects 3 to 5 values</span>
+<span class="sd">    parser.add_argument(&#39;-f&#39;, nargs=(3, 5))</span>
+
+
+<span class="sd">**Tab Completion**</span>
+
+<span class="sd">cmd2 uses its ArgparseCompleter class to enable argparse-based tab completion</span>
+<span class="sd">on all commands that use the @with_argparse wrappers. Out of the box you get</span>
+<span class="sd">tab completion of commands, subcommands, and flag names, as well as instructive</span>
+<span class="sd">hints about the current argument that print when tab is pressed. In addition,</span>
+<span class="sd">you can add tab completion for each argument&#39;s values using parameters passed</span>
+<span class="sd">to add_argument().</span>
+
+<span class="sd">Below are the 3 add_argument() parameters for enabling tab completion of an</span>
+<span class="sd">argument&#39;s value. Only one can be used at a time.</span>
+
+<span class="sd">``choices`` - pass a list of values to the choices parameter.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        my_list = [&#39;An Option&#39;, &#39;SomeOtherOption&#39;]</span>
+<span class="sd">        parser.add_argument(&#39;-o&#39;, &#39;--options&#39;, choices=my_list)</span>
+
+<span class="sd">``choices_provider`` - pass a function that returns choices. This is good in</span>
+<span class="sd">cases where the choice list is dynamically generated when the user hits tab.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        def my_choices_provider(self):</span>
+<span class="sd">            ...</span>
+<span class="sd">            return my_generated_list</span>
+
+<span class="sd">        parser.add_argument(&quot;arg&quot;, choices_provider=my_choices_provider)</span>
+
+<span class="sd">``completer`` - pass a tab completion function that does custom completion.</span>
+
+<span class="sd">cmd2 provides a few completer methods for convenience (e.g., path_complete,</span>
+<span class="sd">delimiter_complete)</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        # This adds file-path completion to an argument</span>
+<span class="sd">        parser.add_argument(&#39;-o&#39;, &#39;--options&#39;, completer=cmd2.Cmd.path_complete)</span>
+
+<span class="sd">    You can use functools.partial() to prepopulate values of the underlying</span>
+<span class="sd">    choices and completer functions/methods.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        # This says to call path_complete with a preset value for its path_filter argument</span>
+<span class="sd">        dir_completer = functools.partial(path_complete,</span>
+<span class="sd">                                          path_filter=lambda path: os.path.isdir(path))</span>
+<span class="sd">        parser.add_argument(&#39;-o&#39;, &#39;--options&#39;, completer=dir_completer)</span>
+
+<span class="sd">For ``choices_provider`` and ``completer``, do not set them to a bound method. This</span>
+<span class="sd">is because ArgparseCompleter passes the `self` argument explicitly to these</span>
+<span class="sd">functions. When ArgparseCompleter calls one, it will detect whether it is bound</span>
+<span class="sd">to a `Cmd` subclass or `CommandSet`. If bound to a `cmd2.Cmd subclass`, it will</span>
+<span class="sd">pass the app instance as the `self` argument. If bound to a `cmd2.CommandSet`</span>
+<span class="sd">subclass, it will pass the `CommandSet` instance as the `self` argument.</span>
+<span class="sd">Therefore instead of passing something like `self.path_complete`, pass</span>
+<span class="sd">`cmd2.Cmd.path_complete`.</span>
+
+<span class="sd">``choices_provider`` and ``completer`` functions can also be implemented as</span>
+<span class="sd">standalone functions (i.e. not a member of a class). In this case,</span>
+<span class="sd">ArgparseCompleter will pass its ``cmd2.Cmd`` app instance as the first</span>
+<span class="sd">positional argument.</span>
+
+<span class="sd">Of the 3 tab completion parameters, ``choices`` is the only one where argparse</span>
+<span class="sd">validates user input against items in the choices list. This is because the</span>
+<span class="sd">other 2 parameters are meant to tab complete data sets that are viewed as</span>
+<span class="sd">dynamic. Therefore it is up to the developer to validate if the user has typed</span>
+<span class="sd">an acceptable value for these arguments.</span>
+
+<span class="sd">There are times when what&#39;s being tab completed is determined by a previous</span>
+<span class="sd">argument on the command line. In theses cases, ArgparseCompleter can pass a</span>
+<span class="sd">dictionary that maps the command line tokens up through the one being completed</span>
+<span class="sd">to their argparse argument name. To receive this dictionary, your</span>
+<span class="sd">choices/completer function should have an argument called arg_tokens.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        def my_choices_provider(self, arg_tokens)</span>
+<span class="sd">        def my_completer(self, text, line, begidx, endidx, arg_tokens)</span>
+
+<span class="sd">All values of the arg_tokens dictionary are lists, even if a particular</span>
+<span class="sd">argument expects only 1 token. Since ArgparseCompleter is for tab completion,</span>
+<span class="sd">it does not convert the tokens to their actual argument types or validate their</span>
+<span class="sd">values. All tokens are stored in the dictionary as the raw strings provided on</span>
+<span class="sd">the command line. It is up to the developer to determine if the user entered</span>
+<span class="sd">the correct argument type (e.g. int) and validate their values.</span>
+
+<span class="sd">CompletionItem Class - This class was added to help in cases where</span>
+<span class="sd">uninformative data is being tab completed. For instance, tab completing ID</span>
+<span class="sd">numbers isn&#39;t very helpful to a user without context. Returning a list of</span>
+<span class="sd">CompletionItems instead of a regular string for completion results will signal</span>
+<span class="sd">the ArgparseCompleter to output the completion results in a table of completion</span>
+<span class="sd">tokens with descriptions instead of just a table of tokens::</span>
+
+<span class="sd">    Instead of this:</span>
+<span class="sd">        1     2     3</span>
+
+<span class="sd">    The user sees this:</span>
+<span class="sd">        ITEM_ID     Item Name</span>
+<span class="sd">        ============================</span>
+<span class="sd">        1           My item</span>
+<span class="sd">        2           Another item</span>
+<span class="sd">        3           Yet another item</span>
+
+
+<span class="sd">The left-most column is the actual value being tab completed and its header is</span>
+<span class="sd">that value&#39;s name. The right column header is defined using the</span>
+<span class="sd">descriptive_header parameter of add_argument(). The right column values come</span>
+<span class="sd">from the CompletionItem.description value.</span>
+
+<span class="sd">Example::</span>
+
+<span class="sd">    token = 1</span>
+<span class="sd">    token_description = &quot;My Item&quot;</span>
+<span class="sd">    completion_item = CompletionItem(token, token_description)</span>
+
+<span class="sd">Since descriptive_header and CompletionItem.description are just strings, you</span>
+<span class="sd">can format them in such a way to have multiple columns::</span>
+
+<span class="sd">    ITEM_ID     Item Name            Checked Out    Due Date</span>
+<span class="sd">    ==========================================================</span>
+<span class="sd">    1           My item              True           02/02/2022</span>
+<span class="sd">    2           Another item         False</span>
+<span class="sd">    3           Yet another item     False</span>
+
+<span class="sd">To use CompletionItems, just return them from your choices_provider or</span>
+<span class="sd">completer functions. They can also be used as argparse choices. When a</span>
+<span class="sd">CompletionItem is created, it stores the original value (e.g. ID number) and</span>
+<span class="sd">makes it accessible through a property called orig_value. cmd2 has patched</span>
+<span class="sd">argparse so that when evaluating choices, input is compared to</span>
+<span class="sd">CompletionItem.orig_value instead of the CompletionItem instance.</span>
+
+<span class="sd">To avoid printing a ton of information to the screen at once when a user</span>
+<span class="sd">presses tab, there is a maximum threshold for the number of CompletionItems</span>
+<span class="sd">that will be shown. Its value is defined in cmd2.Cmd.max_completion_items. It</span>
+<span class="sd">defaults to 50, but can be changed. If the number of completion suggestions</span>
+<span class="sd">exceeds this number, they will be displayed in the typical columnized format</span>
+<span class="sd">and will not include the description value of the CompletionItems.</span>
+
+
+<span class="sd">**Patched argparse functions**</span>
+
+<span class="sd">``argparse._ActionsContainer.add_argument`` - adds arguments related to tab</span>
+<span class="sd">completion and enables nargs range parsing. See _add_argument_wrapper for</span>
+<span class="sd">more details on these arguments.</span>
+
+<span class="sd">``argparse.ArgumentParser._check_value`` - adds support for using</span>
+<span class="sd">``CompletionItems`` as argparse choices. When evaluating choices, input is</span>
+<span class="sd">compared to ``CompletionItem.orig_value`` instead of the ``CompletionItem``</span>
+<span class="sd">instance.</span>
+<span class="sd">See _ArgumentParser_check_value for more details.</span>
+
+<span class="sd">``argparse.ArgumentParser._get_nargs_pattern`` - adds support for nargs ranges.</span>
+<span class="sd">See _get_nargs_pattern_wrapper for more details.</span>
+
+<span class="sd">``argparse.ArgumentParser._match_argument`` - adds support for nargs ranges.</span>
+<span class="sd">See _match_argument_wrapper for more details.</span>
+
+<span class="sd">``argparse._SubParsersAction.remove_parser`` - new function which removes a</span>
+<span class="sd">sub-parser from a sub-parsers group. See _SubParsersAction_remove_parser for</span>
+<span class="sd">more details.</span>
+
+<span class="sd">**Added accessor methods**</span>
+
+<span class="sd">cmd2 has patched ``argparse.Action`` to include the following accessor methods</span>
+<span class="sd">for cases in which you need to manually access the cmd2-specific attributes.</span>
+
+<span class="sd">- ``argparse.Action.get_choices_callable()`` - See</span>
+<span class="sd">  :func:`_action_get_choices_callable` for more details.</span>
+<span class="sd">- ``argparse.Action.set_choices_provider()`` - See</span>
+<span class="sd">  :func:`_action_set_choices_provider` for more details.</span>
+<span class="sd">- ``argparse.Action.set_completer()`` - See</span>
+<span class="sd">  :func:`_action_set_completer` for more details.</span>
+<span class="sd">- ``argparse.Action.get_descriptive_header()`` - See</span>
+<span class="sd">  :func:`_action_get_descriptive_header` for more details.</span>
+<span class="sd">- ``argparse.Action.set_descriptive_header()`` - See</span>
+<span class="sd">  :func:`_action_set_descriptive_header` for more details.</span>
+<span class="sd">- ``argparse.Action.get_nargs_range()`` - See</span>
+<span class="sd">  :func:`_action_get_nargs_range` for more details.</span>
+<span class="sd">- ``argparse.Action.set_nargs_range()`` - See</span>
+<span class="sd">  :func:`_action_set_nargs_range` for more details.</span>
+<span class="sd">- ``argparse.Action.get_suppress_tab_hint()`` - See</span>
+<span class="sd">  :func:`_action_get_suppress_tab_hint` for more details.</span>
+<span class="sd">- ``argparse.Action.set_suppress_tab_hint()`` - See</span>
+<span class="sd">  :func:`_action_set_suppress_tab_hint` for more details.</span>
+
+<span class="sd">cmd2 has patched ``argparse.ArgumentParser`` to include the following accessor methods</span>
+
+<span class="sd">- ``argparse.ArgumentParser.get_ap_completer_type()`` - See</span>
+<span class="sd">  :func:`_ArgumentParser_get_ap_completer_type` for more details.</span>
+<span class="sd">- ``argparse.Action.set_ap_completer_type()`` - See</span>
+<span class="sd">  :func:`_ArgumentParser_set_ap_completer_type` for more details.</span>
+
+<span class="sd">**Subcommand removal**</span>
+
+<span class="sd">cmd2 has patched ``argparse._SubParsersAction`` to include a ``remove_parser()``</span>
+<span class="sd">method which can be used to remove a subcommand.</span>
+
+<span class="sd">``argparse._SubParsersAction.remove_parser`` - new function which removes a</span>
+<span class="sd">sub-parser from a sub-parsers group. See</span>
+<span class="sd">:func:`_SubParsersAction_remove_parser` for more details.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="c1"># noinspection PyUnresolvedReferences,PyProtectedMember</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ONE_OR_MORE</span><span class="p">,</span>
+    <span class="n">ZERO_OR_MORE</span><span class="p">,</span>
+    <span class="n">ArgumentError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">gettext</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">gettext</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">IO</span><span class="p">,</span>
+    <span class="n">TYPE_CHECKING</span><span class="p">,</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">Iterable</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">NoReturn</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">Set</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">Type</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+    <span class="n">cast</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ansi</span><span class="p">,</span>
+    <span class="n">constants</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">Protocol</span><span class="p">,</span>
+        <span class="n">runtime_checkable</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># type: ignore[assignment]</span>
+        <span class="n">Protocol</span><span class="p">,</span>
+        <span class="n">runtime_checkable</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">.argparse_completer</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">ArgparseCompleter</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">generate_range_error</span><span class="p">(</span><span class="n">range_min</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">range_max</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate an error message when the the number of arguments provided is not within the expected range&quot;&quot;&quot;</span>
+    <span class="n">err_str</span> <span class="o">=</span> <span class="s2">&quot;expected &quot;</span>
+
+    <span class="k">if</span> <span class="n">range_max</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">:</span>
+        <span class="n">plural</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">range_min</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;s&#39;</span>
+        <span class="n">err_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;at least </span><span class="si">{</span><span class="n">range_min</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plural</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">range_max</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;s&#39;</span>
+        <span class="k">if</span> <span class="n">range_min</span> <span class="o">==</span> <span class="n">range_max</span><span class="p">:</span>
+            <span class="n">err_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">range_min</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">err_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">range_min</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">range_max</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="n">err_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; argument</span><span class="si">{</span><span class="n">plural</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">err_str</span>
+
+
+<span class="k">class</span> <span class="nc">CompletionItem</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Completion item with descriptive text attached</span>
+
+<span class="sd">    See header of this file for more information</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;CompletionItem&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">CompletionItem</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="c1"># noinspection PyUnusedLocal</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CompletionItem Initializer</span>
+
+<span class="sd">        :param value: the value being tab completed</span>
+<span class="sd">        :param description: description text to display</span>
+<span class="sd">        :param args: args for str __init__</span>
+<span class="sd">        :param kwargs: kwargs for str __init__</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+
+        <span class="c1"># Save the original value to support CompletionItems as argparse choices.</span>
+        <span class="c1"># cmd2 has patched argparse so input is compared to this value instead of the CompletionItem instance.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_orig_value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">orig_value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read-only property for _orig_value&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_value</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Class and functions related to ChoicesCallable</span>
+<span class="c1">############################################################################################################</span>
+
+
+<span class="nd">@runtime_checkable</span>
+<span class="k">class</span> <span class="nc">ChoicesProviderFuncBase</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that returns a list of choices in support of tab completion</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="o">...</span>  <span class="c1"># pragma: no cover</span>
+
+
+<span class="nd">@runtime_checkable</span>
+<span class="k">class</span> <span class="nc">ChoicesProviderFuncWithTokens</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that returns a list of choices in support of tab completion and accepts a dictionary of prior arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">arg_tokens</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="o">...</span>  <span class="c1"># pragma: no cover</span>
+
+
+<span class="n">ChoicesProviderFunc</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">ChoicesProviderFuncBase</span><span class="p">,</span> <span class="n">ChoicesProviderFuncWithTokens</span><span class="p">]</span>
+
+
+<span class="nd">@runtime_checkable</span>
+<span class="k">class</span> <span class="nc">CompleterFuncBase</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to support tab completion with the provided state of the user prompt</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">begidx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">endidx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="o">...</span>  <span class="c1"># pragma: no cover</span>
+
+
+<span class="nd">@runtime_checkable</span>
+<span class="k">class</span> <span class="nc">CompleterFuncWithTokens</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to support tab completion with the provided state of the user prompt and accepts a dictionary of prior</span>
+<span class="sd">    arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">begidx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">endidx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">arg_tokens</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{},</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="o">...</span>  <span class="c1"># pragma: no cover</span>
+
+
+<span class="n">CompleterFunc</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">CompleterFuncBase</span><span class="p">,</span> <span class="n">CompleterFuncWithTokens</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">ChoicesCallable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Enables using a callable as the choices provider for an argparse argument.</span>
+<span class="sd">    While argparse has the built-in choices attribute, it is limited to an iterable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">is_completer</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">to_call</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">CompleterFunc</span><span class="p">,</span> <span class="n">ChoicesProviderFunc</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializer</span>
+<span class="sd">        :param is_completer: True if to_call is a tab completion routine which expects</span>
+<span class="sd">                             the args: text, line, begidx, endidx</span>
+<span class="sd">        :param to_call: the callable object that will be called to provide choices for the argument</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_completer</span> <span class="o">=</span> <span class="n">is_completer</span>
+        <span class="k">if</span> <span class="n">is_completer</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_call</span><span class="p">,</span> <span class="p">(</span><span class="n">CompleterFuncBase</span><span class="p">,</span> <span class="n">CompleterFuncWithTokens</span><span class="p">)):</span>  <span class="c1"># pragma: no cover</span>
+                <span class="c1"># runtime checking of Protocols do not currently check the parameters of a function.</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;With is_completer set to true, to_call must be either CompleterFunc, CompleterFuncWithTokens&#39;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_call</span><span class="p">,</span> <span class="p">(</span><span class="n">ChoicesProviderFuncBase</span><span class="p">,</span> <span class="n">ChoicesProviderFuncWithTokens</span><span class="p">)):</span>  <span class="c1"># pragma: no cover</span>
+                <span class="c1"># runtime checking of Protocols do not currently check the parameters of a function.</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;With is_completer set to false, to_call must be either: &#39;</span>
+                    <span class="s1">&#39;ChoicesProviderFuncBase, ChoicesProviderFuncWithTokens&#39;</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_call</span> <span class="o">=</span> <span class="n">to_call</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">completer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompleterFunc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_call</span><span class="p">,</span> <span class="p">(</span><span class="n">CompleterFuncBase</span><span class="p">,</span> <span class="n">CompleterFuncWithTokens</span><span class="p">)):</span>  <span class="c1"># pragma: no cover</span>
+            <span class="c1"># this should&#39;ve been caught in the constructor, just a backup check</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Function is not a CompleterFunc&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_call</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">choices_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChoicesProviderFunc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_call</span><span class="p">,</span> <span class="p">(</span><span class="n">ChoicesProviderFuncBase</span><span class="p">,</span> <span class="n">ChoicesProviderFuncWithTokens</span><span class="p">)):</span>  <span class="c1"># pragma: no cover</span>
+            <span class="c1"># this should&#39;ve been caught in the constructor, just a backup check</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Function is not a ChoicesProviderFunc&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_call</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># The following are names of custom argparse Action attributes added by cmd2</span>
+<span class="c1">############################################################################################################</span>
+
+<span class="c1"># ChoicesCallable object that specifies the function to be called which provides choices to the argument</span>
+<span class="n">ATTR_CHOICES_CALLABLE</span> <span class="o">=</span> <span class="s1">&#39;choices_callable&#39;</span>
+
+<span class="c1"># Descriptive header that prints when using CompletionItems</span>
+<span class="n">ATTR_DESCRIPTIVE_HEADER</span> <span class="o">=</span> <span class="s1">&#39;descriptive_header&#39;</span>
+
+<span class="c1"># A tuple specifying nargs as a range (min, max)</span>
+<span class="n">ATTR_NARGS_RANGE</span> <span class="o">=</span> <span class="s1">&#39;nargs_range&#39;</span>
+
+<span class="c1"># Pressing tab normally displays the help text for the argument if no choices are available</span>
+<span class="c1"># Setting this attribute to True will suppress these hints</span>
+<span class="n">ATTR_SUPPRESS_TAB_HINT</span> <span class="o">=</span> <span class="s1">&#39;suppress_tab_hint&#39;</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Patch argparse.Action with accessors for choice_callable attribute</span>
+<span class="c1">############################################################################################################</span>
+<span class="k">def</span> <span class="nf">_action_get_choices_callable</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ChoicesCallable</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the choices_callable attribute of an argparse Action.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``get_choices_callable()`` to ``argparse.Action`` class.</span>
+
+<span class="sd">    To call: ``action.get_choices_callable()``</span>
+
+<span class="sd">    :param self: argparse Action being queried</span>
+<span class="sd">    :return: A ChoicesCallable instance or None if attribute does not exist</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">ChoicesCallable</span><span class="p">],</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ATTR_CHOICES_CALLABLE</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="s1">&#39;get_choices_callable&#39;</span><span class="p">,</span> <span class="n">_action_get_choices_callable</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_action_set_choices_callable</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">choices_callable</span><span class="p">:</span> <span class="n">ChoicesCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the choices_callable attribute of an argparse Action.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``_set_choices_callable()`` to ``argparse.Action`` class.</span>
+
+<span class="sd">    Call this using the convenience wrappers ``set_choices_provider()`` and ``set_completer()`` instead.</span>
+
+<span class="sd">    :param self: action being edited</span>
+<span class="sd">    :param choices_callable: the ChoicesCallable instance to use</span>
+<span class="sd">    :raises: TypeError if used on incompatible action type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Verify consistent use of parameters</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;None of the following parameters can be used alongside a choices parameter:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="s2">&quot;choices_provider, completer&quot;</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;None of the following parameters can be used on an action that takes no arguments:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;choices_provider, completer&quot;</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">))</span>
+
+    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ATTR_CHOICES_CALLABLE</span><span class="p">,</span> <span class="n">choices_callable</span><span class="p">)</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="s1">&#39;_set_choices_callable&#39;</span><span class="p">,</span> <span class="n">_action_set_choices_callable</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_action_set_choices_provider</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span>
+    <span class="n">choices_provider</span><span class="p">:</span> <span class="n">ChoicesProviderFunc</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set choices_provider of an argparse Action.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``set_choices_callable()`` to ``argparse.Action`` class.</span>
+
+<span class="sd">    To call: ``action.set_choices_provider(choices_provider)``</span>
+
+<span class="sd">    :param self: action being edited</span>
+<span class="sd">    :param choices_provider: the choices_provider instance to use</span>
+<span class="sd">    :raises: TypeError if used on incompatible action type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_set_choices_callable</span><span class="p">(</span><span class="n">ChoicesCallable</span><span class="p">(</span><span class="n">is_completer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">to_call</span><span class="o">=</span><span class="n">choices_provider</span><span class="p">))</span>  <span class="c1"># type: ignore[attr-defined]</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="s1">&#39;set_choices_provider&#39;</span><span class="p">,</span> <span class="n">_action_set_choices_provider</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_action_set_completer</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span>
+    <span class="n">completer</span><span class="p">:</span> <span class="n">CompleterFunc</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set completer of an argparse Action.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``set_completer()`` to ``argparse.Action`` class.</span>
+
+<span class="sd">    To call: ``action.set_completer(completer)``</span>
+
+<span class="sd">    :param self: action being edited</span>
+<span class="sd">    :param completer: the completer instance to use</span>
+<span class="sd">    :raises: TypeError if used on incompatible action type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_set_choices_callable</span><span class="p">(</span><span class="n">ChoicesCallable</span><span class="p">(</span><span class="n">is_completer</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">to_call</span><span class="o">=</span><span class="n">completer</span><span class="p">))</span>  <span class="c1"># type: ignore[attr-defined]</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="s1">&#39;set_completer&#39;</span><span class="p">,</span> <span class="n">_action_set_completer</span><span class="p">)</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Patch argparse.Action with accessors for descriptive_header attribute</span>
+<span class="c1">############################################################################################################</span>
+<span class="k">def</span> <span class="nf">_action_get_descriptive_header</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the descriptive_header attribute of an argparse Action.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``get_descriptive_header()`` to ``argparse.Action`` class.</span>
+
+<span class="sd">    To call: ``action.get_descriptive_header()``</span>
+
+<span class="sd">    :param self: argparse Action being queried</span>
+<span class="sd">    :return: The value of descriptive_header or None if attribute does not exist</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ATTR_DESCRIPTIVE_HEADER</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="s1">&#39;get_descriptive_header&#39;</span><span class="p">,</span> <span class="n">_action_get_descriptive_header</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_action_set_descriptive_header</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">descriptive_header</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the descriptive_header attribute of an argparse Action.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``set_descriptive_header()`` to ``argparse.Action`` class.</span>
+
+<span class="sd">    To call: ``action.set_descriptive_header(descriptive_header)``</span>
+
+<span class="sd">    :param self: argparse Action being updated</span>
+<span class="sd">    :param descriptive_header: value being assigned</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ATTR_DESCRIPTIVE_HEADER</span><span class="p">,</span> <span class="n">descriptive_header</span><span class="p">)</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="s1">&#39;set_descriptive_header&#39;</span><span class="p">,</span> <span class="n">_action_set_descriptive_header</span><span class="p">)</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Patch argparse.Action with accessors for nargs_range attribute</span>
+<span class="c1">############################################################################################################</span>
+<span class="k">def</span> <span class="nf">_action_get_nargs_range</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the nargs_range attribute of an argparse Action.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``get_nargs_range()`` to ``argparse.Action`` class.</span>
+
+<span class="sd">    To call: ``action.get_nargs_range()``</span>
+
+<span class="sd">    :param self: argparse Action being queried</span>
+<span class="sd">    :return: The value of nargs_range or None if attribute does not exist</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ATTR_NARGS_RANGE</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="s1">&#39;get_nargs_range&#39;</span><span class="p">,</span> <span class="n">_action_get_nargs_range</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_action_set_nargs_range</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">nargs_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the nargs_range attribute of an argparse Action.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``set_nargs_range()`` to ``argparse.Action`` class.</span>
+
+<span class="sd">    To call: ``action.set_nargs_range(nargs_range)``</span>
+
+<span class="sd">    :param self: argparse Action being updated</span>
+<span class="sd">    :param nargs_range: value being assigned</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ATTR_NARGS_RANGE</span><span class="p">,</span> <span class="n">nargs_range</span><span class="p">)</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="s1">&#39;set_nargs_range&#39;</span><span class="p">,</span> <span class="n">_action_set_nargs_range</span><span class="p">)</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Patch argparse.Action with accessors for suppress_tab_hint attribute</span>
+<span class="c1">############################################################################################################</span>
+<span class="k">def</span> <span class="nf">_action_get_suppress_tab_hint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the suppress_tab_hint attribute of an argparse Action.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``get_suppress_tab_hint()`` to ``argparse.Action`` class.</span>
+
+<span class="sd">    To call: ``action.get_suppress_tab_hint()``</span>
+
+<span class="sd">    :param self: argparse Action being queried</span>
+<span class="sd">    :return: The value of suppress_tab_hint or False if attribute does not exist</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ATTR_SUPPRESS_TAB_HINT</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="s1">&#39;get_suppress_tab_hint&#39;</span><span class="p">,</span> <span class="n">_action_get_suppress_tab_hint</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_action_set_suppress_tab_hint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">suppress_tab_hint</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the suppress_tab_hint attribute of an argparse Action.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``set_suppress_tab_hint()`` to ``argparse.Action`` class.</span>
+
+<span class="sd">    To call: ``action.set_suppress_tab_hint(suppress_tab_hint)``</span>
+
+<span class="sd">    :param self: argparse Action being updated</span>
+<span class="sd">    :param suppress_tab_hint: value being assigned</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ATTR_SUPPRESS_TAB_HINT</span><span class="p">,</span> <span class="n">suppress_tab_hint</span><span class="p">)</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="s1">&#39;set_suppress_tab_hint&#39;</span><span class="p">,</span> <span class="n">_action_set_suppress_tab_hint</span><span class="p">)</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Allow developers to add custom action attributes</span>
+<span class="c1">############################################################################################################</span>
+
+<span class="n">CUSTOM_ACTION_ATTRIBS</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="n">_CUSTOM_ATTRIB_PFX</span> <span class="o">=</span> <span class="s1">&#39;_attr_&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">register_argparse_argument_parameter</span><span class="p">(</span><span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">param_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Registers a custom argparse argument parameter.</span>
+
+<span class="sd">    The registered name will then be a recognized keyword parameter to the parser&#39;s `add_argument()` function.</span>
+
+<span class="sd">    An accessor functions will be added to the parameter&#39;s Action object in the form of: ``get_{param_name}()``</span>
+<span class="sd">    and ``set_{param_name}(value)``.</span>
+
+<span class="sd">    :param param_name: Name of the parameter to add.</span>
+<span class="sd">    :param param_type: Type of the parameter to add.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attr_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">_CUSTOM_ATTRIB_PFX</span><span class="si">}{</span><span class="n">param_name</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">if</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">CUSTOM_ACTION_ATTRIBS</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Custom parameter </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> already exists&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;^[A-Za-z_][A-Za-z0-9_]*$&#39;</span><span class="p">,</span> <span class="n">param_name</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid parameter name </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> - cannot be used as a python identifier&#39;</span><span class="p">)</span>
+
+    <span class="n">getter_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;get_</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_action_get_custom_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        Get the custom </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2"> attribute of an argparse Action.</span>
+
+<span class="s2">        This function is added by cmd2 as a method called ``</span><span class="si">{</span><span class="n">getter_name</span><span class="si">}</span><span class="s2">()`` to ``argparse.Action`` class.</span>
+
+<span class="s2">        To call: ``action.</span><span class="si">{</span><span class="n">getter_name</span><span class="si">}</span><span class="s2">()``</span>
+
+<span class="s2">        :param self: argparse Action being queried</span>
+<span class="s2">        :return: The value of </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2"> or None if attribute does not exist</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">getter_name</span><span class="p">,</span> <span class="n">_action_get_custom_parameter</span><span class="p">)</span>
+
+    <span class="n">setter_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;set_</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_action_set_custom_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        Set the custom </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2"> attribute of an argparse Action.</span>
+
+<span class="s2">        This function is added by cmd2 as a method called ``</span><span class="si">{</span><span class="n">setter_name</span><span class="si">}</span><span class="s2">()`` to ``argparse.Action`` class.</span>
+
+<span class="s2">        To call: ``action.</span><span class="si">{</span><span class="n">setter_name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">)``</span>
+
+<span class="s2">        :param self: argparse Action being updated</span>
+<span class="s2">        :param value: value being assigned</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">param_type</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">param_type</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1"> must be of type </span><span class="si">{</span><span class="n">param_type</span><span class="si">}</span><span class="s1">, got: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">setter_name</span><span class="p">,</span> <span class="n">_action_set_custom_parameter</span><span class="p">)</span>
+
+    <span class="n">CUSTOM_ACTION_ATTRIBS</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Patch _ActionsContainer.add_argument with our wrapper to support more arguments</span>
+<span class="c1">############################################################################################################</span>
+
+
+<span class="c1"># Save original _ActionsContainer.add_argument so we can call it in our wrapper</span>
+<span class="c1"># noinspection PyProtectedMember</span>
+<span class="n">orig_actions_container_add_argument</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_ActionsContainer</span><span class="o">.</span><span class="n">add_argument</span>
+
+
+<span class="c1"># noinspection PyProtectedMember</span>
+<span class="k">def</span> <span class="nf">_add_argument_wrapper</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_ActionsContainer</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">nargs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">choices_provider</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ChoicesProviderFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">completer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompleterFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">suppress_tab_hint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">descriptive_header</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper around _ActionsContainer.add_argument() which supports more settings used by cmd2</span>
+
+<span class="sd">    # Args from original function</span>
+<span class="sd">    :param self: instance of the _ActionsContainer being added to</span>
+<span class="sd">    :param args: arguments expected by argparse._ActionsContainer.add_argument</span>
+
+<span class="sd">    # Customized arguments from original function</span>
+<span class="sd">    :param nargs: extends argparse nargs functionality by allowing tuples which specify a range (min, max)</span>
+<span class="sd">                  to specify a max value with no upper bound, use a 1-item tuple (min,)</span>
+
+<span class="sd">    # Added args used by ArgparseCompleter</span>
+<span class="sd">    :param choices_provider: function that provides choices for this argument</span>
+<span class="sd">    :param completer: tab completion function that provides choices for this argument</span>
+<span class="sd">    :param suppress_tab_hint: when ArgparseCompleter has no results to show during tab completion, it displays the</span>
+<span class="sd">                              current argument&#39;s help text as a hint. Set this to True to suppress the hint. If this</span>
+<span class="sd">                              argument&#39;s help text is set to argparse.SUPPRESS, then tab hints will not display</span>
+<span class="sd">                              regardless of the value passed for suppress_tab_hint. Defaults to False.</span>
+<span class="sd">    :param descriptive_header: if the provided choices are CompletionItems, then this header will display</span>
+<span class="sd">                               during tab completion. Defaults to None.</span>
+
+<span class="sd">    # Args from original function</span>
+<span class="sd">    :param kwargs: keyword-arguments recognized by argparse._ActionsContainer.add_argument</span>
+
+<span class="sd">    Note: You can only use 1 of the following in your argument:</span>
+<span class="sd">          choices, choices_provider, completer</span>
+
+<span class="sd">          See the header of this file for more information</span>
+
+<span class="sd">    :return: the created argument action</span>
+<span class="sd">    :raises: ValueError on incorrect parameter usage</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Verify consistent use of arguments</span>
+    <span class="n">choices_callables</span> <span class="o">=</span> <span class="p">[</span><span class="n">choices_provider</span><span class="p">,</span> <span class="n">completer</span><span class="p">]</span>
+    <span class="n">num_params_set</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">choices_callables</span><span class="p">)</span> <span class="o">-</span> <span class="n">choices_callables</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">num_params_set</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Only one of the following parameters may be used at a time:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="s2">&quot;choices_provider, completer&quot;</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">))</span>
+
+    <span class="c1"># Pre-process special ranged nargs</span>
+    <span class="n">nargs_range</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">nargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nargs_adjusted</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="c1"># Check if nargs was given as a range</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+
+            <span class="c1"># Handle 1-item tuple by setting max to INFINITY</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nargs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">nargs</span> <span class="o">=</span> <span class="p">(</span><span class="n">nargs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">constants</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">)</span>
+
+            <span class="c1"># Validate nargs tuple</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">nargs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nargs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>  <span class="c1"># type: ignore[unreachable]</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">nargs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">nargs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Ranged values for nargs must be a tuple of 1 or 2 integers&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nargs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nargs</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>  <span class="c1"># type: ignore[misc]</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid nargs range. The first value must be less than the second&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nargs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Negative numbers are invalid for nargs range&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Save the nargs tuple as our range setting</span>
+            <span class="n">nargs_range</span> <span class="o">=</span> <span class="n">nargs</span>
+            <span class="n">range_min</span> <span class="o">=</span> <span class="n">nargs_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">range_max</span> <span class="o">=</span> <span class="n">nargs_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+
+            <span class="c1"># Convert nargs into a format argparse recognizes</span>
+            <span class="k">if</span> <span class="n">range_min</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">range_max</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">nargs_adjusted</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">OPTIONAL</span>
+
+                    <span class="c1"># No range needed since (0, 1) is just argparse.OPTIONAL</span>
+                    <span class="n">nargs_range</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">nargs_adjusted</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ZERO_OR_MORE</span>
+                    <span class="k">if</span> <span class="n">range_max</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">:</span>
+                        <span class="c1"># No range needed since (0, INFINITY) is just argparse.ZERO_OR_MORE</span>
+                        <span class="n">nargs_range</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">elif</span> <span class="n">range_min</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">range_max</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">:</span>
+                <span class="n">nargs_adjusted</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ONE_OR_MORE</span>
+
+                <span class="c1"># No range needed since (1, INFINITY) is just argparse.ONE_OR_MORE</span>
+                <span class="n">nargs_range</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nargs_adjusted</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ONE_OR_MORE</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nargs_adjusted</span> <span class="o">=</span> <span class="n">nargs</span>
+
+        <span class="c1"># Add the argparse-recognized version of nargs to kwargs</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;nargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nargs_adjusted</span>
+
+    <span class="c1"># Extract registered custom keyword arguments</span>
+    <span class="n">custom_attribs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">keyword</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">CUSTOM_ACTION_ATTRIBS</span><span class="p">:</span>
+            <span class="n">custom_attribs</span><span class="p">[</span><span class="n">keyword</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">custom_attribs</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">keyword</span><span class="p">]</span>
+
+    <span class="c1"># Create the argument using the original add_argument function</span>
+    <span class="n">new_arg</span> <span class="o">=</span> <span class="n">orig_actions_container_add_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Set the custom attributes</span>
+    <span class="n">new_arg</span><span class="o">.</span><span class="n">set_nargs_range</span><span class="p">(</span><span class="n">nargs_range</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type, attr-defined]</span>
+
+    <span class="k">if</span> <span class="n">choices_provider</span><span class="p">:</span>
+        <span class="n">new_arg</span><span class="o">.</span><span class="n">set_choices_provider</span><span class="p">(</span><span class="n">choices_provider</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
+    <span class="k">elif</span> <span class="n">completer</span><span class="p">:</span>
+        <span class="n">new_arg</span><span class="o">.</span><span class="n">set_completer</span><span class="p">(</span><span class="n">completer</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
+
+    <span class="n">new_arg</span><span class="o">.</span><span class="n">set_suppress_tab_hint</span><span class="p">(</span><span class="n">suppress_tab_hint</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
+    <span class="n">new_arg</span><span class="o">.</span><span class="n">set_descriptive_header</span><span class="p">(</span><span class="n">descriptive_header</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
+
+    <span class="k">for</span> <span class="n">keyword</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">custom_attribs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">attr_setter</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">new_arg</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;set_</span><span class="si">{</span><span class="n">keyword</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">attr_setter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">attr_setter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_arg</span>
+
+
+<span class="c1"># Overwrite _ActionsContainer.add_argument with our wrapper</span>
+<span class="c1"># noinspection PyProtectedMember</span>
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">_ActionsContainer</span><span class="p">,</span> <span class="s1">&#39;add_argument&#39;</span><span class="p">,</span> <span class="n">_add_argument_wrapper</span><span class="p">)</span>
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Patch ArgumentParser._get_nargs_pattern with our wrapper to support nargs ranges</span>
+<span class="c1">############################################################################################################</span>
+
+<span class="c1"># Save original ArgumentParser._get_nargs_pattern so we can call it in our wrapper</span>
+<span class="c1"># noinspection PyProtectedMember</span>
+<span class="n">orig_argument_parser_get_nargs_pattern</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="o">.</span><span class="n">_get_nargs_pattern</span>
+
+
+<span class="c1"># noinspection PyProtectedMember</span>
+<span class="k">def</span> <span class="nf">_get_nargs_pattern_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="c1"># Wrapper around ArgumentParser._get_nargs_pattern behavior to support nargs ranges</span>
+    <span class="n">nargs_range</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">get_nargs_range</span><span class="p">()</span>  <span class="c1"># type: ignore[attr-defined]</span>
+    <span class="k">if</span> <span class="n">nargs_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nargs_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">:</span>
+            <span class="n">range_max</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">range_max</span> <span class="o">=</span> <span class="n">nargs_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># type: ignore[assignment]</span>
+
+        <span class="n">nargs_pattern</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;(-*A</span><span class="se">{{</span><span class="si">{</span><span class="n">nargs_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">range_max</span><span class="si">}</span><span class="se">}}</span><span class="s1">-*)&#39;</span>
+
+        <span class="c1"># if this is an optional action, -- is not allowed</span>
+        <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">:</span>
+            <span class="n">nargs_pattern</span> <span class="o">=</span> <span class="n">nargs_pattern</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">nargs_pattern</span> <span class="o">=</span> <span class="n">nargs_pattern</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nargs_pattern</span>
+
+    <span class="k">return</span> <span class="n">orig_argument_parser_get_nargs_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+
+
+<span class="c1"># Overwrite ArgumentParser._get_nargs_pattern with our wrapper</span>
+<span class="c1"># noinspection PyProtectedMember</span>
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="s1">&#39;_get_nargs_pattern&#39;</span><span class="p">,</span> <span class="n">_get_nargs_pattern_wrapper</span><span class="p">)</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Patch ArgumentParser._match_argument with our wrapper to support nargs ranges</span>
+<span class="c1">############################################################################################################</span>
+<span class="c1"># noinspection PyProtectedMember</span>
+<span class="n">orig_argument_parser_match_argument</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="o">.</span><span class="n">_match_argument</span>
+
+
+<span class="c1"># noinspection PyProtectedMember</span>
+<span class="k">def</span> <span class="nf">_match_argument_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">arg_strings_pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="c1"># Wrapper around ArgumentParser._match_argument behavior to support nargs ranges</span>
+    <span class="n">nargs_pattern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_nargs_pattern</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">nargs_pattern</span><span class="p">,</span> <span class="n">arg_strings_pattern</span><span class="p">)</span>
+
+    <span class="c1"># raise an exception if we weren&#39;t able to find a match</span>
+    <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nargs_range</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">get_nargs_range</span><span class="p">()</span>  <span class="c1"># type: ignore[attr-defined]</span>
+        <span class="k">if</span> <span class="n">nargs_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">generate_range_error</span><span class="p">(</span><span class="n">nargs_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nargs_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">orig_argument_parser_match_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">arg_strings_pattern</span><span class="p">)</span>
+
+
+<span class="c1"># Overwrite ArgumentParser._match_argument with our wrapper</span>
+<span class="c1"># noinspection PyProtectedMember</span>
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="s1">&#39;_match_argument&#39;</span><span class="p">,</span> <span class="n">_match_argument_wrapper</span><span class="p">)</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Patch argparse.ArgumentParser with accessors for ap_completer_type attribute</span>
+<span class="c1">############################################################################################################</span>
+
+<span class="c1"># An ArgumentParser attribute which specifies a subclass of ArgparseCompleter for custom tab completion behavior on a</span>
+<span class="c1"># given parser. If this is None or not present, then cmd2 will use argparse_completer.DEFAULT_AP_COMPLETER when tab</span>
+<span class="c1"># completing a parser&#39;s arguments</span>
+<span class="n">ATTR_AP_COMPLETER_TYPE</span> <span class="o">=</span> <span class="s1">&#39;ap_completer_type&#39;</span>
+
+
+<span class="c1"># noinspection PyPep8Naming</span>
+<span class="k">def</span> <span class="nf">_ArgumentParser_get_ap_completer_type</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="s1">&#39;ArgparseCompleter&#39;</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the ap_completer_type attribute of an argparse ArgumentParser.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``get_ap_completer_type()`` to ``argparse.ArgumentParser`` class.</span>
+
+<span class="sd">    To call: ``parser.get_ap_completer_type()``</span>
+
+<span class="sd">    :param self: ArgumentParser being queried</span>
+<span class="sd">    :return: An ArgparseCompleter-based class or None if attribute does not exist</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="s1">&#39;ArgparseCompleter&#39;</span><span class="p">]],</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ATTR_AP_COMPLETER_TYPE</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="s1">&#39;get_ap_completer_type&#39;</span><span class="p">,</span> <span class="n">_ArgumentParser_get_ap_completer_type</span><span class="p">)</span>
+
+
+<span class="c1"># noinspection PyPep8Naming</span>
+<span class="k">def</span> <span class="nf">_ArgumentParser_set_ap_completer_type</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">ap_completer_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="s1">&#39;ArgparseCompleter&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the ap_completer_type attribute of an argparse ArgumentParser.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``set_ap_completer_type()`` to ``argparse.ArgumentParser`` class.</span>
+
+<span class="sd">    To call: ``parser.set_ap_completer_type(ap_completer_type)``</span>
+
+<span class="sd">    :param self: ArgumentParser being edited</span>
+<span class="sd">    :param ap_completer_type: the custom ArgparseCompleter-based class to use when tab completing arguments for this parser</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ATTR_AP_COMPLETER_TYPE</span><span class="p">,</span> <span class="n">ap_completer_type</span><span class="p">)</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="s1">&#39;set_ap_completer_type&#39;</span><span class="p">,</span> <span class="n">_ArgumentParser_set_ap_completer_type</span><span class="p">)</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Patch ArgumentParser._check_value to support CompletionItems as choices</span>
+<span class="c1">############################################################################################################</span>
+<span class="c1"># noinspection PyPep8Naming</span>
+<span class="k">def</span> <span class="nf">_ArgumentParser_check_value</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom override of ArgumentParser._check_value that supports CompletionItems as choices.</span>
+<span class="sd">    When evaluating choices, input is compared to CompletionItem.orig_value instead of the</span>
+<span class="sd">    CompletionItem instance.</span>
+
+<span class="sd">    :param self: ArgumentParser instance</span>
+<span class="sd">    :param action: the action being populated</span>
+<span class="sd">    :param value: value from command line already run through conversion function by argparse</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Import gettext like argparse does</span>
+    <span class="kn">from</span> <span class="nn">gettext</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">gettext</span> <span class="k">as</span> <span class="n">_</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># converted value must be one of the choices (if specified)</span>
+    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># If any choice is a CompletionItem, then use its orig_value property.</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">orig_value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">CompletionItem</span><span class="p">)</span> <span class="k">else</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">action</span><span class="o">.</span><span class="n">choices</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">choices</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;choices&#39;</span><span class="p">:</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="n">choices</span><span class="p">))}</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;invalid choice: </span><span class="si">%(value)r</span><span class="s1"> (choose from </span><span class="si">%(choices)s</span><span class="s1">)&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span>
+
+
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="s1">&#39;_check_value&#39;</span><span class="p">,</span> <span class="n">_ArgumentParser_check_value</span><span class="p">)</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Patch argparse._SubParsersAction to add remove_parser function</span>
+<span class="c1">############################################################################################################</span>
+
+<span class="c1"># noinspection PyPep8Naming,PyProtectedMember</span>
+<span class="k">def</span> <span class="nf">_SubParsersAction_remove_parser</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes a sub-parser from a sub-parsers group. Used to remove subcommands from a parser.</span>
+
+<span class="sd">    This function is added by cmd2 as a method called ``remove_parser()`` to ``argparse._SubParsersAction`` class.</span>
+
+<span class="sd">    To call: ``action.remove_parser(name)``</span>
+
+<span class="sd">    :param self: instance of the _SubParsersAction being edited</span>
+<span class="sd">    :param name: name of the subcommand for the sub-parser to remove</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Remove this subcommand from its base command&#39;s help text</span>
+    <span class="k">for</span> <span class="n">choice_action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_choices_actions</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">choice_action</span><span class="o">.</span><span class="n">dest</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_choices_actions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">choice_action</span><span class="p">)</span>
+            <span class="k">break</span>
+
+    <span class="c1"># Remove this subcommand and all its aliases from the base command</span>
+    <span class="n">subparser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_parser_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subparser</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cur_name</span><span class="p">,</span> <span class="n">cur_parser</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_parser_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">cur_parser</span> <span class="ow">is</span> <span class="n">subparser</span><span class="p">:</span>
+                <span class="n">to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cur_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cur_name</span> <span class="ow">in</span> <span class="n">to_remove</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_parser_map</span><span class="p">[</span><span class="n">cur_name</span><span class="p">]</span>
+
+
+<span class="c1"># noinspection PyProtectedMember</span>
+<span class="nb">setattr</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">,</span> <span class="s1">&#39;remove_parser&#39;</span><span class="p">,</span> <span class="n">_SubParsersAction_remove_parser</span><span class="p">)</span>
+
+
+<span class="c1">############################################################################################################</span>
+<span class="c1"># Unless otherwise noted, everything below this point are copied from Python&#39;s</span>
+<span class="c1"># argparse implementation with minor tweaks to adjust output.</span>
+<span class="c1"># Changes are noted if it&#39;s buried in a block of copied code. Otherwise the</span>
+<span class="c1"># function will check for a special case and fall back to the parent function</span>
+<span class="c1">############################################################################################################</span>
+
+
+<span class="c1"># noinspection PyCompatibility,PyShadowingBuiltins</span>
+<span class="k">class</span> <span class="nc">Cmd2HelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawTextHelpFormatter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom help formatter to configure ordering of help text&quot;&quot;&quot;</span>
+
+    <span class="c1"># noinspection PyProtectedMember</span>
+    <span class="k">def</span> <span class="nf">_format_usage</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">usage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">actions</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">],</span>
+        <span class="n">groups</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">_ArgumentGroup</span><span class="p">],</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">gettext</span><span class="p">(</span><span class="s1">&#39;Usage: &#39;</span><span class="p">)</span>
+
+        <span class="c1"># if usage is specified, use that</span>
+        <span class="k">if</span> <span class="n">usage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">usage</span> <span class="o">%=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prog</span><span class="p">)</span>
+
+        <span class="c1"># if no optionals or positionals are available, usage is just prog</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">usage</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(prog)s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prog</span><span class="p">)</span>
+
+        <span class="c1"># if optionals and positionals are available, calculate usage</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prog</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(prog)s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prog</span><span class="p">)</span>
+
+            <span class="c1"># split optionals from positionals</span>
+            <span class="n">optionals</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">positionals</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># Begin cmd2 customization (separates required and optional, applies to all changes in this function)</span>
+            <span class="n">required_options</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                        <span class="n">required_options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">optionals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">positionals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="c1"># End cmd2 customization</span>
+
+            <span class="c1"># build full usage string</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_actions_usage</span>
+            <span class="n">action_usage</span> <span class="o">=</span> <span class="nb">format</span><span class="p">(</span><span class="n">required_options</span> <span class="o">+</span> <span class="n">optionals</span> <span class="o">+</span> <span class="n">positionals</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+            <span class="n">usage</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="n">prog</span><span class="p">,</span> <span class="n">action_usage</span><span class="p">]</span> <span class="k">if</span> <span class="n">s</span><span class="p">])</span>
+
+            <span class="c1"># wrap the usage parts if it&#39;s too long</span>
+            <span class="n">text_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_indent</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">usage</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">text_width</span><span class="p">:</span>
+
+                <span class="c1"># Begin cmd2 customization</span>
+
+                <span class="c1"># break usage into wrappable parts</span>
+                <span class="n">part_regexp</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\(.*?\)+|\[.*?\]+|\S+&#39;</span>
+                <span class="n">req_usage</span> <span class="o">=</span> <span class="nb">format</span><span class="p">(</span><span class="n">required_options</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+                <span class="n">opt_usage</span> <span class="o">=</span> <span class="nb">format</span><span class="p">(</span><span class="n">optionals</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+                <span class="n">pos_usage</span> <span class="o">=</span> <span class="nb">format</span><span class="p">(</span><span class="n">positionals</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+                <span class="n">req_parts</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">part_regexp</span><span class="p">,</span> <span class="n">req_usage</span><span class="p">)</span>
+                <span class="n">opt_parts</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">part_regexp</span><span class="p">,</span> <span class="n">opt_usage</span><span class="p">)</span>
+                <span class="n">pos_parts</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">part_regexp</span><span class="p">,</span> <span class="n">pos_usage</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">req_parts</span><span class="p">)</span> <span class="o">==</span> <span class="n">req_usage</span>
+                <span class="k">assert</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">opt_parts</span><span class="p">)</span> <span class="o">==</span> <span class="n">opt_usage</span>
+                <span class="k">assert</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pos_parts</span><span class="p">)</span> <span class="o">==</span> <span class="n">pos_usage</span>
+
+                <span class="c1"># End cmd2 customization</span>
+
+                <span class="c1"># helper for wrapping lines</span>
+                <span class="c1"># noinspection PyMissingOrEmptyDocstring,PyShadowingNames</span>
+                <span class="k">def</span> <span class="nf">get_lines</span><span class="p">(</span><span class="n">parts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+                    <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">line</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">line_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">line_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indent</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">line_len</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">text_width</span> <span class="ow">and</span> <span class="n">line</span><span class="p">:</span>
+                            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">line_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indent</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                        <span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+                        <span class="n">line_len</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="nb">len</span><span class="p">(</span><span class="n">indent</span><span class="p">)</span> <span class="p">:]</span>
+                    <span class="k">return</span> <span class="n">lines</span>
+
+                <span class="c1"># if prog is short, follow it with optionals or positionals</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.75</span> <span class="o">*</span> <span class="n">text_width</span><span class="p">:</span>
+                    <span class="n">indent</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="c1"># Begin cmd2 customization</span>
+                    <span class="k">if</span> <span class="n">req_parts</span><span class="p">:</span>
+                        <span class="n">lines</span> <span class="o">=</span> <span class="n">get_lines</span><span class="p">([</span><span class="n">prog</span><span class="p">]</span> <span class="o">+</span> <span class="n">req_parts</span><span class="p">,</span> <span class="n">indent</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
+                        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">get_lines</span><span class="p">(</span><span class="n">opt_parts</span><span class="p">,</span> <span class="n">indent</span><span class="p">))</span>
+                        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">get_lines</span><span class="p">(</span><span class="n">pos_parts</span><span class="p">,</span> <span class="n">indent</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="n">opt_parts</span><span class="p">:</span>
+                        <span class="n">lines</span> <span class="o">=</span> <span class="n">get_lines</span><span class="p">([</span><span class="n">prog</span><span class="p">]</span> <span class="o">+</span> <span class="n">opt_parts</span><span class="p">,</span> <span class="n">indent</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
+                        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">get_lines</span><span class="p">(</span><span class="n">pos_parts</span><span class="p">,</span> <span class="n">indent</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="n">pos_parts</span><span class="p">:</span>
+                        <span class="n">lines</span> <span class="o">=</span> <span class="n">get_lines</span><span class="p">([</span><span class="n">prog</span><span class="p">]</span> <span class="o">+</span> <span class="n">pos_parts</span><span class="p">,</span> <span class="n">indent</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">prog</span><span class="p">]</span>
+                    <span class="c1"># End cmd2 customization</span>
+
+                <span class="c1"># if prog is long, put it on its own line</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">indent</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+                    <span class="c1"># Begin cmd2 customization</span>
+                    <span class="n">parts</span> <span class="o">=</span> <span class="n">req_parts</span> <span class="o">+</span> <span class="n">opt_parts</span> <span class="o">+</span> <span class="n">pos_parts</span>
+                    <span class="n">lines</span> <span class="o">=</span> <span class="n">get_lines</span><span class="p">(</span><span class="n">parts</span><span class="p">,</span> <span class="n">indent</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">get_lines</span><span class="p">(</span><span class="n">req_parts</span><span class="p">,</span> <span class="n">indent</span><span class="p">))</span>
+                        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">get_lines</span><span class="p">(</span><span class="n">opt_parts</span><span class="p">,</span> <span class="n">indent</span><span class="p">))</span>
+                        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">get_lines</span><span class="p">(</span><span class="n">pos_parts</span><span class="p">,</span> <span class="n">indent</span><span class="p">))</span>
+                    <span class="c1"># End cmd2 customization</span>
+                    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">prog</span><span class="p">]</span> <span class="o">+</span> <span class="n">lines</span>
+
+                <span class="c1"># join lines into usage</span>
+                <span class="n">usage</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+        <span class="c1"># prefix with &#39;Usage:&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="se">\n\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">usage</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_format_action_invocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">:</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_metavar_for_positional</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">metavar</span><span class="p">,)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metavar_formatter</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default</span><span class="p">)(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">metavar</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># if the Optional doesn&#39;t take a value, format is:</span>
+            <span class="c1">#    -s, --long</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
+                <span class="k">return</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+
+            <span class="c1"># Begin cmd2 customization (less verbose)</span>
+            <span class="c1"># if the Optional takes a value, format is:</span>
+            <span class="c1">#    -s, --long ARGS</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_metavar_for_optional</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                <span class="n">args_string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_args</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">args_string</span>
+            <span class="c1"># End cmd2 customization</span>
+
+    <span class="c1"># noinspection PyMethodMayBeStatic</span>
+    <span class="k">def</span> <span class="nf">_determine_metavar</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span>
+        <span class="n">default_metavar</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Custom method to determine what to use as the metavar value of an action&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">metavar</span>
+        <span class="k">elif</span> <span class="n">action</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">choice_strs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span> <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">action</span><span class="o">.</span><span class="n">choices</span><span class="p">]</span>
+            <span class="c1"># Begin cmd2 customization (added space after comma)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;{</span><span class="si">%s</span><span class="s1">}&#39;</span> <span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">choice_strs</span><span class="p">)</span>
+            <span class="c1"># End cmd2 customization</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">default_metavar</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_metavar_formatter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span>
+        <span class="n">default_metavar</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+        <span class="n">metavar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_metavar</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">)</span>
+
+        <span class="c1"># noinspection PyMissingOrEmptyDocstring</span>
+        <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="n">tuple_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metavar</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">metavar</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">metavar</span><span class="p">,)</span> <span class="o">*</span> <span class="n">tuple_size</span>
+
+        <span class="k">return</span> <span class="nb">format</span>
+
+    <span class="c1"># noinspection PyProtectedMember</span>
+    <span class="k">def</span> <span class="nf">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Customized to handle ranged nargs and make other output less verbose&quot;&quot;&quot;</span>
+        <span class="n">metavar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_metavar</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">)</span>
+        <span class="n">metavar_formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metavar_formatter</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">)</span>
+
+        <span class="c1"># Handle nargs specified as a range</span>
+        <span class="n">nargs_range</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">get_nargs_range</span><span class="p">()</span>  <span class="c1"># type: ignore[attr-defined]</span>
+        <span class="k">if</span> <span class="n">nargs_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nargs_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">:</span>
+                <span class="n">range_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">nargs_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">+&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">range_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">nargs_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">..</span><span class="si">{</span><span class="n">nargs_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+
+            <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">{{</span><span class="si">{}</span><span class="s1">}}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metavar_formatter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">range_str</span><span class="p">)</span>
+
+        <span class="c1"># Make this output less verbose. Do not customize the output when metavar is a</span>
+        <span class="c1"># tuple of strings. Allow argparse&#39;s formatter to handle that instead.</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metavar</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="n">ZERO_OR_MORE</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;[</span><span class="si">%s</span><span class="s1"> [...]]&#39;</span> <span class="o">%</span> <span class="n">metavar_formatter</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="n">ONE_OR_MORE</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> [...]&#39;</span> <span class="o">%</span> <span class="n">metavar_formatter</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">{{</span><span class="si">{}</span><span class="s1">}}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metavar_formatter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format_args</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+
+
+<span class="c1"># noinspection PyCompatibility</span>
+<span class="k">class</span> <span class="nc">Cmd2ArgumentParser</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom ArgumentParser class that improves error and help output&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">usage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">epilog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">parents</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+        <span class="n">formatter_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">HelpFormatter</span><span class="p">]</span> <span class="o">=</span> <span class="n">Cmd2HelpFormatter</span><span class="p">,</span>
+        <span class="n">prefix_chars</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span>
+        <span class="n">fromfile_prefix_chars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">argument_default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">conflict_handler</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span>
+        <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">allow_abbrev</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">ap_completer_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="s1">&#39;ArgparseCompleter&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        # Custom parameter added by cmd2</span>
+
+<span class="sd">        :param ap_completer_type: optional parameter which specifies a subclass of ArgparseCompleter for custom tab completion</span>
+<span class="sd">                                  behavior on this parser. If this is None or not present, then cmd2 will use</span>
+<span class="sd">                                  argparse_completer.DEFAULT_AP_COMPLETER when tab completing this parser&#39;s arguments</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Cmd2ArgumentParser</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+            <span class="n">usage</span><span class="o">=</span><span class="n">usage</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">epilog</span><span class="o">=</span><span class="n">epilog</span><span class="p">,</span>
+            <span class="n">parents</span><span class="o">=</span><span class="n">parents</span> <span class="k">if</span> <span class="n">parents</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="n">formatter_class</span><span class="o">=</span><span class="n">formatter_class</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="n">prefix_chars</span><span class="o">=</span><span class="n">prefix_chars</span><span class="p">,</span>
+            <span class="n">fromfile_prefix_chars</span><span class="o">=</span><span class="n">fromfile_prefix_chars</span><span class="p">,</span>
+            <span class="n">argument_default</span><span class="o">=</span><span class="n">argument_default</span><span class="p">,</span>
+            <span class="n">conflict_handler</span><span class="o">=</span><span class="n">conflict_handler</span><span class="p">,</span>
+            <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
+            <span class="n">allow_abbrev</span><span class="o">=</span><span class="n">allow_abbrev</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_ap_completer_type</span><span class="p">(</span><span class="n">ap_completer_type</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
+
+    <span class="c1"># noinspection PyProtectedMember</span>
+    <span class="k">def</span> <span class="nf">add_subparsers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Custom override. Sets a default title if one was not given.</span>
+
+<span class="sd">        :param kwargs: additional keyword arguments</span>
+<span class="sd">        :return: argparse Subparser Action</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s1">&#39;title&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;subcommands&#39;</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Custom override that applies custom formatting to the error message&quot;&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">linum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">formatted_message</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">linum</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">formatted_message</span> <span class="o">=</span> <span class="s1">&#39;Error: &#39;</span> <span class="o">+</span> <span class="n">line</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">formatted_message</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">       &#39;</span> <span class="o">+</span> <span class="n">line</span>
+            <span class="n">linum</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_usage</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">formatted_message</span> <span class="o">=</span> <span class="n">ansi</span><span class="o">.</span><span class="n">style_error</span><span class="p">(</span><span class="n">formatted_message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">formatted_message</span><span class="si">}</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># noinspection PyProtectedMember</span>
+    <span class="k">def</span> <span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Copy of format_help() from argparse.ArgumentParser with tweaks to separately display required parameters&quot;&quot;&quot;</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_formatter</span><span class="p">()</span>
+
+        <span class="c1"># usage</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="n">add_usage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">usage</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutually_exclusive_groups</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+
+        <span class="c1"># description</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+
+        <span class="c1"># Begin cmd2 customization (separate required and optional arguments)</span>
+
+        <span class="c1"># positionals, optionals and user-defined groups</span>
+        <span class="k">for</span> <span class="n">action_group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+                <span class="n">default_options_group</span> <span class="o">=</span> <span class="n">action_group</span><span class="o">.</span><span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;options&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">default_options_group</span> <span class="o">=</span> <span class="n">action_group</span><span class="o">.</span><span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;optional arguments&#39;</span>
+
+            <span class="k">if</span> <span class="n">default_options_group</span><span class="p">:</span>
+                <span class="c1"># check if the arguments are required, group accordingly</span>
+                <span class="n">req_args</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">opt_args</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">action_group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                        <span class="n">req_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">opt_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+                <span class="c1"># separately display required arguments</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">start_section</span><span class="p">(</span><span class="s1">&#39;required arguments&#39;</span><span class="p">)</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="n">action_group</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">add_arguments</span><span class="p">(</span><span class="n">req_args</span><span class="p">)</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">end_section</span><span class="p">()</span>
+
+                <span class="c1"># now display truly optional arguments</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">start_section</span><span class="p">(</span><span class="s1">&#39;optional arguments&#39;</span><span class="p">)</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="n">action_group</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">add_arguments</span><span class="p">(</span><span class="n">opt_args</span><span class="p">)</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">end_section</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">start_section</span><span class="p">(</span><span class="n">action_group</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="n">action_group</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">add_arguments</span><span class="p">(</span><span class="n">action_group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">)</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">end_section</span><span class="p">()</span>
+
+        <span class="c1"># End cmd2 customization</span>
+
+        <span class="c1"># epilog</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epilog</span><span class="p">)</span>
+
+        <span class="c1"># determine help from format above</span>
+        <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="n">format_help</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_print_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">IO</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Override _print_message to use style_aware_write() since we use ANSI escape characters to support color</span>
+        <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">file</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+            <span class="n">ansi</span><span class="o">.</span><span class="n">style_aware_write</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Cmd2AttributeWrapper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wraps a cmd2-specific attribute added to an argparse Namespace.</span>
+<span class="sd">    This makes it easy to know which attributes in a Namespace are</span>
+<span class="sd">    arguments from a parser and which were added by cmd2.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__attribute</span> <span class="o">=</span> <span class="n">attribute</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the value of the attribute&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__attribute</span>
+
+    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_val</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the value of the attribute&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__attribute</span> <span class="o">=</span> <span class="n">new_val</span>
+
+
+<span class="c1"># The default ArgumentParser class for a cmd2 app</span>
+<span class="n">DEFAULT_ARGUMENT_PARSER</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">]</span> <span class="o">=</span> <span class="n">Cmd2ArgumentParser</span>
+
+
+<span class="k">def</span> <span class="nf">set_default_argument_parser_type</span><span class="p">(</span><span class="n">parser_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the default ArgumentParser class for a cmd2 app. This must be called prior to loading cmd2.py if</span>
+<span class="sd">    you want to override the parser for cmd2&#39;s built-in commands. See examples/override_parser.py.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">DEFAULT_ARGUMENT_PARSER</span>
+    <span class="n">DEFAULT_ARGUMENT_PARSER</span> <span class="o">=</span> <span class="n">parser_type</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.svg" alt="Logo of SP - SDK"/>
+            </a></p>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Silent Push - SDK</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">cmd2.argparse_custom</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Silent Push.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

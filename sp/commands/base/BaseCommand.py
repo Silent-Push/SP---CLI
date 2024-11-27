@@ -1,6 +1,7 @@
 import json
 
 import pandas
+from cmd2 import Statement, CommandSet
 from cmd2.ansi import style_success
 
 from sp.common.utils import flatten_dict, PandasDataFrameTSV
@@ -8,16 +9,41 @@ from sp.settings import CRLF
 
 
 class BaseCommand:
-    _commandSet = None
-    _response = {}
-    _params = None
-    _output = ""
+    """
+    Contains all common methods used for all Command classes
+    """
+    _commandSet: CommandSet = None
+    """The CommandSet object passed by the child class"""
+    _response: dict = {}
+    """The API response"""
+    _params: Statement = None
+    """The Statement object passed by the child class"""
+    _output: str = ""
+    """The final command result output"""
 
-    def __init__(self, params, command_set):
+    def __init__(self, params: Statement, command_set: CommandSet):
+        """
+        Context manager base class for all commands
+
+        >>> with BaseCommand(statement, command_set) as command:
+        ...    command.do_something()
+
+        :param params: The passed command options
+        :param command_set: The CommandSet object related to the command
+        """
         self._commandSet = command_set
         self._params = params
 
     def __enter__(self):
+        """
+        Override this method if you need anything done before executing the command
+
+        >>> def __enter__(self):
+        ...     print("loading command...")
+        ...     return super().__enter__()
+
+        :return: BaseCommand
+        """
         if self._params.params:
             self._URL += "&" + "&".join(self._params.params)
         return self
@@ -25,6 +51,18 @@ class BaseCommand:
         # self._commandSet._cmd.pfeedback(f"\t{self._feedback}...")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Override this method if you need anything done after executing the command
+
+        >>> def __exit__(self):
+        ...     print("command done!")
+        ...     return super().__exit__()
+
+        :param exc_type:
+        :param exc_val:
+        :param exc_tb:
+        :return: None
+        """
         if self._params.json:
             self._output = json.dumps(self._response, indent=2) + CRLF
         elif self._params.csv:
@@ -43,6 +81,11 @@ class BaseCommand:
         # self._commandSet._cmd.pfeedback(f"\t*{self._feedback}")
 
     def check_error(self):
+        """
+        Tries to extract as much error from the response payload as possible
+
+        :return: None
+        """
         if not self._response.status_code == 200:
             import re
             import json

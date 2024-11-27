@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Score command &#8212; Silent Push - SDK</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=501c1f32" />
+    
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="PADNS Query command" href="padns_query.html" />
+    <link rel="prev" title="Enrich command" href="enrich.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="padns_query.html" title="PADNS Query command"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="enrich.html" title="Enrich command"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Silent Push - SDK</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Score command</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-sp.commands.score">
+<span id="score-command"></span><h1>Score command<a class="headerlink" href="#module-sp.commands.score" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="sp.commands.score.ScoreCommandSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sp.commands.score.</span></span><span class="sig-name descname"><span class="pre">ScoreCommandSet</span></span><a class="reference internal" href="../_modules/sp/commands/score.html#ScoreCommandSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sp.commands.score.ScoreCommandSet" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCommandSet</span></code></p>
+<p>The Score Command Set</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sp.commands.score.ScoreCommandSet._score_parser">
+<span class="sig-name descname"><span class="pre">_score_parser</span></span><a class="headerlink" href="#sp.commands.score.ScoreCommandSet._score_parser" title="Link to this definition">¶</a></dt>
+<dd><p>The argument parser for the score command</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sp.commands.score.ScoreCommandSet.do_score">
+<span class="sig-name descname"><span class="pre">do_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Statement</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sp/commands/score.html#ScoreCommandSet.do_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sp.commands.score.ScoreCommandSet.do_score" title="Link to this definition">¶</a></dt>
+<dd><p>Scores a domain, IP or URL</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> (<em>Statement</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sp.commands.score.ScoreCommandSet.Score">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Score</span></span><a class="reference internal" href="../_modules/sp/commands/score.html#ScoreCommandSet.Score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sp.commands.score.ScoreCommandSet.Score" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCommand</span></code></p>
+<p>The Score command, it’s a context manager class</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sp.commands.score.ScoreCommandSet.Score._URL">
+<span class="sig-name descname"><span class="pre">_URL</span></span><a class="headerlink" href="#sp.commands.score.ScoreCommandSet.Score._URL" title="Link to this definition">¶</a></dt>
+<dd><p>The score endpoint URL</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sp.commands.score.ScoreCommandSet.Score.__enter__">
+<span class="sig-name descname"><span class="pre">__enter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sp/commands/score.html#ScoreCommandSet.Score.__enter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sp.commands.score.ScoreCommandSet.Score.__enter__" title="Link to this definition">¶</a></dt>
+<dd><p>The logic before executing the command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Score</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sp.commands.score.ScoreCommandSet.Score.score">
+<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sp/commands/score.html#ScoreCommandSet.Score.score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sp.commands.score.ScoreCommandSet.Score.score" title="Link to this definition">¶</a></dt>
+<dd><p>The command main logic</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sp.commands.score.ScoreCommandSet.Score.__exit__">
+<span class="sig-name descname"><span class="pre">__exit__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exc_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc_tb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sp/commands/score.html#ScoreCommandSet.Score.__exit__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sp.commands.score.ScoreCommandSet.Score.__exit__" title="Link to this definition">¶</a></dt>
+<dd><p>The logic after executing the command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>exc_type</strong> – Exception type, if need to catch</p></li>
+<li><p><strong>exc_val</strong> – Exception value</p></li>
+<li><p><strong>exc_tb</strong> – Exception traceback</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sp.commands.score.ScoreCommandSet.cmd2_default_help_category">
+<span class="sig-name descname"><span class="pre">cmd2_default_help_category</span></span><a class="headerlink" href="#sp.commands.score.ScoreCommandSet.cmd2_default_help_category" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo.svg" alt="Logo of SP - SDK"/>
+            </a></p>
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Score command</a><ul>
+<li><a class="reference internal" href="#sp.commands.score.ScoreCommandSet"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet</span></code></a><ul>
+<li><a class="reference internal" href="#sp.commands.score.ScoreCommandSet._score_parser"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet._score_parser</span></code></a></li>
+<li><a class="reference internal" href="#sp.commands.score.ScoreCommandSet.do_score"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet.do_score()</span></code></a></li>
+<li><a class="reference internal" href="#sp.commands.score.ScoreCommandSet.Score"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet.Score</span></code></a><ul>
+<li><a class="reference internal" href="#sp.commands.score.ScoreCommandSet.Score._URL"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet.Score._URL</span></code></a></li>
+<li><a class="reference internal" href="#sp.commands.score.ScoreCommandSet.Score.__enter__"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet.Score.__enter__()</span></code></a></li>
+<li><a class="reference internal" href="#sp.commands.score.ScoreCommandSet.Score.score"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet.Score.score()</span></code></a></li>
+<li><a class="reference internal" href="#sp.commands.score.ScoreCommandSet.Score.__exit__"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet.Score.__exit__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sp.commands.score.ScoreCommandSet.cmd2_default_help_category"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet.cmd2_default_help_category</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="enrich.html"
+                          title="previous chapter">Enrich command</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="padns_query.html"
+                          title="next chapter">PADNS Query command</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/sp/score.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="padns_query.html" title="PADNS Query command"
+             >next</a></li>
+        <li class="right" >
+          <a href="enrich.html" title="Enrich command"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Silent Push - SDK</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Score command</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Silent Push.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

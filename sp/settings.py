@@ -4,10 +4,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 CRLF = "\r\n"
+"""The prompt line break"""
 API_URL = os.environ.get(
     "SILENT_PUSH_API_URL", "https://app.silentpush.com/api/v1/merge-api/"
 )
+"""The Silent Push API URL, you can export it to your prompt if needs to change or use .env"""
 API_KEY = os.environ.get("SILENT_PUSH_API_KEY")
+"""Your Silent Push API key"""
 
 if API_URL is None:
     raise EnvironmentError(
@@ -23,7 +26,12 @@ if API_KEY is None:
     )
 
 
-def get_initial_commands():
+def get_initial_commands() -> set:
+    """
+    The available commands to the app, any new created command needs to be added here
+
+    :return: The set of commands
+    """
     from sp.commands import (
         EnrichCommandSet,
         ScoreCommandSet,
@@ -35,7 +43,6 @@ def get_initial_commands():
         ScoreCommandSet(),
     }
 
-# SPQL fields
 WEBSCAN_FIELDS = {
     "adtech.ads_txt",
     "adtech.ads_txt_sha256",
@@ -145,6 +152,7 @@ WEBSCAN_FIELDS = {
     "tld",
     "url",
 }
+"""SPQL fields that can be used for the field parameter of webscan command"""
 
 SERVICES_FIELDS = {
     "banner",
@@ -219,3 +227,4 @@ SPQL_DATASOURCES = {
     "opendirectory",
     "webscanhistory",
 }
+"""SPQL data sources that can be used for the datasource parameter of webscan command"""

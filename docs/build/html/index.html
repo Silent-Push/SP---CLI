@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SP - SDK documentation &#8212; Silent Push - SDK</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=501c1f32" />
+    
+    <script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="icon" href="_static/favicon.ico"/>
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SP - CLI" href="sp/README.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="sp/README.html" title="SP - CLI"
+             accesskey="N">next</a></li>
+        <li class="nav-item nav-item-0"><a href="#">Silent Push - SDK</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">SP - SDK documentation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="sp-sdk-documentation">
+<h1>SP - SDK documentation<a class="headerlink" href="#sp-sdk-documentation" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sp/README.html">SP - CLI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sp/README.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sp/README.html#usage">Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sp/README.html#supported-commands-and-sub-commands-so-far">Supported commands and sub-commands so far</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/README.html#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sp/README.html#interactive-mode">Interactive mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sp/README.html#the-load-and-unload-command">The load and unload command</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sp/README.html#scripting">Scripting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sp/README.html#run-pyscript-command">run_pyscript command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/README.html#run-script-command">run_script command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/README.html#batch-execution-tips">Batch execution tips</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sp/README.html#for-devs">For Devs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sp/README.html#using-the-library">Using the library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/README.html#extending-the-commands-guidelines">Extending the commands - Guidelines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sp/README.html#support">Support</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sp/enrich.html">Enrich command</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sp/enrich.html#sp.commands.enrich.EnrichCommandSet"><code class="docutils literal notranslate"><span class="pre">EnrichCommandSet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sp/enrich.html#sp.commands.enrich.EnrichCommandSet.enrich_parser"><code class="docutils literal notranslate"><span class="pre">EnrichCommandSet.enrich_parser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/enrich.html#sp.commands.enrich.EnrichCommandSet.do_enrich"><code class="docutils literal notranslate"><span class="pre">EnrichCommandSet.do_enrich()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/enrich.html#sp.commands.enrich.EnrichCommandSet.Enrich"><code class="docutils literal notranslate"><span class="pre">EnrichCommandSet.Enrich</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/enrich.html#sp.commands.enrich.EnrichCommandSet.bulk_enrich_parser"><code class="docutils literal notranslate"><span class="pre">EnrichCommandSet.bulk_enrich_parser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/enrich.html#sp.commands.enrich.EnrichCommandSet.do_bulk_enrich"><code class="docutils literal notranslate"><span class="pre">EnrichCommandSet.do_bulk_enrich()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/enrich.html#sp.commands.enrich.EnrichCommandSet.BulkEnrich"><code class="docutils literal notranslate"><span class="pre">EnrichCommandSet.BulkEnrich</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/enrich.html#sp.commands.enrich.EnrichCommandSet.cmd2_default_help_category"><code class="docutils literal notranslate"><span class="pre">EnrichCommandSet.cmd2_default_help_category</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sp/score.html">Score command</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sp/score.html#sp.commands.score.ScoreCommandSet"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sp/score.html#sp.commands.score.ScoreCommandSet._score_parser"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet._score_parser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/score.html#sp.commands.score.ScoreCommandSet.do_score"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet.do_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/score.html#sp.commands.score.ScoreCommandSet.Score"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet.Score</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/score.html#sp.commands.score.ScoreCommandSet.cmd2_default_help_category"><code class="docutils literal notranslate"><span class="pre">ScoreCommandSet.cmd2_default_help_category</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sp/padns_query.html">PADNS Query command</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet._query_parser"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet._query_parser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.subcommand_parser"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.subcommand_parser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.do_query"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.do_query()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_a"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_a()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_aaaa"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_aaaa()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_cname"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_cname()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_mx"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_mx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_ns"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_ns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_ptr4"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_ptr4()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_ptr6"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_ptr6()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_any"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_any()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_anyipv4"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_anyipv4()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_anyipv6"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_anyipv6()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.cmd2_default_help_category"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.cmd2_default_help_category</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_soa"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_soa()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_query.html#sp.commands.query.PADNSQueryCommandSet.query_txt"><code class="docutils literal notranslate"><span class="pre">PADNSQueryCommandSet.query_txt()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sp/padns_answer.html">PADNS Answer command</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet._answer_parser"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet._answer_parser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.subcommand_parser"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.subcommand_parser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.do_answer"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.do_answer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_a"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_a()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_aaaa"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_aaaa()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_cname"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_cname()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_mx"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_mx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_ns"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_ns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_ptr4"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_ptr4()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_ptr6"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_ptr6()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_soa"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_soa()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_txt"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_txt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_mxhash"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_mxhash()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_nshash"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_nshash()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_soahash"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_soahash()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.cmd2_default_help_category"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.cmd2_default_help_category</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/padns_answer.html#sp.commands.answer.PADNSAnswerCommandSet.answer_txthash"><code class="docutils literal notranslate"><span class="pre">PADNSAnswerCommandSet.answer_txthash()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sp/spql_webscan.html">SPQL Webscan command</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sp/spql_webscan.html#sp.commands.webscan.SPQLWebscanCommandSet"><code class="docutils literal notranslate"><span class="pre">SPQLWebscanCommandSet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sp/spql_webscan.html#sp.commands.webscan.SPQLWebscanCommandSet.spql_parser"><code class="docutils literal notranslate"><span class="pre">SPQLWebscanCommandSet.spql_parser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/spql_webscan.html#sp.commands.webscan.SPQLWebscanCommandSet.do_spql"><code class="docutils literal notranslate"><span class="pre">SPQLWebscanCommandSet.do_spql()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/spql_webscan.html#sp.commands.webscan.SPQLWebscanCommandSet.cmd2_default_help_category"><code class="docutils literal notranslate"><span class="pre">SPQLWebscanCommandSet.cmd2_default_help_category</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/spql_webscan.html#sp.commands.webscan.SPQLWebscanCommandSet.spql_webscan_parser"><code class="docutils literal notranslate"><span class="pre">SPQLWebscanCommandSet.spql_webscan_parser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sp/spql_webscan.html#sp.commands.webscan.SPQLWebscanCommandSet.spql_webscan"><code class="docutils literal notranslate"><span class="pre">SPQLWebscanCommandSet.spql_webscan()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/logo.svg" alt="Logo of SP - SDK"/>
+            </a></p>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="sp/README.html"
+                          title="next chapter">SP - CLI</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="sp/README.html" title="SP - CLI"
+             >next</a></li>
+        <li class="nav-item nav-item-0"><a href="#">Silent Push - SDK</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">SP - SDK documentation</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Silent Push.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

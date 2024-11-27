@@ -16,27 +16,41 @@ from sp.settings import API_URL, API_KEY
 
 @with_default_category("Enrichment")
 class EnrichCommandSet(BaseCommandSet):
+    """
+    Enrich Command Set
+    """
 
     enrich_parser = BaseCommandSet._get_enrich_arg_parser()
+    """The argument parser for the enrich command"""
 
-    # @targeted_command
-    # @validate_ioc
     @with_argparser(enrich_parser)
     def do_enrich(self, params: Statement):
         """
         Enriches a domain, IP or URL
+
+        :param params: The passed command parameters
+        :return: None
         """
-        with self.Enrichment(params, self) as enrichment:
+        with self.Enrich(params, self) as enrichment:
             enrichment.enrich()
 
-    class Enrichment(BaseCommand):
+    class Enrich(BaseCommand):
+        """
+        Enrich command
+        """
         _URL = API_URL + "explore/enrich/{type}/{ioc}/?format=json"
+        """The enrich endpoint URL"""
 
         def __enter__(self):
+            """
+            The logic before executing the command
+
+            :return: Enrich
+            """
             self._URL = self._URL.format(
                 type=IOCUtils(self._params.ioc).type, ioc=self._params.ioc
             )
-            self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
+            # self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
             if self._params.explain:
                 self._params.params.append("explain=1")
             else:
@@ -49,36 +63,62 @@ class EnrichCommandSet(BaseCommandSet):
             return self
 
         def enrich(self):
+            """
+            The command main logic
+
+            :return: None
+            """
             self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
             self.check_error()
             self._response = json.loads(self._response.content).get("response")
 
         def __exit__(self, exc_type, exc_val, exc_tb):
+            """
+            The logic after executing the command
+
+            :param exc_type: Exception type, if need to catch
+            :param exc_val: Exception value
+            :param exc_tb: Exception trac
+            """
             super().__exit__(exc_type, exc_val, exc_tb)
             self._commandSet._cmd._add_ioc_to_cache(self._params.ioc)
 
     bulk_enrich_parser = BaseCommandSet._get_bulk_enrich_arg_parser()
+    """The argument parser for the bulk_enrich command"""
 
     @with_argparser(bulk_enrich_parser)
     def do_bulk_enrich(self, params: Statement):
         """
-        Enriches domains or IPs (ipv4 or ipv6) in a bulk
-        You can also use a file as input, i.e.:
-            cat to_enrich.txt | xargs sp bulk_enrich
+        | Enriches domains or IPs (ipv4 or ipv6) in a bulk
+        | You can also use a file as input, i.e.:
+        |   ``cat to_enrich.txt | xargs sp bulk_enrich``
+
+        :param params: The passed command parameters
+        :return: None
         """
-        with self.BulkEnrichment(params, self) as bulk_enrichment:
+        with self.BulkEnrich(params, self) as bulk_enrichment:
             bulk_enrichment.enrich()
 
-    class BulkEnrichment(BaseCommand):
+    class BulkEnrich(BaseCommand):
+        """
+        Bulk Enrich command
+        """
         _URL = API_URL + "explore/bulk/summary/{type}?format=json"
+        """The bulk enrich endpoint URL"""
         payload = None
+        """The post payload for the endpoint"""
 
         def __enter__(self):
+            """
+            The logic before executing the command
+
+            :return: BulkEnrich
+            """
             ioc_type = IOCUtils(self._params.iocs[0]).type
             self._URL = self._URL.format(
                 type=ioc_type,
             )
-            self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
+            # self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
             if self._params.iocs:
                 self.payload = {
                     "domains"
@@ -97,6 +137,11 @@ class EnrichCommandSet(BaseCommandSet):
             return self
 
         def enrich(self):
+            """
+            The command main logic
+
+            :return: None
+            """
             if self.payload:
                 self._response = requests.post(
                     self._URL, json=self.payload, headers={"x-api-key": API_KEY}
@@ -105,5 +150,13 @@ class EnrichCommandSet(BaseCommandSet):
             self._response = json.loads(self._response.content).get("response")
 
         def __exit__(self, exc_type, exc_val, exc_tb):
+            """
+            The logic after executing the command
+
+            :param exc_type: Exception type, if need to catch
+            :param exc_val: Exception value
+            :param exc_tb: Exception traceback
+            :return: None
+            """
             super().__exit__(exc_type, exc_val, exc_tb)
             self._commandSet._cmd._add_ioc_to_cache(self._params.iocs)

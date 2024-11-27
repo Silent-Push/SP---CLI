@@ -2,14 +2,30 @@ from cmd2 import CommandSet, Cmd2ArgumentParser
 
 
 class BaseCommandSet(CommandSet):
+    """
+    Contains all common methods used for all CommandSet classes
+    """
+
     @staticmethod
-    def __set_common_enrich_options(enrich_parser):
+    def __set_common_enrich_options(enrich_parser: Cmd2ArgumentParser) -> Cmd2ArgumentParser:
+        """
+        Set the common options for enrichment commands: -e, -s
+
+        :param enrich_parser: The parser to be overloaded
+        :return: Cmd2ArgumentParser
+        """
         enrich_parser.add_argument("-e", "--explain", action="store_true")
         enrich_parser.add_argument("-s", "--scan_data", action="store_true")
         return enrich_parser
 
     @staticmethod
-    def __set__common_options(parser):
+    def __set__common_options(parser: Cmd2ArgumentParser) -> Cmd2ArgumentParser:
+        """
+        Set the 'parameter' options for the majority of the commands: [params...]
+
+        :param parser: The parser to be overloaded
+        :return: Cmd2ArgumentParser
+        """
         parser.add_argument(
             "params",
             nargs="*",
@@ -19,7 +35,12 @@ class BaseCommandSet(CommandSet):
         return parser
 
     @staticmethod
-    def _get_arg_parser():
+    def _get_arg_parser() -> Cmd2ArgumentParser:
+        """
+        Set the common options for all commands: -j -c -t
+
+        :return: Cmd2ArgumentParser
+        """
         base_arg_parser = Cmd2ArgumentParser()
         base_arg_parser.add_argument(
             "-j", "--json", help="Output as JSON", action="store_true"
@@ -36,7 +57,12 @@ class BaseCommandSet(CommandSet):
         return base_arg_parser
 
     @staticmethod
-    def _get_ioc_arg_parser():
+    def _get_ioc_arg_parser() -> Cmd2ArgumentParser:
+        """
+        Set the 'ioc' option for the majority of the commands: [ioc]
+
+        :return: Cmd2ArgumentParser
+        """
         ioc_parser = BaseCommandSet._get_arg_parser()
         ioc_parser.add_argument(
             "ioc",
@@ -47,18 +73,33 @@ class BaseCommandSet(CommandSet):
         return ioc_parser
 
     @staticmethod
-    def _get_score_arg_parser():
+    def _get_score_arg_parser() -> Cmd2ArgumentParser:
+        """
+        The parser for score command: -j -c -t [ioc] [params...]
+
+        :return: Cmd2ArgumentParser
+        """
         score_parser = BaseCommandSet._get_ioc_arg_parser()
         return BaseCommandSet.__set__common_options(score_parser)
 
     @staticmethod
-    def _get_enrich_arg_parser():
+    def _get_enrich_arg_parser() -> Cmd2ArgumentParser:
+        """
+        The parser for enrich command: -j -c -t -e -s [ioc] [params...]
+
+        :return:
+        """
         enrich_parser = BaseCommandSet._get_ioc_arg_parser()
         enrich_parser = BaseCommandSet.__set_common_enrich_options(enrich_parser)
         return BaseCommandSet.__set__common_options(enrich_parser)
 
     @staticmethod
-    def _get_bulk_enrich_arg_parser():
+    def _get_bulk_enrich_arg_parser() -> Cmd2ArgumentParser:
+        """
+        The parser for bulk enrich command: -j -c -t -e -s [iocs...] [params...]
+
+        :return:
+        """
         bulk_enrich_parser = BaseCommandSet._get_arg_parser()
         bulk_enrich_parser.add_argument(
             "iocs",
@@ -73,7 +114,12 @@ class BaseCommandSet(CommandSet):
         return BaseCommandSet.__set__common_options(bulk_enrich_parser)
 
     @staticmethod
-    def _get_padns_arg_parser():
+    def _get_padns_arg_parser() -> Cmd2ArgumentParser:
+        """
+        The parser for PADNS command and sub commands: -j -c -t [ioc] [params...]
+
+        :return:
+        """
         padns_parser = BaseCommandSet._get_arg_parser()
         padns_parser.add_argument(
             "ioc",
@@ -84,7 +130,12 @@ class BaseCommandSet(CommandSet):
         return BaseCommandSet.__set__common_options(padns_parser)
 
     @staticmethod
-    def _get_spql_webscan_arg_parser():
+    def _get_spql_webscan_arg_parser() -> Cmd2ArgumentParser:
+        """
+        The parser for SPQL Webscan command: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
+
+        :return: Cmd2ArgumentParser
+        """
         from sp.settings import WEBSCAN_FIELDS, SPQL_DATASOURCES
 
         spql_webscan_parser = BaseCommandSet._get_arg_parser()

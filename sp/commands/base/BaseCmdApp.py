@@ -15,10 +15,17 @@ from sp.settings import get_initial_commands
 
 
 class BaseCmdApp(cmd2.Cmd):
-    intro = "Silent Push - CLI"
+    """
+    The cmd2 base class, handles the main logic needed by all commands
+    """
+    intro: str = "Silent Push - CLI"
+    """The intro banner for the interactive mode"""
     prompt = style("SP# ", fg=Fg[Fg.LIGHT_GRAY.name.upper()], bold=True)
-    PREPEND_COMMANDS = ["padns", "query", "answer", "spql", "webscan"]
-    LOADED_COMMAND = ""
+    """The prompt"""
+    PREPEND_COMMANDS: list = ["padns", "query", "answer", "spql", "webscan"]
+    """The list of sub commands that should be prepended with their main commands"""
+    LOADED_COMMAND: str = ""
+    """The loaded main command that should be displayed in the prompt"""
 
     def __init__(self, **kwargs):
         self.app_man = kwargs.get("application_manager")
@@ -42,8 +49,11 @@ class BaseCmdApp(cmd2.Cmd):
         self, data: cmd2.plugin.PostparsingData
     ) -> cmd2.plugin.PostparsingData:
         """
-        Automatiically adds 'padns' to the subcommands so user can type just
-        'query a...' rather than 'padns query a...'
+        A post parsing hook to automatically precede sub commands
+        so user can type like 'query a...' rather than 'padns query a...'
+
+        :param data: The original post parsing object within the command and arguments
+        :return: The modified post parsing object
         """
         command = data.statement.command
         rest_args = data.statement.args
@@ -79,6 +89,13 @@ class BaseCmdApp(cmd2.Cmd):
 
     @functools.singledispatch
     def _add_ioc_to_cache(self, ioc: str) -> None:
+        """
+        Adds IoCs to cache, so they can be part of the command history and
+        be offered as choices to commands that need IoC
+
+        :param ioc: The IoC to be added to cache
+        :return: None
+        """
         if ioc not in self._ioc_cache:
             self._ioc_cache.append(ioc)
 
@@ -87,6 +104,11 @@ class BaseCmdApp(cmd2.Cmd):
         self._ioc_cache.extend(iocs)
 
     def _get_iocs_from_history(self) -> List[str]:
+        """
+        The initial IoCs history
+
+        :return: The list of IoCs history
+        """
         return [
             h.statement.args
             for h in self.history
@@ -100,5 +122,10 @@ class BaseCmdApp(cmd2.Cmd):
         ]
 
     def do_intro(self, _):
-        """Display the intro banner"""
+        """
+        Displays the intro banner
+
+        :param _:
+        :return:
+        """
         self.poutput(style(self.intro, fg=Fg[self.foreground_color.upper()]))

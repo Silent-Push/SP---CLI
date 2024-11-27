@@ -13,13 +13,23 @@ from sp.commands import *
 
 
 class App(BaseCmdApp):
+    """
+    The core class which the CLI is instantiated
+    """
 
     load_parser = cmd2.Cmd2ArgumentParser()
+    """The argument parser for the load command"""
     load_parser.add_argument("cmds", choices=["padns", "spql"])
 
     @with_argparser(load_parser)
     @with_category("Command Loading")
     def do_load(self, ns: argparse.Namespace):
+        """
+        Switches to a command group and loads it's sub commands i.e.: padns
+
+        :param ns: The argument passed to the load command
+        :return: None
+        """
         # self.poutput(f"ns: {ns}")
         if ns.cmds == "padns":
             self.prompt = style(
@@ -46,6 +56,12 @@ class App(BaseCmdApp):
     @with_argparser(load_parser)
     @with_category("Command Loading")
     def do_unload(self, ns: argparse.Namespace):
+        """
+        Switches off the loaded command group and return to single prompt
+
+        :param ns: The argument passed to the unload command
+        :return: None
+        """
         if ns.cmds == "padns":
             self.prompt = style("SP# ", fg=Fg[Fg.LIGHT_GRAY.name.upper()], bold=True)
             self.unregister_command_set(self._query)
@@ -59,6 +75,7 @@ class App(BaseCmdApp):
             self.poutput("SPQL unloaded")
 
     padns_parser = cmd2.Cmd2ArgumentParser()
+    """The argument parser for the padns command"""
     padns_parser.add_subparsers(
         title="PADNS command", help="query/answer or any PADNS available command"
     )
@@ -66,6 +83,12 @@ class App(BaseCmdApp):
     @with_category("PADNS")
     @with_argparser(padns_parser)
     def do_padns(self, ns: argparse.Namespace):
+        """
+        The PADNS main command
+
+        :param ns: The padns sub command i.e.: query
+        :return: None
+        """
         # Call handler for whatever subcommand was selected
         handler = ns.cmd2_handler.get()
         if handler is not None:
@@ -80,6 +103,12 @@ class App(BaseCmdApp):
 
 
 def main(argv=None):
+    """
+    Instantiate the CLI app and handles the prompt including interactive
+
+    :param argv: The initial command passed
+    :return: The exit code to the OS
+    """
     app_man = AppFileManager(__app_name__)
     app_man.create_hist_dir()  # Create history and cache directories
     app = App(application_manager=app_man)
@@ -101,3 +130,5 @@ if __name__ == "__main__":
     import sys
 
     sys.exit(main())
+
+# @TODO: verbose
