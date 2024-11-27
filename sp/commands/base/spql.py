@@ -10,6 +10,7 @@ class SPQL(BaseCommand):
     """
     SPQL main command
     """
+
     _URL = API_URL + "explore/scandata/search/raw?format=json"
     """The SPQL endpoint URL"""
     query: str = ""
@@ -47,10 +48,7 @@ class SPQL(BaseCommand):
 
         :return: The query string
         """
-        return (
-            ''.join(self.query) +
-            f" AND datasource={self.datasource or 'webscan'}"
-        )
+        return "".join(self.query) + f" AND datasource={self.datasource or 'webscan'}"
 
     def scan(self):
         """

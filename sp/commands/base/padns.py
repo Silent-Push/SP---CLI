@@ -10,6 +10,7 @@ class PADNS(BaseCommand):
     """
     PADNS main command
     """
+
     _URL = API_URL + "explore/padns/lookup/{type}/{qtype}/{ioc}/?format=json"
     """The PADNS endpoint URL"""
     _type: str = "query"

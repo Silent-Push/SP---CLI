@@ -7,7 +7,9 @@ class BaseCommandSet(CommandSet):
     """
 
     @staticmethod
-    def __set_common_enrich_options(enrich_parser: Cmd2ArgumentParser) -> Cmd2ArgumentParser:
+    def __set_common_enrich_options(
+        enrich_parser: Cmd2ArgumentParser,
+    ) -> Cmd2ArgumentParser:
         """
         Set the common options for enrichment commands: -e, -s
 
@@ -143,11 +145,9 @@ class BaseCommandSet(CommandSet):
             "query",
             nargs="?",
             # choices_provider=(lambda field: WEBSCAN_FIELDS),
-            help='the query to run, i.e.: "\"domain\"=\"ig.com\""',
+            help='the query to run, i.e.: ""domain"="ig.com""',
         )
-        spql_webscan_parser = BaseCommandSet.__set__common_options(
-            spql_webscan_parser
-        )
+        spql_webscan_parser = BaseCommandSet.__set__common_options(spql_webscan_parser)
         spql_webscan_parser.add_argument(
             "-f",
             "--fields",
@@ -161,7 +161,7 @@ class BaseCommandSet(CommandSet):
             nargs="*",
             choices_provider=(lambda field: WEBSCAN_FIELDS),
             help="the sort order (multiple for nested sorting),"
-                 "i.e.: scan_date/desc domain/asc",
+            "i.e.: scan_date/desc domain/asc",
         )
         spql_webscan_parser.add_argument(
             "-d",

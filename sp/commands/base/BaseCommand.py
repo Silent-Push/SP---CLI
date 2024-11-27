@@ -12,6 +12,7 @@ class BaseCommand:
     """
     Contains all common methods used for all Command classes
     """
+
     _commandSet: CommandSet = None
     """The CommandSet object passed by the child class"""
     _response: dict = {}

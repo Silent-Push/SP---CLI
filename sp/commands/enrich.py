@@ -38,6 +38,7 @@ class EnrichCommandSet(BaseCommandSet):
         """
         Enrich command
         """
+
         _URL = API_URL + "explore/enrich/{type}/{ioc}/?format=json"
         """The enrich endpoint URL"""
 
@@ -103,6 +104,7 @@ class EnrichCommandSet(BaseCommandSet):
         """
         Bulk Enrich command
         """
+
         _URL = API_URL + "explore/bulk/summary/{type}?format=json"
         """The bulk enrich endpoint URL"""
         payload = None

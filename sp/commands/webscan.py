@@ -10,10 +10,10 @@ from sp.commands.base.BaseCommandSet import BaseCommandSet
 @with_default_category("SPQL")
 class SPQLWebscanCommandSet(BaseCommandSet):
     """
-   SPQL Webscan Command Set, structured as:
-        - **spql**: main command
-            - **webscan**: sub command of spql command
-            - ... (more to come)
+    SPQL Webscan Command Set, structured as:
+         - **spql**: main command
+             - **webscan**: sub command of spql command
+             - ... (more to come)
     """
 
     spql_parser = cmd2.Cmd2ArgumentParser()
@@ -21,7 +21,7 @@ class SPQLWebscanCommandSet(BaseCommandSet):
     spql_parser.add_subparsers(
         title="SPQL command",
         help="Silent Push Query Language, "
-             "see: https://help.silentpush.com/docs/spql"
+        "see: https://help.silentpush.com/docs/spql",
     )
 
     @with_argparser(spql_parser)

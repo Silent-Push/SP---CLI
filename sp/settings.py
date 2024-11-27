@@ -43,6 +43,7 @@ def get_initial_commands() -> set:
         ScoreCommandSet(),
     }
 
+
 WEBSCAN_FIELDS = {
     "adtech.ads_txt",
     "adtech.ads_txt_sha256",
@@ -183,7 +184,7 @@ SERVICES_FIELDS = {
     "ssl.subject.country",
     "ssl.subject.names",
     "ssl.subject.organization",
-    "ssl.wildcard"
+    "ssl.wildcard",
 }
 
 OPEN_DIRECTORY_FIELDS = {
@@ -197,7 +198,7 @@ OPEN_DIRECTORY_FIELDS = {
     "port",
     "scan_date",
     "scheme",
-    "size"
+    "size",
 }
 
 WEBSCAN_HISTORY_FIELDS = {
@@ -207,7 +208,7 @@ WEBSCAN_HISTORY_FIELDS = {
     "ip",
     "origin_url",
     "scan_date",
-    "scheme"
+    "scheme",
 }
 
 WEBSCAN_FAILURE_FIELDS = {
@@ -217,7 +218,7 @@ WEBSCAN_FAILURE_FIELDS = {
     "reason",
     "scan_date",
     "scheme",
-    "url"
+    "url",
 }
 
 SPQL_DATASOURCES = {

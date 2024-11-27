@@ -18,6 +18,7 @@ class BaseCmdApp(cmd2.Cmd):
     """
     The cmd2 base class, handles the main logic needed by all commands
     """
+
     intro: str = "Silent Push - CLI"
     """The intro banner for the interactive mode"""
     prompt = style("SP# ", fg=Fg[Fg.LIGHT_GRAY.name.upper()], bold=True)
@@ -112,13 +113,7 @@ class BaseCmdApp(cmd2.Cmd):
         return [
             h.statement.args
             for h in self.history
-            if h.statement.command
-            in [
-                "enrich",
-                "score",
-                "query",
-                "answer"
-            ]
+            if h.statement.command in ["enrich", "score", "query", "answer"]
         ]
 
     def do_intro(self, _):
