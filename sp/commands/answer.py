@@ -139,14 +139,11 @@ class PADNSAnswerCommandSet(BaseCommandSet):
     @cmd2.as_subcommand_to("answer", "soa", subcommand_parser)
     def answer_soa(self, params: Statement):
         """
-        Reverse SOA lookup sub command of answer sub command
+        Reverse SOA lookup sub command of answer sub command, accepts wildcards
 
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNS(params, self, type="answer", qtype="soa") as padns:
             padns.lookup()
 
