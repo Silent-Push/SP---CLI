@@ -7,7 +7,7 @@ test:
   variables:
     SILENT_PUSH_API_KEY: "$SILENT_PUSH_API_KEY"
   before_script:
-  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
   script:
     pytest
   tags:
