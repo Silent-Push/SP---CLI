@@ -1,5 +1,6 @@
 stages:
 - test
+- document
 
 test:
   stage: test
@@ -12,3 +13,15 @@ test:
     pytest
   tags:
   - python
+
+document:
+  stage: document
+  image: python:3.9
+  script: |
+    cd docs/source &
+    make html
+  artifacts:
+    paths:
+      - docs/build/html
+  tags:
+    - document
