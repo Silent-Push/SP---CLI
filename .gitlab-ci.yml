@@ -1,6 +1,7 @@
 stages:
 - test
 - pages
+- build
 
 test:
   stage: test
@@ -28,3 +29,14 @@ pages:
   - deploy
   only:
     - main
+
+build:
+  stage: build
+  image: python:3.9
+  before_script:
+  - python3 -m pip install build
+  script:
+    - python3 -m build --wheel
+  artifacts:
+    paths:
+      - dist
