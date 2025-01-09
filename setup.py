@@ -116,7 +116,7 @@ setup(
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
     package_dir={
-        "sp": "sp",
+        # "sp": "sp",
         "sp.commands": "sp/commands",
         "sp.commands.base": "sp/commands/base",
         "sp.common": "sp/common",
@@ -128,7 +128,7 @@ setup(
     # the `py_modules` argument instead as follows, which will expect a file
     # called `my_module.py` to exist:
     #
-    py_modules=["sp.main", "sp.settings"],
+    # py_modules=["sp.main", "sp.settings"],
     #
     packages=[
         "sp",
@@ -171,9 +171,9 @@ setup(
         "console_scripts": [
             "sp=sp.main:main",
         ],
-        "gui_scripts": [
-            "sp=sp.main:main",
-        ],
+        # "gui_scripts": [
+        #     "sp=sp.main:main",
+        # ],
     },
     # List additional URLs that are relevant to your project as a dict.
     #

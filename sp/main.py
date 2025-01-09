@@ -112,7 +112,7 @@ def main(argv=None):
     app_man = AppFileManager(__app_name__)
     app_man.create_hist_dir()  # Create history and cache directories
     app = App(application_manager=app_man)
-    parser = argparse.ArgumentParser(prog="SP-CLI")
+    parser = argparse.ArgumentParser(prog="sp")
     command_help = "command: score/enrich/padns (if none, enter interactive shell)"
     parser.add_argument("command", nargs="?", help=command_help)
     arg_help = "optional arguments for command: -j/-c/-t"
@@ -131,4 +131,4 @@ if __name__ == "__main__":
 
     sys.exit(main())
 
-# @TODO: verbose
+# @TODO: verbose, version
