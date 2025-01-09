@@ -18,7 +18,7 @@ document:
   stage: document
   image: python:3.9
   script: |
-    cd docs/source &
+    cd docs/source
     make html
   artifacts:
     paths:
