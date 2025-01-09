@@ -12,7 +12,6 @@
 /now-3d
 /SilentPushCLI.egg-info/**
 *.png
-/docs/build/**
 .DS_Store
 __pycache__
 .doctree

@@ -41,6 +41,7 @@
 <h1>SP - CLI<a class="headerlink" href="#sp-cli" title="Link to this heading">¶</a></h1>
 <p>The Silent Push Command Line Interface</p>
 <ul class="simple">
+<li><p><a class="reference external" href="#Requirements">Requirements</a></p></li>
 <li><p><a class="reference external" href="#Installation">Installation</a></p></li>
 <li><p><a class="reference external" href="#Usage">Usage</a></p>
 <ul>
@@ -70,8 +71,22 @@ Guidelines</a></p></li>
 </li>
 <li><p><a class="reference external" href="#support">Support</a></p></li>
 </ul>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Python 3.9 or later with pip: <a class="reference external" href="https://www.python.org/downloads/">https://www.python.org/downloads/</a></p></li>
+<li><p>Windows users only:</p>
+<ul>
+<li><p>Microsoft Build Tools: <a class="reference external" href="https://visualstudio.microsoft.com/visual-cpp-build-tools/">https://visualstudio.microsoft.com/visual-cpp-build-tools/</a></p></li>
+</ul>
+</li>
+</ul>
+</section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+</section>
+<section id="linux-and-macos-users">
+<h2>Linux and MacOS users<a class="headerlink" href="#linux-and-macos-users" title="Link to this heading">¶</a></h2>
 <p>Download the python wheel from <a class="reference external" href="https://labs.silentpush.com/jorgeley/">https://labs.silentpush.com/jorgeley/</a> and
 then install it with pip:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>SilentPushCLI-0.0.1-py3-none-linux.whl
@@ -81,6 +96,19 @@ then install it with pip:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">SILENT_PUSH_API_KEY</span><span class="o">=</span>YOUR-API-KEY
 </pre></div>
 </div>
+</section>
+<section id="windows-users">
+<h2>Windows Users<a class="headerlink" href="#windows-users" title="Link to this heading">¶</a></h2>
+<p>Download the python wheel from <a class="reference external" href="https://labs.silentpush.com/jorgeley/">https://labs.silentpush.com/jorgeley/</a> (there are different
+versions for Win32 and AMD64), open your CMD - Command Prompt and then install it with pip:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>SilentPushCLI-0.0.1-py3-none-win32.whl
+</pre></div>
+</div>
+<p>After installed, export your Silent Push API key to your terminal:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>setx<span class="w"> </span>/m<span class="w"> </span>SILENT_PUSH_API_KEY<span class="w"> </span>YOUR-API-KEY
+</pre></div>
+</div>
+<p>Restart your CMD - Command Prompt</p>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
@@ -402,7 +430,10 @@ help</p>
     <h3><a href="../index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">SP - CLI</a><ul>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#linux-and-macos-users">Linux and MacOS users</a></li>
+<li><a class="reference internal" href="#windows-users">Windows Users</a></li>
 <li><a class="reference internal" href="#usage">Usage</a><ul>
 <li><a class="reference internal" href="#supported-commands-and-sub-commands-so-far">Supported commands and sub-commands so far</a></li>
 <li><a class="reference internal" href="#options">Options</a></li>

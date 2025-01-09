@@ -3,6 +3,8 @@ SP - CLI
 
 The Silent Push Command Line Interface
 
+-  `Requirements <#Requirements>`__
+
 -  `Installation <#Installation>`__
 
 -  `Usage <#Usage>`__
@@ -33,8 +35,19 @@ The Silent Push Command Line Interface
 
 -  `Support <#support>`__
 
+Requirements
+------------
+
+-  Python 3.9 or later with pip: https://www.python.org/downloads/
+-  Windows users only:
+
+   -  Microsoft Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+
 Installation
 ------------
+
+Linux and MacOS users
+---------------------
 
 Download the python wheel from https://labs.silentpush.com/jorgeley/ and
 then install it with pip:
@@ -48,6 +61,24 @@ After installed, export your Silent Push API key to your terminal:
 .. code:: shell
 
    export SILENT_PUSH_API_KEY=YOUR-API-KEY
+
+Windows Users
+-------------
+
+Download the python wheel from https://labs.silentpush.com/jorgeley/ (there are different
+versions for Win32 and AMD64), open your CMD - Command Prompt and then install it with pip:
+
+.. code:: shell
+
+    python -m pip install SilentPushCLI-0.0.1-py3-none-win32.whl
+
+After installed, export your Silent Push API key to your terminal:
+
+.. code:: shell
+
+    setx /m SILENT_PUSH_API_KEY YOUR-API-KEY
+
+Restart your CMD - Command Prompt
 
 Usage
 -----
