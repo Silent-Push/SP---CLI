@@ -24,4 +24,4 @@ document:
     paths:
       - docs/build/html
   tags:
-  - document
+  - deploy
