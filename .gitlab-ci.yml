@@ -41,12 +41,9 @@ deploy:
   script:
     - python3 -m build --wheel
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-    - chmod 644 ./tmp/id_rsa_2
+    - chmod 400 ./tmp/id_rsa_2
     - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
-    - ping -c3 $DEPLOY_HOST
-#    - cat ./tmp/id_rsa_2
-# @FIXME: Host key verification failed.
-    - scp -i ./tmp/id_rsa_2 dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    - scp -vi ./tmp/id_rsa_2 dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
   artifacts:
     paths:
       - dist
