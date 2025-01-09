@@ -20,7 +20,8 @@ pages:
   before_script:
   - python3 -m pip install sphinx
   script:
-    sphinx-build -b html docs/source public/
+    - python3 -m pip install sphinx furo
+    - sphinx-build -b html docs/source public/
   artifacts:
     paths:
       - public
