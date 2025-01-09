@@ -1,7 +1,7 @@
 stages:
 - test
 - pages
-- build
+- deploy
 
 test:
   stage: test
@@ -30,8 +30,8 @@ pages:
   only:
     - main
 
-build:
-  stage: build
+deploy:
+  stage: deploy
   image: python:3.9
   before_script:
   - python3 -m pip install build
