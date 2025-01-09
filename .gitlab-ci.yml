@@ -43,7 +43,7 @@ deploy:
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
     - chmod 400 ./tmp/id_rsa_2
     - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
-    - scp -vi ./tmp/id_rsa_2 dist/*.whl -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    - scp -v -i ./tmp/id_rsa_2 dist/*.whl -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
   artifacts:
     paths:
       - dist
