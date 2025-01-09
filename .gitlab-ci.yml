@@ -44,10 +44,10 @@ deploy:
     - chmod 400 ./tmp/id_rsa_2
     - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
     - scp -v -o StrictHostKeyChecking=no -i ./tmp/id_rsa_2 dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    - rm -Rfvv ./tmp
   artifacts:
     paths:
       - dist
-      - ./tmp
   tags:
   - deploy
   only:
