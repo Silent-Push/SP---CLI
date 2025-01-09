@@ -40,3 +40,7 @@ deploy:
   artifacts:
     paths:
       - dist
+  tags:
+  - deploy
+  only:
+    - main
