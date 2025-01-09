@@ -1,6 +1,6 @@
 stages:
 - test
-- document
+- pages
 
 test:
   stage: test
@@ -14,14 +14,17 @@ test:
   tags:
   - python
 
-document:
-  stage: document
+pages:
+  stage: pages
   image: python:3.9
-  script: |
-    cd docs/source
-    make html
+  before_script:
+  - pip install -r requirements-dev.txt
+  script:
+    sphinx-build -b html docs/source public/
   artifacts:
     paths:
-      - docs/build/html
+      - public
   tags:
   - deploy
+  only:
+    - main
