@@ -16,11 +16,10 @@ test:
 
 pages:
   stage: pages
-#  image: python:3.9
-#  before_script:
-#  - python3 -m pip install sphinx
+  image: python:3.9
+  before_script:
+  - python3 -m pip install sphinx
   script:
-    - python3 -m pip install sphinx furo
     - python3 -m sphinx -b html docs/source public/
   artifacts:
     paths:
