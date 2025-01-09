@@ -18,7 +18,7 @@ pages:
   stage: pages
   image: python:3.9
   before_script:
-  - pip install -r requirements-dev.txt
+  - python3 -m pip install sphinx
   script:
     sphinx-build -b html docs/source public/
   artifacts:
