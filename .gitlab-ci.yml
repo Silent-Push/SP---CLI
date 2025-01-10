@@ -25,10 +25,6 @@ pages:
   artifacts:
     paths:
       - public
-  tags:
-  - deploy
-  only:
-    - main
 
 deploy:
   variables:
@@ -40,11 +36,8 @@ deploy:
 #  @TODO: we also need to build for Win32 and 64
   script:
     - python3 -m build --wheel
-    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-    - chmod 400 ./tmp/id_rsa_2
     - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
-    - scp -v -o StrictHostKeyChecking=no -i ./tmp/id_rsa_2 dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-    - rm -Rfvv ./tmp
+    - scp -v -o StrictHostKeyChecking=no -i $DEPLOY_KEY dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
   artifacts:
     paths:
       - dist
