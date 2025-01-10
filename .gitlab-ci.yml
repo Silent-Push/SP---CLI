@@ -40,8 +40,10 @@ deploy:
     - python3 -m build --wheel "-C=--build-option=--plat-name win32"
     - python3 -m build --wheel "-C=--build-option=--plat-name win_amd64"
     - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
-    - chmod 600 $DEPLOY_KEY
-    - scp -v -o StrictHostKeyChecking=no -i $DEPLOY_KEY dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    - echo $DEPLOY_KEY > deploy_key
+    - chmod 600 deploy_key
+    - cat deploy_key
+    - scp -v -o StrictHostKeyChecking=no -i deploy_key dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
   artifacts:
     paths:
       - dist
