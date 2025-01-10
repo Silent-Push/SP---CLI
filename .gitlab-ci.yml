@@ -45,7 +45,6 @@ deploy:
     - echo '-----END OPENSSH PRIVATE KEY-----' >> deploy_key
     - chmod 600 deploy_key
     - scp -v -o StrictHostKeyChecking=no -i deploy_key dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-    - ls /var/opt/gitlab/gitlab-ci/builds
     - ls /var/opt/gitlab/gitlab-rails/shared/artifacts
   artifacts:
     paths:
