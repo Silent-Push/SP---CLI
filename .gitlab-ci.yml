@@ -40,9 +40,11 @@ deploy:
     - python3 -m build --wheel "-C=--build-option=--plat-name win32"
     - python3 -m build --wheel "-C=--build-option=--plat-name win_amd64"
     - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
-    - echo $DEPLOY_KEY > deploy_key
-    - chmod 600 deploy_key
+    - echo '-----BEGIN OPENSSH PRIVATE KEY-----' > deploy_key
+    - sed -r 's/-----(BEGIN|END) OPENSSH PRIVATE KEY----- ?//g' $DEPLOY_KEY | sed 's/ /\n/g' >> deploy_key
+    - echo '-----END OPENSSH PRIVATE KEY-----' >> deploy_key
     - cat deploy_key
+    - chmod 600 deploy_key
     - scp -v -o StrictHostKeyChecking=no -i deploy_key dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
   artifacts:
     paths:
