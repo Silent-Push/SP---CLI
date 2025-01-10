@@ -38,13 +38,10 @@ deploy:
 #  @TODO: we also need to build for Win32 and 64
   script:
     - python3 -m build --wheel
+    - python3 -m build --wheel "-C=--build-option=--plat-name win32"
+    - python3 -m build --wheel "-C=--build-option=--plat-name win_amd64"
     - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
-    - find /home/gitlab-runner/builds/ -name DEPLOY_KEY
-    - ls -la /home/gitlab-runner/builds/
-    - ls -la /home/gitlab-runner/builds/$CI_RUNNER_SHORT_TOKEN
-    - ls -la /home/gitlab-runner/builds/$CI_RUNNER_SHORT_TOKEN/0/
     - echo $DEPLOY_KEY
-    - chmod 600 /home/gitlab-runner/builds/$CI_RUNNER_SHORT_TOKEN/0/silentpush-app/client-api.tmp/DEPLOY_KEY
     - scp -v -o StrictHostKeyChecking=no -i $DEPLOY_KEY dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
   artifacts:
     paths:
