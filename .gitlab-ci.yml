@@ -36,16 +36,15 @@ deploy:
   before_script:
   - python3 -m pip install build
   script:
+    - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
     - python3 -m build --wheel
     - python3 -m build --wheel "-C=--build-option=--plat-name win32"
     - python3 -m build --wheel "-C=--build-option=--plat-name win_amd64"
-    - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
     - echo '-----BEGIN OPENSSH PRIVATE KEY-----' > deploy_key
     - echo $DEPLOY_KEY | sed -r 's/-----(BEGIN|END) OPENSSH PRIVATE KEY----- ?//g' | sed 's/ /\n/g' >> deploy_key
     - echo '-----END OPENSSH PRIVATE KEY-----' >> deploy_key
     - chmod 600 deploy_key
     - scp -v -o StrictHostKeyChecking=no -i deploy_key dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-    - ls /var/opt/gitlab/gitlab-rails/shared/artifacts
   artifacts:
     paths:
       - dist
