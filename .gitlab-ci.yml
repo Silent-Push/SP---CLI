@@ -23,6 +23,7 @@ pages:
   script:
     - python3 -m sphinx -b html docs/source public/
   artifacts:
+    expire_in: 1 day
     paths:
       - public
   tags:
@@ -46,6 +47,7 @@ deploy:
     - chmod 600 deploy_key
     - scp -v -o StrictHostKeyChecking=no -i deploy_key dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
   artifacts:
+    expire_in: 1 day
     paths:
       - dist
   tags:
