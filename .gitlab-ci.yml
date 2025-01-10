@@ -39,7 +39,6 @@ deploy:
   script:
     - python3 -m build --wheel
     - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
-    - echo $DEPLOY_KEY
     - scp -v -o StrictHostKeyChecking=no -i $DEPLOY_KEY dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
   artifacts:
     paths:
