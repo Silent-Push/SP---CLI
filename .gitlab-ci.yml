@@ -39,6 +39,10 @@ deploy:
   script:
     - python3 -m build --wheel
     - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
+    - ls -la /home/gitlab-runner/builds/
+    - ls -la /home/gitlab-runner/builds/$CI_RUNNER_SHORT_TOKEN
+    - ls -la /home/gitlab-runner/builds/$CI_RUNNER_SHORT_TOKEN/0/
+    - chmod 600 /home/gitlab-runner/builds/$CI_RUNNER_SHORT_TOKEN/0/silentpush-app/client-api.tmp/DEPLOY_KEY
     - scp -v -o StrictHostKeyChecking=no -i $DEPLOY_KEY dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
   artifacts:
     paths:
