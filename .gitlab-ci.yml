@@ -6,13 +6,10 @@ stages:
 test:
   stage: test
   image: python:3.9
-  variables:
-    REF_DEPLOY_KEY: $DEPLOY_KEY
   before_script:
   - pip install -r requirements-dev.txt
   script:
-    - echo $REF_DEPLOY_KEY
-    - pytest
+    pytest
   tags:
   - python
 
