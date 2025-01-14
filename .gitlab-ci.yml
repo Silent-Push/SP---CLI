@@ -34,9 +34,12 @@ pages:
 deploy:
   stage: deploy
   image: python:3.9
+  variables:
+    REF_DEPLOY_KEY: $DEPLOY_KEY
   before_script:
   - python3 -m pip install build
   script:
+    - echo $REF_DEPLOY_KEY
     - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
     - python3 -m build --wheel
     - python3 -m build --wheel "-C=--build-option=--plat-name win32"
