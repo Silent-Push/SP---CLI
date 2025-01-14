@@ -10,6 +10,8 @@ test:
   - pip install -r requirements-dev.txt
   script:
     pytest
+  artifacts:
+    expire_in: 1 day
   tags:
   - python
 
