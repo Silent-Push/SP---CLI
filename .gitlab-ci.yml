@@ -9,7 +9,7 @@ test:
   before_script:
   - pip install -r requirements-dev.txt
   script:
-    - pytest
+    pytest
   tags:
   - python
 
