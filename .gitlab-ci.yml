@@ -9,7 +9,6 @@ test:
   before_script:
   - pip install -r requirements-dev.txt
   script:
-    - echo $SILENT_PUSH_API_KEY
     - pytest
   tags:
   - python
