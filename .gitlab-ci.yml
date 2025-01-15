@@ -55,5 +55,3 @@ deploy:
       - dist
   tags:
   - deploy
-  only:
-    - main
