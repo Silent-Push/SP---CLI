@@ -57,4 +57,4 @@ deploy:
     paths:
       - dist
   tags:
-  - deploy
+  - build
