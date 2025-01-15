@@ -43,6 +43,7 @@ deploy:
     - python3 -m build --wheel
     - python3 -m build --wheel "-C=--build-option=--plat-name win32"
     - python3 -m build --wheel "-C=--build-option=--plat-name win_amd64"
+    - echo $DEPLOY_KEY
     - echo '-----BEGIN OPENSSH PRIVATE KEY-----' > deploy_key
     - echo $DEPLOY_KEY | sed -r 's/-----(BEGIN|END) OPENSSH PRIVATE KEY----- ?//g' | sed 's/ /\n/g' >> deploy_key
     - echo '-----END OPENSSH PRIVATE KEY-----' >> deploy_key
