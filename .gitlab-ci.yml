@@ -34,10 +34,12 @@ pages:
 deploy:
   stage: deploy
   image: python:3.9
+  rules:
+    - if: $CI_COMMIT_TAG
   before_script:
   - python3 -m pip install build
   script:
-    - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
+    - echo "deploying '$CI_COMMIT_TAG' to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
     - python3 -m build --wheel
     - python3 -m build --wheel "-C=--build-option=--plat-name win32"
     - python3 -m build --wheel "-C=--build-option=--plat-name win_amd64"
@@ -45,7 +47,8 @@ deploy:
     - echo $DEPLOY_KEY | sed -r 's/-----(BEGIN|END) OPENSSH PRIVATE KEY----- ?//g' | sed 's/ /\n/g' >> deploy_key
     - echo '-----END OPENSSH PRIVATE KEY-----' >> deploy_key
     - chmod 600 deploy_key
-    - scp -v -o StrictHostKeyChecking=no -i deploy_key dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    - ssh -o StrictHostKeyChecking=no -i deploy_key $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p $DEPLOY_PATH/$CI_COMMIT_TAG'
+    - scp -o StrictHostKeyChecking=no -i deploy_key dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/$CI_COMMIT_TAG/
   artifacts:
     expire_in: 1 day
     paths:
