@@ -47,7 +47,7 @@ deploy:
     - echo $DEPLOY_KEY | sed -r 's/-----(BEGIN|END) OPENSSH PRIVATE KEY----- ?//g' | sed 's/ /\n/g' >> deploy_key
     - echo '-----END OPENSSH PRIVATE KEY-----' >> deploy_key
     - chmod 600 deploy_key
-    - ssh -o StrictHostKeyChecking=no -i deploy_key $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p $DEPLOY_PATH/$CI_COMMIT_TAG'
+    - ssh -v -o StrictHostKeyChecking=no -i deploy_key $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p $DEPLOY_PATH/$CI_COMMIT_TAG'
     - scp -o StrictHostKeyChecking=no -i deploy_key dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/$CI_COMMIT_TAG/
   artifacts:
     expire_in: 1 day
