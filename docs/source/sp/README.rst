@@ -1,7 +1,7 @@
-SP - CLI
+SP - SDK
 ========
 
-The Silent Push Command Line Interface
+The Silent Push Software Development Kit, it also includes a CLI (Command Line Interface)
 
 -  `Requirements <#Requirements>`__
 
@@ -54,7 +54,7 @@ then install it with pip:
 
 .. code:: shell
 
-   python3 -m pip install SilentPushCLI-0.0.1-py3-none-linux.whl
+   python3 -m pip install SilentPushSDK-0.0.1-py3-none-linux.whl
 
 After installed, export your Silent Push API key to your terminal:
 
@@ -70,7 +70,7 @@ versions for Win32 and AMD64), open your CMD - Command Prompt and then install i
 
 .. code:: shell
 
-    python -m pip install SilentPushCLI-0.0.1-py3-none-win32.whl
+    python -m pip install SilentPushSDK-0.0.1-py3-none-win32.whl
 
 After installed, export your Silent Push API key to your terminal:
 
@@ -83,9 +83,23 @@ Restart your CMD - Command Prompt
 Usage
 -----
 
+Syntax:
+
 .. code:: shell
 
    sp COMMAND [SUB-COMMAND...] IOC [PARAMETER=VALUE...] [OPTION...]
+
+Use the help verbose command to get a detailed list of the available commands:
+
+.. code:: shell
+
+    sp help -v
+
+Use the help flag on any command to get more details:
+
+.. code:: shell
+
+    sp padns query a --help
 
 Examples:
 

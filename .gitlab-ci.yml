@@ -1,19 +1,59 @@
 stages:
 - test
-- pages
+- build
 - deploy
+- pages
 
 test:
   stage: test
   image: python:3.9
-  variables:
-    SILENT_PUSH_API_KEY: "$SILENT_PUSH_API_KEY"
   before_script:
   - pip install -r requirements-dev.txt
   script:
     pytest
+  artifacts:
+    expire_in: 1 hour
   tags:
   - python
+
+build:
+  stage: build
+  image: python:3.9
+  rules:
+    - if: $CI_COMMIT_TAG
+  before_script:
+  - python3 -m pip install build
+  script:
+    - echo "Building $CI_COMMIT_TAG"
+    - mkdir -p dist/$CI_COMMIT_TAG
+    - python3 -m build -o dist/$CI_COMMIT_TAG --wheel
+    - python3 -m build -o dist/$CI_COMMIT_TAG --wheel "-C=--build-option=--plat-name win32"
+    - python3 -m build -o dist/$CI_COMMIT_TAG --wheel "-C=--build-option=--plat-name win_amd64"
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - dist
+
+deploy:
+  stage: deploy
+  image: python:3.9
+  dependencies:
+    - build
+  script:
+    - echo "deploying '$CI_COMMIT_TAG' to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
+    - echo '-----BEGIN OPENSSH PRIVATE KEY-----' > deploy_key
+    - echo $DEPLOY_KEY | sed -r 's/-----(BEGIN|END) OPENSSH PRIVATE KEY----- ?//g' | sed 's/ /\n/g' >> deploy_key
+    - echo '-----END OPENSSH PRIVATE KEY-----' >> deploy_key
+    - chmod 600 deploy_key
+    - scp -r -o StrictHostKeyChecking=no -i deploy_key dist/* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - dist
+  tags:
+  - deploy
+  only:
+    - main
 
 pages:
   stage: pages
@@ -23,33 +63,9 @@ pages:
   script:
     - python3 -m sphinx -b html docs/source public/
   artifacts:
-    expire_in: 1 day
+    expire_in: 1 hour
     paths:
       - public
-  tags:
-  - deploy
-  only:
-    - main
-
-deploy:
-  stage: deploy
-  image: python:3.9
-  before_script:
-  - python3 -m pip install build
-  script:
-    - echo "deploying to '$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH'"
-    - python3 -m build --wheel
-    - python3 -m build --wheel "-C=--build-option=--plat-name win32"
-    - python3 -m build --wheel "-C=--build-option=--plat-name win_amd64"
-    - echo '-----BEGIN OPENSSH PRIVATE KEY-----' > deploy_key
-    - echo $DEPLOY_KEY | sed -r 's/-----(BEGIN|END) OPENSSH PRIVATE KEY----- ?//g' | sed 's/ /\n/g' >> deploy_key
-    - echo '-----END OPENSSH PRIVATE KEY-----' >> deploy_key
-    - chmod 600 deploy_key
-    - scp -v -o StrictHostKeyChecking=no -i deploy_key dist/*.whl $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - dist
   tags:
   - deploy
   only:

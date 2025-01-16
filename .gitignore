@@ -18,3 +18,4 @@ __pycache__
 .html
 .js
 .pickle
+/SilentPushSDK.egg-info/**
