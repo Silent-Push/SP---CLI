@@ -33,6 +33,8 @@ build:
     expire_in: 1 day
     paths:
       - dist
+  tags:
+    - build
 
 deploy:
   stage: deploy
