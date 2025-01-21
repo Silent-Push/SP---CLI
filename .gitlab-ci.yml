@@ -70,3 +70,4 @@ pages:
       - public
   tags:
   - deploy
+  environment: production
