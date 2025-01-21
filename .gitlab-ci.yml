@@ -68,3 +68,5 @@ pages:
   artifacts:
     paths:
       - public
+  tags:
+  - deploy
