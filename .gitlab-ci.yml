@@ -63,6 +63,7 @@ pages:
   script:
     - python3 -m sphinx -b html docs/source public
   pages: true
+  publish: public
   only:
     - main
   artifacts:
