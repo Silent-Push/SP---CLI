@@ -3,6 +3,7 @@
 /script.txt
 /script.py
 /build/**
+/builds/**
 /dist/**
 /sp.egg-info/**
 /results.txt
