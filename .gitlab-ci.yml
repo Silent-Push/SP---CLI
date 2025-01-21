@@ -58,15 +58,14 @@ deploy:
 pages:
   stage: pages
   image: python:3.9
-  rules:
-    - if: $CI_COMMIT_TAG
   before_script:
   - python3 -m pip install sphinx
   script:
     - python3 -m sphinx -b html docs/source public/
   artifacts:
-    expire_in: 1 hour
     paths:
       - public
+  only:
+    - main
   tags:
   - deploy
