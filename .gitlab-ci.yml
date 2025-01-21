@@ -61,12 +61,12 @@ pages:
   before_script:
   - python3 -m pip install sphinx
   script:
-    - python3 -m sphinx -b html docs/source public
+    - python3 -m sphinx -b html docs/source wikis/public
   pages: true
   only:
     - main
   artifacts:
     paths:
-      - public
+      - wikis/public
   tags:
   - deploy
