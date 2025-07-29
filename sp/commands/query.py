@@ -3,7 +3,7 @@ import argparse
 import cmd2
 from cmd2 import Statement, Cmd2ArgumentParser, with_argparser, with_default_category
 
-from sp.commands.base.padns import PADNS
+from sp.commands.base.padns import PADNSLookup
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.common.parse_ioc import IOCUtils
 
@@ -44,7 +44,7 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        with PADNS(params, self, qtype="a") as padns:
+        with PADNSLookup(params, self, qtype="a") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "aaaa", subcommand_parser)
@@ -55,10 +55,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="aaaa") as padns:
+        with PADNSLookup(params, self, qtype="aaaa") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "cname", subcommand_parser)
@@ -69,10 +69,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="cname") as padns:
+        with PADNSLookup(params, self, qtype="cname") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "mx", subcommand_parser)
@@ -83,10 +83,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="mx") as padns:
+        with PADNSLookup(params, self, qtype="mx") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "ns", subcommand_parser)
@@ -97,10 +97,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="ns") as padns:
+        with PADNSLookup(params, self, qtype="ns") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "ptr4", subcommand_parser)
@@ -111,10 +111,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="ptr4") as padns:
+        with PADNSLookup(params, self, qtype="ptr4") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "ptr6", subcommand_parser)
@@ -125,10 +125,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="ptr6") as padns:
+        with PADNSLookup(params, self, qtype="ptr6") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "any", subcommand_parser)
@@ -140,10 +140,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="any") as padns:
+        with PADNSLookup(params, self, qtype="any") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "anyipv4", subcommand_parser)
@@ -155,10 +155,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="anyipv4") as padns:
+        with PADNSLookup(params, self, qtype="anyipv4") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "anyipv6", subcommand_parser)
@@ -170,10 +170,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="anyipv6") as padns:
+        with PADNSLookup(params, self, qtype="anyipv6") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "soa", subcommand_parser)
@@ -184,10 +184,10 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="soa") as padns:
+        with PADNSLookup(params, self, qtype="soa") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("query", "txt", subcommand_parser)
@@ -198,8 +198,8 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, qtype="txt") as padns:
+        with PADNSLookup(params, self, qtype="txt") as padns:
             padns.lookup()

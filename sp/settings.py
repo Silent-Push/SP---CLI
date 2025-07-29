@@ -6,7 +6,7 @@ load_dotenv()
 CRLF = "\r\n"
 """The prompt line break"""
 API_URL = os.environ.get(
-    "SILENT_PUSH_API_URL", "https://app.silentpush.com/api/v1/merge-api/"
+    "SILENT_PUSH_API_URL", "https://app.silentpush.com/api/"
 )
 """The Silent Push API URL, you can export it to your prompt if needs to change or use .env"""
 API_KEY = os.environ.get("SILENT_PUSH_API_KEY")
@@ -16,7 +16,7 @@ if API_URL is None:
     raise EnvironmentError(
         "Please set the Silent Push API URL in your environment.\n"
         '\texport SILENT_PUSH_API_URL="'
-        'https://app.silentpush.com/api/v1/merge-api/"'
+        'https://app.silentpush.com/api/"'
     )
 
 if API_KEY is None:
@@ -35,14 +35,85 @@ def get_initial_commands() -> set:
     from sp.commands import (
         EnrichCommandSet,
         ScoreCommandSet,
+        # PADNSQueryCommandSet,
+        # PADNSAnswerCommandSet,
+        PADNSSearchCommandSet,
+        SPQLCommandSet,
     )
 
     # the available initial commands
     return {
         EnrichCommandSet(),
         ScoreCommandSet(),
+        # PADNSQueryCommandSet(),
+        # PADNSAnswerCommandSet(),
+        PADNSSearchCommandSet(),
+        SPQLCommandSet(),
     }
 
+SPQL_COMMANDS = ["feedscan", "webscan", "livescan"]
+
+FEEDSCAN_FIELDS = [
+    "domaininfo.registrar",
+    "nameservers.density",
+    "nameservers.nameserver",
+    "domaininfo.zone",
+    "ip_diversity.asns",
+    "feed_scope",
+    "feed_category",
+    "ip_flags.vpn_tags",
+    "ip_flags.proxy_tags",
+    "ip_flags.is_proxy",
+    "ip_flags.is_vpn",
+    "datasource",
+    "ip_reputation_score",
+    "vendor",
+    "feed",
+    "feed_frequency",
+    "nameservers_tags",
+    "host",
+    "subdomain",
+    "domain",
+    "domaininfo.whois_created_date",
+    "ip_diversity.ip_diversity_groups",
+    "ip_diversity.ip_diversity_all",
+    "ip_diversity.asn_diversity",
+    "domain_urls.results_summary.tranco_rank",
+    "domaininfo.whois_age",
+    "domaininfo.age",
+    "ns_reputation.ns_reputation_max",
+    "nschanges.results_summary.ns_entropy_score",
+    "ns_reputation.is_parked",
+    "domain_urls.results_summary.is_url_shortener",
+    "domain_urls.results_summary.is_dynamic_domain",
+    "domain_urls.results_summary.tranco_top10k",
+    "ip_location.continent_code",
+    "ip_location.country_code",
+    "subnet",
+    "ip_ptr",
+    "asname",
+    "ipv4",
+    "subnet_allocation_age",
+    "asn_allocation_age",
+    "density",
+    "asn",
+    "asn_takedown_reputation_score",
+    "subnet_reputation_score",
+    "asn_reputation_score",
+    "benign_info.known_benign",
+    "sinkhole_info.known_sinkhole_ip",
+    "ip_is_dsl_dynamic",
+    "ip_is_tor_exit_node",
+    "sp_risk_score",
+    "listing_score",
+    "tags",
+    "first_seen_on",
+    "last_seen_on",
+    "type",
+    "indicator",
+    "indicator_hash",
+    "uuid",
+]
 
 WEBSCAN_FIELDS = {
     "adtech.ads_txt",

@@ -4,7 +4,7 @@ import pandas
 from cmd2 import Statement, CommandSet
 from cmd2.ansi import style_success
 
-from sp.common.utils import flatten_dict, PandasDataFrameTSV
+from sp.common.utils import flatten_dict, PandasDataFrameTSV, flatten_list
 from sp.settings import CRLF
 
 
@@ -64,18 +64,28 @@ class BaseCommand:
         :param exc_tb:
         :return: None
         """
+        flattened = self._response
+        if isinstance(self._response, dict):
+            flattened = flatten_dict(self._response)
+        elif isinstance(self._response, list):
+            flattened = flatten_list(self._response)
         if self._params.json:
             self._output = json.dumps(self._response, indent=2) + CRLF
         elif self._params.csv:
             # @TODO: there's a weird ",0" in the 1st line output
-            dataframe = pandas.DataFrame(flatten_dict(self._response), index=[0])
+            dataframe = pandas.DataFrame(flattened, index=[0])
             dataframe = dataframe.transpose()
-            self._output = dataframe.to_csv() + CRLF
+            self._output = dataframe.to_csv(header=False) + CRLF
         elif self._params.tsv:
-            dataframe = PandasDataFrameTSV(flatten_dict(self._response), index=[0])
+            # @TODO: doesn't work for IP Diversity command
+            # , index=[i for i in range(len(self._response))]
+            dataframe = PandasDataFrameTSV(flattened, index=[0])
             self._output = dataframe.to_tsv() + CRLF
         else:
-            self._output = json.dumps(self._response, indent=2) + CRLF
+            try:
+                self._output = json.dumps(self._response, indent=2) + CRLF
+            except TypeError:
+                self._commandSet._cmd.perror("Something went wrong, wrong syntax? Try 'help <command>'")
         self._commandSet._cmd.poutput(style_success(self._output))
         # used by the run_script and run_pyscript command
         self._commandSet._cmd.last_result = self._output

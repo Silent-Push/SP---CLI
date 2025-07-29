@@ -31,6 +31,10 @@ class ScoreCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
+        # @TODO: maybe move this to parent class to avoid repetition
+        if not IOCUtils(params.ioc).valid:
+            self._cmd.perror("Not a valid IoC")
+            return
         with self.Score(params, self) as scoring:
             scoring.score()
 
@@ -39,7 +43,7 @@ class ScoreCommandSet(BaseCommandSet):
         The Score command, it's a context manager class
         """
 
-        _URL = API_URL + "explore/{type}/riskscore/{ioc}/?format=json"
+        _URL = API_URL + "v1/merge-api/explore/{type}/riskscore/{ioc}/?format=json"
         """The score endpoint URL"""
 
         def __enter__(self):

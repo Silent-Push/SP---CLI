@@ -3,11 +3,6 @@ from typing import List
 
 from cmd2 import CommandSetRegistrationError, Fg, style
 
-from sp.commands import (
-    PADNSQueryCommandSet,
-    PADNSAnswerCommandSet,
-    SPQLWebscanCommandSet,
-)
 
 import cmd2
 
@@ -23,7 +18,7 @@ class BaseCmdApp(cmd2.Cmd):
     """The intro banner for the interactive mode"""
     prompt = style("SP# ", fg=Fg[Fg.LIGHT_GRAY.name.upper()], bold=True)
     """The prompt"""
-    PREPEND_COMMANDS: list = ["padns", "query", "answer", "spql", "webscan"]
+    PREPEND_COMMANDS: list = ["padns", "query", "answer", ]
     """The list of sub commands that should be prepended with their main commands"""
     LOADED_COMMAND: str = ""
     """The loaded main command that should be displayed in the prompt"""
@@ -41,9 +36,6 @@ class BaseCmdApp(cmd2.Cmd):
         self.foreground_color = Fg.CYAN.name.lower()
         # Create a cache object to save url information to
         self._ioc_cache: List = self._get_iocs_from_history()
-        self._query = PADNSQueryCommandSet()
-        self._answer = PADNSAnswerCommandSet()
-        self._webscan = SPQLWebscanCommandSet()
         self.register_postparsing_hook(self.prepend_padns_main_command_hook)
 
     def prepend_padns_main_command_hook(
@@ -65,21 +57,25 @@ class BaseCmdApp(cmd2.Cmd):
         try:
             if command == "padns":
                 # self.poutput("prepend padns hook")
+                from sp.commands.query import PADNSQueryCommandSet
+                from sp.commands.answer import PADNSAnswerCommandSet
+
+                self._query = PADNSQueryCommandSet()
+                self._answer = PADNSAnswerCommandSet()
                 self.register_command_set(self._query)
                 self.register_command_set(self._answer)
             elif command == "query" or rest_args.startswith("query"):
+                from sp.commands.query import PADNSQueryCommandSet
+                self._query = PADNSQueryCommandSet()
                 # self.poutput("prepend query hook")
                 command = f"padns {command}"
                 self.register_command_set(self._query)
             elif command == "answer" or rest_args.startswith("answer"):
+                from sp.commands.answer import PADNSAnswerCommandSet
+                self._answer = PADNSAnswerCommandSet()
                 # self.poutput("prepend answer hook")
                 command = f"padns {command}"
                 self.register_command_set(self._answer)
-            elif command == "spql":
-                self.register_command_set(self._webscan)
-            elif command == "webscan" or rest_args.startswith("webscan"):
-                command = f"spql {command}"
-                self.register_command_set(self._webscan)
         except CommandSetRegistrationError:
             pass  # command already registered
         new_command = f"{command} {rest_args} {post_command}"
