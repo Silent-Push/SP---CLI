@@ -6,19 +6,23 @@ from sp.commands.base.BaseCommand import BaseCommand
 from sp.settings import API_URL, API_KEY
 
 
-class SPQL(BaseCommand):
+class BaseSPQL(BaseCommand):
     """
     SPQL main command
     """
 
-    _URL = API_URL + "explore/scandata/search/raw?format=json"
+    _URL = API_URL + "v1/merge-api/explore/scandata/search/raw?format=json"
     """The SPQL endpoint URL"""
     query: str = ""
     """The SPQL query string i.e.: 'domain=ig.com'"""
-    datasource: str = "webscan"
+    datasource: list = ["webscan"]
     """The SPQL data source which to query for"""
     fields: list = []
     """The output fields parameter"""
+    limit: int = 100
+    """The number of results to return"""
+    metadata: bool = False
+    """If should include metadata in results"""
     sort: list = []
     """The sort parameter"""
     payload: dict = {}
@@ -37,9 +41,13 @@ class SPQL(BaseCommand):
         :param command_set: The CommandSet object related to the command
         """
         self.query = params.query
-        self.datasource = params.datasource
-        self.fields = params.fields
-        self.sort = params.sort
+        if not self.query:
+            raise ValueError("need a query!")
+        self.datasource = params.datasource or self.datasource
+        self.fields = params.fields or self.fields
+        self.sort = params.sort or self.sort
+        self.limit = params.limit or 100
+        self.metadata = params.with_metadata or False
         super().__init__(params, command_set)
 
     def _get_query(self):
@@ -48,7 +56,8 @@ class SPQL(BaseCommand):
 
         :return: The query string
         """
-        return "".join(self.query) + f" AND datasource={self.datasource or 'webscan'}"
+        datasources = ','.join(f'"{d}"' for d in self.datasource)
+        return self.query[1:-1] + " AND datasource=[" + datasources + "]"
 
     def scan(self):
         """
@@ -61,11 +70,40 @@ class SPQL(BaseCommand):
             return
         self.payload = {
             "query": self._get_query(),
-            "fields": self.fields,
-            "sort": self.sort,
+            # "fields": self.fields,  # @TODO: not supported yet
+            "sorting": self.sort,
+            "limit": self.limit,
         }
         self._response = requests.post(
             self._URL, json=self.payload, headers={"x-api-key": API_KEY}
         )
         self.check_error()
-        self._response = json.loads(self._response.content).get("response")
+
+
+class WebScan(BaseSPQL):
+    _URL = API_URL + "v1/merge-api/explore/scandata/search/raw?format=json"
+    datasource: list = ["webscan"]
+    """The SPQL data source which to query for"""
+
+    def scan(self):
+        super().scan()
+        self._response = (
+                json.loads(self._response.content).get("response", {}) or {}
+        ).get("scandata_raw")
+
+
+class FeedScan(BaseSPQL):
+    _URL = API_URL + "v2/feed-scan/query-data/"
+    datasource: list = ["FEED", "DRAFT"]
+    """The SPQL data source which to query for"""
+
+    def scan(self):
+        super().scan()
+        if self.metadata:
+            self._response = json.loads(self._response.content).get("response")
+        else:
+            self._response = (
+                    json.loads(self._response.content).get("response", {}) or {}
+            ).get("data")
+
+

@@ -14,7 +14,7 @@ test:
   artifacts:
     expire_in: 1 hour
   tags:
-  - python
+    - docker
 
 build:
   stage: build
@@ -34,7 +34,7 @@ build:
     paths:
       - dist
   tags:
-    - build
+    - docker
 
 deploy:
   stage: deploy
@@ -53,7 +53,7 @@ deploy:
   artifacts:
     expire_in: 1 hour
   tags:
-  - deploy
+    - docker
 
 pages:
   stage: pages
@@ -70,4 +70,4 @@ pages:
     paths:
       - public
   tags:
-  - deploy
+    - docker

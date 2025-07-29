@@ -9,7 +9,7 @@ from tldextract import tldextract
 
 class IOCUtils(ABC):
 
-    __SAFE_CHARS = ":/?!=#&$+@"
+    __SAFE_CHARS = ":/?!=#&$+@*"
     type = "unknown"
     valid = False
     tld_extracted = None
@@ -33,15 +33,19 @@ class IOCUtils(ABC):
         return self._IOC
 
     def validate(self) -> bool:
-        self.valid = bool(validators.url(self._IOC))
-        if self.valid:
+        self.valid = False
+        if self._IOC.startswith('*'):
+            self.type = "regex"
+            self.valid = True
+        if not self.valid:
+            self.valid = bool(validators.url(self._IOC))
             if validators.domain(self.url_parsed.netloc):
                 self.url_type = "domain"
             if validators.ipv4(self.url_parsed.netloc):
                 self.url_type = "ipv4"
             if validators.ipv6(self.url_parsed.netloc):
                 self.url_type = "ipv6"
-        self.type = "url"
+            self.type = "url"
         if not self.valid:
             self.valid = bool(validators.domain(self._IOC))
             self.type = "domain"

@@ -3,7 +3,7 @@ import argparse
 import cmd2
 from cmd2 import Statement, with_default_category, Cmd2ArgumentParser, with_argparser
 
-from sp.commands.base.padns import PADNS
+from sp.commands.base.padns import PADNSLookup
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.common.parse_ioc import IOCUtils
 
@@ -46,10 +46,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, type="answer", qtype="a") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="a") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "aaaa", subcommand_parser)
@@ -60,10 +60,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, type="answer", qtype="aaaa") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="aaaa") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "cname", subcommand_parser)
@@ -74,10 +74,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, type="answer", qtype="cname") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="cname") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "mx", subcommand_parser)
@@ -88,10 +88,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, type="answer", qtype="mx") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="mx") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "ns", subcommand_parser)
@@ -102,10 +102,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, type="answer", qtype="ns") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="ns") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "ptr4", subcommand_parser)
@@ -116,10 +116,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, type="answer", qtype="ptr4") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="ptr4") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "ptr6", subcommand_parser)
@@ -130,10 +130,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, type="answer", qtype="ptr6") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="ptr6") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "soa", subcommand_parser)
@@ -144,7 +144,7 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        with PADNS(params, self, type="answer", qtype="soa") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="soa") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "txt", subcommand_parser)
@@ -155,10 +155,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        # if not IOCUtils(params.ioc).validate():
+        # if not IOCUtils(params.ioc).valid:
         #     self._cmd.perror("Not a valid IoC")
         #     return
-        with PADNS(params, self, type="answer", qtype="txt") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="txt") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "mxhash", subcommand_parser)
@@ -169,10 +169,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, type="answer", qtype="mxhash") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="mxhash") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "nshash", subcommand_parser)
@@ -183,10 +183,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, type="answer", qtype="nshash") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="nshash") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "soahash", subcommand_parser)
@@ -197,10 +197,10 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).validate():
+        if not IOCUtils(params.ioc).valid:
             self._cmd.perror("Not a valid IoC")
             return
-        with PADNS(params, self, type="answer", qtype="soahash") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="soahash") as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("answer", "txthash", subcommand_parser)
@@ -211,8 +211,8 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        # if not IOCUtils(params.ioc).validate():
+        # if not IOCUtils(params.ioc).valid:
         #     self._cmd.perror("Not a valid IoC")
         #     return
-        with PADNS(params, self, type="answer", qtype="txthash") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="txthash") as padns:
             padns.lookup()
