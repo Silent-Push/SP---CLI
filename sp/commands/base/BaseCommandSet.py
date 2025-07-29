@@ -132,30 +132,57 @@ class BaseCommandSet(CommandSet):
         return BaseCommandSet.__set__common_options(padns_parser)
 
     @staticmethod
-    def _get_spql_webscan_arg_parser() -> Cmd2ArgumentParser:
+    def _get_spql_arg_parser() -> Cmd2ArgumentParser:
         """
-        The parser for SPQL Webscan command: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
+        The parser for SPQL commands: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
 
         :return: Cmd2ArgumentParser
         """
-        from sp.settings import WEBSCAN_FIELDS, SPQL_DATASOURCES
+        from sp.settings import SPQL_DATASOURCES
 
-        spql_webscan_parser = BaseCommandSet._get_arg_parser()
-        spql_webscan_parser.add_argument(
+        spql_parser = BaseCommandSet._get_arg_parser()
+        spql_parser.add_argument(
             "query",
             nargs="?",
+            type=str,
             # choices_provider=(lambda field: WEBSCAN_FIELDS),
             help='the query to run, i.e.: ""domain"="ig.com""',
         )
-        spql_webscan_parser = BaseCommandSet.__set__common_options(spql_webscan_parser)
-        spql_webscan_parser.add_argument(
+        spql_parser = BaseCommandSet.__set__common_options(spql_parser)
+        spql_parser.add_argument(
+            "-d",
+            "--datasource",
+            nargs="?",
+            choices_provider=(lambda datasource: SPQL_DATASOURCES),
+            help="the datasource to query",
+        )
+        spql_parser.add_argument(
+            "-l",
+            "--limit",
+            type=int,
+            help="The number of records to return",
+        )
+        spql_parser.add_argument("-m", "--with-metadata", action="store_true")
+        return spql_parser
+
+    @staticmethod
+    def _get_webscan_arg_parser() -> Cmd2ArgumentParser:
+        """
+        The parser for SPQL Webscan commands: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
+
+        :return: Cmd2ArgumentParser
+        """
+        from sp.settings import WEBSCAN_FIELDS
+
+        webscan_parser = BaseCommandSet._get_spql_arg_parser()
+        webscan_parser.add_argument(
             "-f",
             "--fields",
             nargs="*",
             choices_provider=(lambda field: WEBSCAN_FIELDS),
             help="the fields to be output",
         )
-        spql_webscan_parser.add_argument(
+        webscan_parser.add_argument(
             "-s",
             "--sort",
             nargs="*",
@@ -163,11 +190,31 @@ class BaseCommandSet(CommandSet):
             help="the sort order (multiple for nested sorting),"
             "i.e.: scan_date/desc domain/asc",
         )
-        spql_webscan_parser.add_argument(
-            "-d",
-            "--datasource",
-            nargs="?",
-            choices_provider=(lambda datasource: SPQL_DATASOURCES),
-            help="the datasource to query",
+        return webscan_parser
+
+    @staticmethod
+    def _get_feedscan_arg_parser() -> Cmd2ArgumentParser:
+        """
+        The parser for SPQL Feed Scan commands: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
+
+        :return: Cmd2ArgumentParser
+        """
+        from sp.settings import FEEDSCAN_FIELDS
+
+        feedscan_parser = BaseCommandSet._get_spql_arg_parser()
+        feedscan_parser.add_argument(
+            "-f",
+            "--fields",
+            nargs="*",
+            choices_provider=(lambda field: FEEDSCAN_FIELDS),
+            help="the fields to be output",
         )
-        return spql_webscan_parser
+        feedscan_parser.add_argument(
+            "-s",
+            "--sort",
+            nargs="*",
+            choices_provider=(lambda field: FEEDSCAN_FIELDS),
+            help="the sort order (multiple for nested sorting),"
+            "i.e.: scan_date/desc domain/asc",
+        )
+        return feedscan_parser
