@@ -1,3 +1,5 @@
+from tests.fixtures.app import app
+
 # @TODO
 
 
