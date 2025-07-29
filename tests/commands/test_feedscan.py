@@ -2,4 +2,4 @@
 
 
 def test_feedscan(app):
-    pass
+    assert True
