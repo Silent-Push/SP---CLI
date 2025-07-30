@@ -28,7 +28,7 @@ class AppFileManager:
 
 class PandasDataFrameTSV(pandas.DataFrame):
     def to_tsv(self, *args, **kwargs) -> str:
-        return self.transpose().to_string()
+        return self.transpose().to_string(max_colwidth=200, header=False)
 
     @property
     def _constructor(self) -> Callable[..., DataFrame]:
@@ -40,6 +40,17 @@ def strip_command_options(command_set, args):
         for option in action.option_strings:
             args = args.strip(option)
     return args.strip()
+
+
+def flatten_list(data):
+    merged_list = dict()
+    prefix = 0
+    for d in data:
+        if not isinstance(d, dict):
+            return data
+        merged_list = {**merged_list, **flatten_dict(d, str(f"{prefix}_"))}
+        prefix += 1
+    return merged_list
 
 
 def flatten_dict(data, prefix=""):

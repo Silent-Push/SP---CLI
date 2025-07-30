@@ -149,7 +149,12 @@ Supported commands and sub-commands so far
       -  txt
       -  txthash
 
+   -  spql
+      -  feescan
+      -  webscan
+
 -  load
+-  unload
 
 Options
 ~~~~~~~

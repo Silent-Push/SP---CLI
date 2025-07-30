@@ -111,7 +111,11 @@ sp padns query a ig.com limit=2 sort=last_seen/- -t
     - soahash
     - txt
     - txthash
+- spql
+  - feedscan
+  - webscan
 - load
+- unload
 ### Options
 - all commands
   - **-j, --json**: JSON output (default)
