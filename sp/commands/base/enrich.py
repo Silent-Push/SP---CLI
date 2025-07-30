@@ -1,9 +1,10 @@
 import json
 
 import requests
+
 from sp.commands.base.BaseCommand import BaseCommand
-from sp.settings import API_URL, API_KEY
 from sp.common.parse_ioc import IOCUtils
+from sp.settings import API_KEY, API_URL
 
 
 class Enrich(BaseCommand):

@@ -8,9 +8,10 @@ https://packaging.python.org/guides/distributing-packages-using-setuptools/
 https://github.com/pypa/sampleproject
 """
 
+import pathlib
+
 # Always prefer setuptools over distutils
 from setuptools import setup
-import pathlib
 
 here = pathlib.Path(__file__).parent.resolve()
 

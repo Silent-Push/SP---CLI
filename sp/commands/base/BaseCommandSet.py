@@ -1,4 +1,4 @@
-from cmd2 import CommandSet, Cmd2ArgumentParser
+from cmd2 import Cmd2ArgumentParser, CommandSet
 
 
 class BaseCommandSet(CommandSet):

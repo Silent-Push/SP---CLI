@@ -1,10 +1,11 @@
 import argparse
 
 import cmd2
-from cmd2 import Statement, Cmd2ArgumentParser, with_argparser, with_default_category
+from cmd2 import (Cmd2ArgumentParser, Statement, with_argparser,
+                  with_default_category)
 
-from sp.commands.base.padns import PADNSSearch
 from sp.commands.base.BaseCommandSet import BaseCommandSet
+from sp.commands.base.padns import PADNSSearch
 from sp.common.parse_ioc import IOCUtils
 
 
@@ -20,7 +21,9 @@ class PADNSSearchCommandSet(BaseCommandSet):
 
     _search_parser = Cmd2ArgumentParser()
     """The argument parser for the PADNS Search command, contains a 'sub parser'"""
-    _search_parser.add_subparsers(title="search", help="specify a search lookup, i.e.: ipdiversity")
+    _search_parser.add_subparsers(
+        title="search", help="specify a search lookup, i.e.: ipdiversity"
+    )
     subcommand_parser = BaseCommandSet._get_padns_arg_parser()
     """The argument parser for the PADNS Search sub commands (ipdiversity, selfhosted, ...)"""
 

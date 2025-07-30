@@ -1,10 +1,11 @@
 import argparse
 
 import cmd2
-from cmd2 import Statement, with_default_category, Cmd2ArgumentParser, with_argparser
+from cmd2 import (Cmd2ArgumentParser, Statement, with_argparser,
+                  with_default_category)
 
-from sp.commands.base.padns import PADNSLookup
 from sp.commands.base.BaseCommandSet import BaseCommandSet
+from sp.commands.base.padns import PADNSLookup
 from sp.common.parse_ioc import IOCUtils
 
 

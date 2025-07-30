@@ -1,7 +1,8 @@
 import json
-import jsonschema
 
+import jsonschema
 from cmd2 import CommandResult
+
 from tests.fixtures.app import app
 
 common_properties = {
@@ -20,14 +21,9 @@ def get_answer_result_schema(properties: dict = common_properties):
         "properties": {
             "records": {
                 "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        **properties
-                    }
-                }
+                "items": {"type": "object", "properties": {**properties}},
             }
-        }
+        },
     }
 
 
@@ -64,7 +60,7 @@ def test_answer_mx(app):
     answer_mx_properties = {
         **common_properties,
         "ttl": {"type": "number"},
-        "mxhash": {"type": "string"}
+        "mxhash": {"type": "string"},
     }
     answer_mx_result_schema = get_answer_result_schema(answer_mx_properties)
     jsonschema.validate(instance=answer_mx_result, schema=answer_mx_result_schema)
@@ -78,7 +74,7 @@ def test_answer_mxhash(app):
     answer_mx_properties = {
         **common_properties,
         "ttl": {"type": "number"},
-        "mxhash": {"type": "string"}
+        "mxhash": {"type": "string"},
     }
     answer_mx_result_schema = get_answer_result_schema(answer_mx_properties)
     jsonschema.validate(instance=answer_mx_result, schema=answer_mx_result_schema)
@@ -92,7 +88,7 @@ def test_answer_ns(app):
     answer_ns_properties = {
         **common_properties,
         "ttl": {"type": "number"},
-        "nshash": {"type": "string"}
+        "nshash": {"type": "string"},
     }
     answer_ns_result_schema = get_answer_result_schema(answer_ns_properties)
     jsonschema.validate(instance=answer_ns_result, schema=answer_ns_result_schema)
@@ -106,7 +102,7 @@ def test_answer_nshash(app):
     answer_ns_properties = {
         **common_properties,
         "ttl": {"type": "number"},
-        "nshash": {"type": "string"}
+        "nshash": {"type": "string"},
     }
     answer_ns_result_schema = get_answer_result_schema(answer_ns_properties)
     jsonschema.validate(instance=answer_ns_result, schema=answer_ns_result_schema)
@@ -133,10 +129,7 @@ def test_answer_soa(app):
     assert isinstance(out, CommandResult)
     answer_soa_result = json.loads(out.stdout)
     assert isinstance(answer_soa_result, dict)
-    answer_soa_properties = {
-        **common_properties,
-        "soahash": {"type": "string"}
-    }
+    answer_soa_properties = {**common_properties, "soahash": {"type": "string"}}
     answer_soa_result_schema = get_answer_result_schema(answer_soa_properties)
     jsonschema.validate(instance=answer_soa_result, schema=answer_soa_result_schema)
 
@@ -146,10 +139,7 @@ def test_answer_soahash(app):
     assert isinstance(out, CommandResult)
     answer_soa_result = json.loads(out.stdout)
     assert isinstance(answer_soa_result, dict)
-    answer_soa_properties = {
-        **common_properties,
-        "soahash": {"type": "string"}
-    }
+    answer_soa_properties = {**common_properties, "soahash": {"type": "string"}}
     answer_soa_result_schema = get_answer_result_schema(answer_soa_properties)
     jsonschema.validate(instance=answer_soa_result, schema=answer_soa_result_schema)
 
@@ -159,10 +149,7 @@ def test_answer_txt(app):
     assert isinstance(out, CommandResult)
     answer_txt_result = json.loads(out.stdout)
     assert isinstance(answer_txt_result, dict)
-    answer_txt_properties = {
-        **common_properties,
-        "txthash": {"type": "string"}
-    }
+    answer_txt_properties = {**common_properties, "txthash": {"type": "string"}}
     answer_txt_result_schema = get_answer_result_schema(answer_txt_properties)
     jsonschema.validate(instance=answer_txt_result, schema=answer_txt_result_schema)
 
@@ -172,9 +159,6 @@ def test_answer_txthash(app):
     assert isinstance(out, CommandResult)
     answer_txt_result = json.loads(out.stdout)
     assert isinstance(answer_txt_result, dict)
-    answer_txt_properties = {
-        **common_properties,
-        "txthash": {"type": "string"}
-    }
+    answer_txt_properties = {**common_properties, "txthash": {"type": "string"}}
     answer_txt_result_schema = get_answer_result_schema(answer_txt_properties)
     jsonschema.validate(instance=answer_txt_result, schema=answer_txt_result_schema)

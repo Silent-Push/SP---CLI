@@ -1,9 +1,10 @@
 import json
+
 import requests
-from cmd2 import Statement, CommandSet
+from cmd2 import CommandSet, Statement
 
 from sp.commands.base.BaseCommand import BaseCommand
-from sp.settings import API_URL, API_KEY
+from sp.settings import API_KEY, API_URL
 
 
 class BaseSPQL(BaseCommand):
@@ -56,7 +57,7 @@ class BaseSPQL(BaseCommand):
 
         :return: The query string
         """
-        datasources = ','.join(f'"{d}"' for d in self.datasource)
+        datasources = ",".join(f'"{d}"' for d in self.datasource)
         return self.query[1:-1] + " AND datasource=[" + datasources + "]"
 
     def scan(self):
@@ -105,5 +106,3 @@ class FeedScan(BaseSPQL):
             self._response = (
                     json.loads(self._response.content).get("response", {}) or {}
             ).get("data")
-
-

@@ -8,7 +8,6 @@ from tldextract import tldextract
 
 
 class IOCUtils(ABC):
-
     __SAFE_CHARS = ":/?!=#&$+@*"
     type = "unknown"
     valid = False
@@ -34,7 +33,7 @@ class IOCUtils(ABC):
 
     def validate(self) -> bool:
         self.valid = False
-        if self._IOC.startswith('*'):
+        if self._IOC.startswith("*"):
             self.type = "regex"
             self.valid = True
         if not self.valid:
