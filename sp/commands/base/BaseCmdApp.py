@@ -1,10 +1,8 @@
 import functools
 from typing import List
 
-from cmd2 import CommandSetRegistrationError, Fg, style
-
-
 import cmd2
+from cmd2 import CommandSetRegistrationError, Fg, style
 
 from sp.settings import get_initial_commands
 
@@ -18,7 +16,11 @@ class BaseCmdApp(cmd2.Cmd):
     """The intro banner for the interactive mode"""
     prompt = style("SP# ", fg=Fg[Fg.LIGHT_GRAY.name.upper()], bold=True)
     """The prompt"""
-    PREPEND_COMMANDS: list = ["padns", "query", "answer", ]
+    PREPEND_COMMANDS: list = [
+        "padns",
+        "query",
+        "answer",
+    ]
     """The list of sub commands that should be prepended with their main commands"""
     LOADED_COMMAND: str = ""
     """The loaded main command that should be displayed in the prompt"""
@@ -57,8 +59,8 @@ class BaseCmdApp(cmd2.Cmd):
         try:
             if command == "padns":
                 # self.poutput("prepend padns hook")
-                from sp.commands.query import PADNSQueryCommandSet
                 from sp.commands.answer import PADNSAnswerCommandSet
+                from sp.commands.query import PADNSQueryCommandSet
 
                 self._query = PADNSQueryCommandSet()
                 self._answer = PADNSAnswerCommandSet()
@@ -66,12 +68,14 @@ class BaseCmdApp(cmd2.Cmd):
                 self.register_command_set(self._answer)
             elif command == "query" or rest_args.startswith("query"):
                 from sp.commands.query import PADNSQueryCommandSet
+
                 self._query = PADNSQueryCommandSet()
                 # self.poutput("prepend query hook")
                 command = f"padns {command}"
                 self.register_command_set(self._query)
             elif command == "answer" or rest_args.startswith("answer"):
                 from sp.commands.answer import PADNSAnswerCommandSet
+
                 self._answer = PADNSAnswerCommandSet()
                 # self.poutput("prepend answer hook")
                 command = f"padns {command}"

@@ -1,7 +1,7 @@
-from cmd2 import Statement, with_default_category, with_argparser
+from cmd2 import Statement, with_argparser, with_default_category
 
-from sp.commands.base.spql import WebScan, FeedScan
 from sp.commands.base.BaseCommandSet import BaseCommandSet
+from sp.commands.base.spql import FeedScan, WebScan
 
 
 @with_default_category("SPQL")
@@ -28,6 +28,7 @@ class SPQLCommandSet(BaseCommandSet):
             spql.scan()
 
     feedscan_parser = BaseCommandSet._get_feedscan_arg_parser()
+
     @with_argparser(feedscan_parser, preserve_quotes=True)
     def do_feedscan(self, params: Statement):
         """

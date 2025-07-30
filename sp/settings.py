@@ -1,13 +1,12 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 CRLF = "\r\n"
 """The prompt line break"""
-API_URL = os.environ.get(
-    "SILENT_PUSH_API_URL", "https://app.silentpush.com/api/"
-)
+API_URL = os.environ.get("SILENT_PUSH_API_URL", "https://app.silentpush.com/api/")
 """The Silent Push API URL, you can export it to your prompt if needs to change or use .env"""
 API_KEY = os.environ.get("SILENT_PUSH_API_KEY")
 """Your Silent Push API key"""
@@ -32,14 +31,9 @@ def get_initial_commands() -> set:
 
     :return: The set of commands
     """
-    from sp.commands import (
-        EnrichCommandSet,
-        ScoreCommandSet,
-        # PADNSQueryCommandSet,
-        # PADNSAnswerCommandSet,
-        PADNSSearchCommandSet,
-        SPQLCommandSet,
-    )
+    from sp.commands import (  # PADNSQueryCommandSet,; PADNSAnswerCommandSet,
+        EnrichCommandSet, PADNSSearchCommandSet, ScoreCommandSet,
+        SPQLCommandSet)
 
     # the available initial commands
     return {
@@ -50,6 +44,7 @@ def get_initial_commands() -> set:
         PADNSSearchCommandSet(),
         SPQLCommandSet(),
     }
+
 
 SPQL_COMMANDS = ["feedscan", "webscan", "livescan"]
 

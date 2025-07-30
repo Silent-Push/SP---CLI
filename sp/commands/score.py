@@ -1,16 +1,12 @@
 import json
-import requests
 
-from cmd2 import (
-    Statement,
-    with_argparser,
-    with_default_category,
-)
+import requests
+from cmd2 import Statement, with_argparser, with_default_category
 
 from sp.commands.base.BaseCommand import BaseCommand
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.common.parse_ioc import IOCUtils
-from sp.settings import API_URL, API_KEY
+from sp.settings import API_KEY, API_URL
 
 
 # @TODO: rename to riskscore
