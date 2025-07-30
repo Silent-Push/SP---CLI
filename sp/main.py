@@ -5,9 +5,9 @@ __app_name__ = "SP-CLI"
 
 from cmd2 import with_category, Fg, CommandSetRegistrationError, style
 
+from sp.commands import *
 from sp.commands.base.BaseCmdApp import BaseCmdApp
 from sp.common.utils import AppFileManager
-from sp.commands import *
 from sp.settings import SPQL_COMMANDS
 
 
@@ -111,6 +111,11 @@ def main(argv=None):
     if args.command:
         if args.command in SPQL_COMMANDS:
             if args.command_args[0].find('"') == -1 and args.command_args[0].find("'") == -1:
+                args.command_args[0] = f'"{args.command_args[0]}"'
+            elif args.command_args[0].find('"') >= 0:
+                args.command_args[0] = f"'{args.command_args[0]}'"
+            elif args.command_args[0].find("'") >= 0:
+                app.pwarning("Please use double quotes with SPQL!")
                 args.command_args[0] = f'"{args.command_args[0]}"'
         new_args = " ".join(args.command_args)
         app.onecmd_plus_hooks("{} {}".format(args.command, new_args))
