@@ -1,7 +1,8 @@
 import json
-import jsonschema
 
+import jsonschema
 from cmd2 import CommandResult
+
 from tests.fixtures.app import app
 
 

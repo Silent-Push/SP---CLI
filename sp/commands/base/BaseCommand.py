@@ -1,10 +1,10 @@
 import json
 
 import pandas
-from cmd2 import Statement, CommandSet
+from cmd2 import CommandSet, Statement
 from cmd2.ansi import style_success
 
-from sp.common.utils import flatten_dict, PandasDataFrameTSV, flatten_list
+from sp.common.utils import PandasDataFrameTSV, flatten_dict, flatten_list
 from sp.settings import CRLF
 
 
@@ -85,7 +85,9 @@ class BaseCommand:
             try:
                 self._output = json.dumps(self._response, indent=2) + CRLF
             except TypeError:
-                self._commandSet._cmd.perror("Something went wrong, wrong syntax? Try 'help <command>'")
+                self._commandSet._cmd.perror(
+                    "Something went wrong, wrong syntax? Try 'help <command>'"
+                )
         self._commandSet._cmd.poutput(style_success(self._output))
         # used by the run_script and run_pyscript command
         self._commandSet._cmd.last_result = self._output
@@ -98,8 +100,8 @@ class BaseCommand:
         :return: None
         """
         if not self._response.status_code == 200:
-            import re
             import json
+            import re
 
             # try to extract the error from the API response
             content = self._response.content.decode()

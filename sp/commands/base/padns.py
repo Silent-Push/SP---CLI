@@ -1,13 +1,13 @@
 import json
+
 import requests
-from cmd2 import Statement, CommandSet
+from cmd2 import CommandSet, Statement
 
 from sp.commands.base.BaseCommand import BaseCommand
-from sp.settings import API_URL, API_KEY
+from sp.settings import API_KEY, API_URL
 
 
 class BasePADNS(BaseCommand):
-
     def lookup(self):
         """
         The PADNS main command logic
@@ -41,7 +41,9 @@ class PADNSLookup(BasePADNS):
     PADNS Lookup main command
     """
 
-    _URL = API_URL + "v1/merge-api/explore/padns/lookup/{type}/{qtype}/{ioc}/?format=json"
+    _URL = (
+            API_URL + "v1/merge-api/explore/padns/lookup/{type}/{qtype}/{ioc}/?format=json"
+    )
     """The PADNS endpoint URL"""
     _type: str = "query"
     """The type of the PADNS query"""
@@ -124,7 +126,7 @@ class PADNSSearch(BasePADNS):
 
         :return: PADNS
         """
-        qtype = f"/{self._qtype}" if self._qtype else ''
+        qtype = f"/{self._qtype}" if self._qtype else ""
         self._URL = self._URL.format(type=self._type, qtype=qtype)
         self._URL += f"&domain={self._params.ioc}"
         super().__enter__()

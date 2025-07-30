@@ -3,7 +3,7 @@
 
 __app_name__ = "SP-CLI"
 
-from cmd2 import with_category, Fg, CommandSetRegistrationError, style
+from cmd2 import CommandSetRegistrationError, Fg, style, with_category
 
 from sp.commands import *
 from sp.commands.base.BaseCmdApp import BaseCmdApp
@@ -18,7 +18,12 @@ class App(BaseCmdApp):
 
     load_parser = cmd2.Cmd2ArgumentParser()
     """The argument parser for the load command"""
-    load_parser.add_argument("cmds", choices=["padns", ])
+    load_parser.add_argument(
+        "cmds",
+        choices=[
+            "padns",
+        ],
+    )
 
     @with_argparser(load_parser)
     @with_category("Command Loading")
@@ -36,8 +41,8 @@ class App(BaseCmdApp):
             )
             self.LOADED_COMMAND = "padns"
             try:
-                from sp.commands.query import PADNSQueryCommandSet
                 from sp.commands.answer import PADNSAnswerCommandSet
+                from sp.commands.query import PADNSQueryCommandSet
 
                 self._query = PADNSQueryCommandSet()
                 self._answer = PADNSAnswerCommandSet()
@@ -110,7 +115,10 @@ def main(argv=None):
     exit_code = 0
     if args.command:
         if args.command in SPQL_COMMANDS:
-            if args.command_args[0].find('"') == -1 and args.command_args[0].find("'") == -1:
+            if (
+                    args.command_args[0].find('"') == -1
+                    and args.command_args[0].find("'") == -1
+            ):
                 args.command_args[0] = f'"{args.command_args[0]}"'
             elif args.command_args[0].find('"') >= 0:
                 args.command_args[0] = f"'{args.command_args[0]}'"

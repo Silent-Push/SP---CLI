@@ -1,7 +1,8 @@
 import json
-import jsonschema
 
+import jsonschema
 from cmd2 import CommandResult
+
 from tests.fixtures.app import app
 
 enrich_result_schema = {
@@ -17,7 +18,7 @@ enrich_result_schema = {
         "ns_reputation": {"type": "object"},
         "nschanges": {"type": "object"},
         "private_suffix_info": {"type": "object"},
-        "sp_risk_score": {"type": "number"}
+        "sp_risk_score": {"type": "number"},
     },
 }
 
@@ -35,10 +36,5 @@ def test_bulk_enrich(app):
     assert isinstance(out, CommandResult)
     bulk_enrich_result = json.loads(out.stdout)
     assert isinstance(bulk_enrich_result, list)
-    bulk_enrich_result_schema = {
-        "type": "array",
-        "items": {
-            **enrich_result_schema
-        }
-    }
+    bulk_enrich_result_schema = {"type": "array", "items": {**enrich_result_schema}}
     jsonschema.validate(instance=bulk_enrich_result, schema=bulk_enrich_result_schema)

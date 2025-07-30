@@ -1,7 +1,8 @@
 import json
-import jsonschema
 
+import jsonschema
 from cmd2 import CommandResult
+
 from tests.fixtures.app import app
 
 common_properties = {
@@ -20,14 +21,9 @@ def get_query_result_schema(properties: dict = common_properties):
         "properties": {
             "records": {
                 "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        **properties
-                    }
-                }
+                "items": {"type": "object", "properties": {**properties}},
             }
-        }
+        },
     }
 
 
@@ -88,7 +84,7 @@ def test_query_mx(app):
     query_mx_properties = {
         **common_properties,
         "ttl": {"type": "number"},
-        "mxhash": {"type": "string"}
+        "mxhash": {"type": "string"},
     }
     query_mx_result_schema = get_query_result_schema(query_mx_properties)
     jsonschema.validate(instance=query_mx_result, schema=query_mx_result_schema)
@@ -102,7 +98,7 @@ def test_query_ns(app):
     query_ns_properties = {
         **common_properties,
         "ttl": {"type": "number"},
-        "nshash": {"type": "string"}
+        "nshash": {"type": "string"},
     }
     query_ns_result_schema = get_query_result_schema(query_ns_properties)
     jsonschema.validate(instance=query_ns_result, schema=query_ns_result_schema)
@@ -129,10 +125,7 @@ def test_query_soa(app):
     assert isinstance(out, CommandResult)
     query_soa_result = json.loads(out.stdout)
     assert isinstance(query_soa_result, dict)
-    query_soa_properties = {
-        **common_properties,
-        "soahash": {"type": "string"}
-    }
+    query_soa_properties = {**common_properties, "soahash": {"type": "string"}}
     query_soa_result_schema = get_query_result_schema(query_soa_properties)
     jsonschema.validate(instance=query_soa_result, schema=query_soa_result_schema)
 
@@ -142,9 +135,6 @@ def test_query_txt(app):
     assert isinstance(out, CommandResult)
     query_txt_result = json.loads(out.stdout)
     assert isinstance(query_txt_result, dict)
-    query_txt_properties = {
-        **common_properties,
-        "txthash": {"type": "string"}
-    }
+    query_txt_properties = {**common_properties, "txthash": {"type": "string"}}
     query_txt_result_schema = get_query_result_schema(query_txt_properties)
     jsonschema.validate(instance=query_txt_result, schema=query_txt_result_schema)
