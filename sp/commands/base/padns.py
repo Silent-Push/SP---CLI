@@ -22,7 +22,10 @@ class BasePADNS(BaseCommand):
             headers={"x-api-key": API_KEY, "User-Agent": "SP-CLI"},
         )
         self.check_error()
-        self._response = json.loads(self._response.content).get("response")
+        try:
+            self._response = json.loads(self._response.content).get("response")
+        except json.JSONDecodeError as e:
+            self._commandSet._cmd.perror(f"Can't parse command response: {e.msg}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """

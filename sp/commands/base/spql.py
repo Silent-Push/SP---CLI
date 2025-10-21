@@ -17,6 +17,7 @@ class BaseSPQL(BaseCommand):
     query: str = ""
     """The SPQL query string i.e.: 'domain=ig.com'"""
     datasource: list = ["webscan"]
+    # TODO: fields is accepted in SPQL https://silentpush.atlassian.net/wiki/spaces/TI/pages/1576075279/Example+Web+Scanner+Queries+Other+Search+Tips
     """The SPQL data source which to query for"""
     fields: list = []
     """The output fields parameter"""
@@ -100,9 +101,12 @@ class FeedScan(BaseSPQL):
 
     def scan(self):
         super().scan()
-        if self.metadata:
-            self._response = json.loads(self._response.content).get("response")
-        else:
-            self._response = (
-                    json.loads(self._response.content).get("response", {}) or {}
-            ).get("data")
+        try:
+            if self.metadata:
+                self._response = json.loads(self._response.content).get("response")
+            else:
+                self._response = (
+                        json.loads(self._response.content).get("response", {}) or {}
+                ).get("data")
+        except json.JSONDecodeError as e:
+            self._commandSet._cmd.perror(f"Can't parse command response: {e.msg}")

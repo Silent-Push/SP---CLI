@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../.."))
 
-project = "SP - SDK"
+project = "SP - CLI"
 copyright = "2024, Silent Push"
 author = "Jorgeley<jorgeley@silentpush.com>"
 version = release = "0.0.1"
@@ -39,7 +39,7 @@ exclude_patterns = ["build", "docs", "_autosummary"]
 html_theme = "classic"
 html_logo = "../logo.svg"
 html_favicon = "../favicon.ico"
-html_title = "Silent Push - SDK"
+html_title = "Silent Push - CLI"
 html_use_index = False
 html_domain_indices = False
 html_theme_options = {
