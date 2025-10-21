@@ -1,7 +1,7 @@
-SP - SDK
+SP - CLI
 ========
 
-The Silent Push Software Development Kit, it also includes a CLI (Command Line Interface)
+The Silent Push CLI (Command Line Interface)
 
 -  `Requirements <#Requirements>`__
 
@@ -54,7 +54,7 @@ then install it with pip:
 
 .. code:: shell
 
-   python3 -m pip install SilentPushSDK-0.0.1-py3-none-linux.whl
+   python3 -m pip install SilentPushCLI-0.0.1-py3-none-linux.whl
 
 After installed, export your Silent Push API key to your terminal:
 
@@ -70,7 +70,7 @@ versions for Win32 and AMD64), open your CMD - Command Prompt and then install i
 
 .. code:: shell
 
-    python -m pip install SilentPushSDK-0.0.1-py3-none-win32.whl
+    python -m pip install SilentPushCLI-0.0.1-py3-none-win32.whl
 
 After installed, export your Silent Push API key to your terminal:
 
