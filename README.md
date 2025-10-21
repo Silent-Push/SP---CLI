@@ -1,5 +1,6 @@
-# SP - SDK
-The Silent Push Software Development Kit, it also includes a CLI (Command Line Interface)
+# SP - CLI
+
+The Silent Push CLI (Command Line Interface)
 
 - [Requirements](#Requirements)
 
@@ -39,9 +40,9 @@ The Silent Push Software Development Kit, it also includes a CLI (Command Line I
 ## Installation
 ### Linux and MacOS users
 Download the python wheel from https://labs.silentpush.com/jorgeley/
-and then install it with pip:
+and then install it with pip (choose correct version):
 ```shell
-python -m pip install SilentPushSDK-0.0.1-py3-none-any.whl
+python -m pip install SilentPushCLI-0.0.1-py3-none-any.whl
 ```
 After installed, export your Silent Push API key to your terminal:
 ```shell
@@ -51,7 +52,7 @@ export SILENT_PUSH_API_KEY=YOUR-API-KEY
 Download the python wheel from https://labs.silentpush.com/jorgeley/ (there are different
 versions for Win32 and AMD64), open your CMD - Command Prompt and then install it with pip:
 ```shell
-python -m pip install SilentPushSDK-0.0.1-py3-none-win32.whl
+python -m pip install SilentPushCLI-0.0.1-py3-none-win32.whl
 ```
 After installed, export your Silent Push API key to your terminal:
 ```shell

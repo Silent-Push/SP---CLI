@@ -44,7 +44,10 @@ class Enrich(BaseCommand):
         """
         self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
         self.check_error()
-        self._response = json.loads(self._response.content).get("response")
+        try:
+            self._response = json.loads(self._response.content).get("response")
+        except json.JSONDecodeError as e:
+            self._commandSet._cmd.perror(f"Can't parse command response: {e.msg}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
@@ -107,7 +110,10 @@ class BulkEnrich(BaseCommand):
                 self._URL, json=self.payload, headers={"x-api-key": API_KEY}
             )
         self.check_error()
-        self._response = json.loads(self._response.content).get("response")
+        try:
+            self._response = json.loads(self._response.content).get("response")
+        except json.JSONDecodeError as e:
+            self._commandSet._cmd.perror(f"Can't parse command response: {e.msg}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
