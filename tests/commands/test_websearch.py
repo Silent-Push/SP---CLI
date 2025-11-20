@@ -7,11 +7,12 @@ from tests.fixtures.app import app
 
 
 def test_websearch(app):
+    app.interactive = False
     websearch_result_schema = {
         "type": "array",
         "items": {"type": "object"},  # too many properties to validate
     }
-    out = app.app_cmd("websearch 'domain=\"microsoft.com\"'")
+    out = app.app_cmd("websearch 'domain=\"microsoft.com\"'\n")
     assert isinstance(out, CommandResult)
     websearch_result = json.loads(out.stdout)
     assert isinstance(websearch_result, list)

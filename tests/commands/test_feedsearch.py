@@ -7,11 +7,12 @@ from tests.fixtures.app import app
 
 
 def test_feedsearch(app):
+    app.interactive = False
     feedsearch_result_schema = {
         "type": "array",
         "items": {"type": "object"},  # too many properties to validate
     }
-    out = app.app_cmd("feedsearch 'vendor=\"Silent Push\"'")
+    out = app.app_cmd("feedsearch 'vendor=\"Silent Push\"'\n")
     assert isinstance(out, CommandResult)
     feedsearch_result = json.loads(out.stdout)
     assert isinstance(feedsearch_result, list)
