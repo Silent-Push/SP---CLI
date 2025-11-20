@@ -8,18 +8,18 @@ from sp.commands.base.spql import FeedScan, WebScan
 class SPQLCommandSet(BaseCommandSet):
     """
     SPQL Command Set:
-         - **webscan**: sub command of spql command
-         - **feedscan**: sub command of spql command
+         - **websearch**: sub command of spql command
+         - **feedsearch**: sub command of spql command
          - ... (more to come)
     """
 
-    webscan_parser = BaseCommandSet._get_webscan_arg_parser()
+    websearch_parser = BaseCommandSet._get_websearch_arg_parser()
     """The argument parser for the SPQL command"""
 
-    @with_argparser(webscan_parser, preserve_quotes=True)
-    def do_webscan(self, params: Statement):
+    @with_argparser(websearch_parser, preserve_quotes=True)
+    def do_websearch(self, params: Statement):
         """
-        SPQL Webscan
+        SPQL Websearch
 
         :param params: The passed command parameters
         :return: None
@@ -27,12 +27,12 @@ class SPQLCommandSet(BaseCommandSet):
         with WebScan(params, self) as spql:
             spql.scan()
 
-    feedscan_parser = BaseCommandSet._get_feedscan_arg_parser()
+    feedsearch_parser = BaseCommandSet._get_feedsearch_arg_parser()
 
-    @with_argparser(feedscan_parser, preserve_quotes=True)
-    def do_feedscan(self, params: Statement):
+    @with_argparser(feedsearch_parser, preserve_quotes=True)
+    def do_feedsearch(self, params: Statement):
         """
-        SPQL Feedscan
+        SPQL Feedsearch
 
         :param params: The passed command parameters
         :return: None

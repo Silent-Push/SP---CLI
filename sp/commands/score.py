@@ -48,8 +48,9 @@ class ScoreCommandSet(BaseCommandSet):
 
             :return: Score
             """
+            self.ioc_type = IOCUtils(self._params.ioc).type
             self._URL = self._URL.format(
-                type=IOCUtils(self._params.ioc).type, ioc=self._params.ioc
+                type=self.ioc_type, ioc=self._params.ioc
             )
             # self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
             super().__enter__()
@@ -64,8 +65,15 @@ class ScoreCommandSet(BaseCommandSet):
             self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
             self.check_error()
             try:
-                self._response = json.loads(self._response.content).get("response")
-            except json.JSONDecodeError as e:
+                response = json.loads(self._response.content).get("response")
+                if self._params.verbose:
+                    self._response = response
+                    return
+                if self.ioc_type == "domain":
+                    self._response = response.get("sp_risk_score")
+                else:
+                    self._response = response.get("ip2asn")[0].get("sp_risk_score")
+            except (json.JSONDecodeError, IndexError) as e:
                 self._commandSet._cmd.perror(f"Can't parse command response: {e.msg}")
 
         def __exit__(self, exc_type, exc_val, exc_tb):

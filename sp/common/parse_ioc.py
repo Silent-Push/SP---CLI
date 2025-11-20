@@ -17,6 +17,8 @@ class IOCUtils(ABC):
     ip_parsed = None
 
     def __init__(self, ioc: str) -> None:
+        if not ioc:
+            return None
         self._IOC = ioc
         self.tld_extracted = tldextract.extract(self._IOC)
         self.url_parsed = urlparse(self._IOC)

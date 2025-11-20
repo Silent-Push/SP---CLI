@@ -1,4 +1,6 @@
 import json
+import re
+from unittest.mock import patch
 
 import jsonschema
 from cmd2 import CommandResult
@@ -23,7 +25,7 @@ enrich_result_schema = {
 }
 
 
-def test_enrich(app):
+def test_enrich_domain(app):
     out = app.app_cmd("enrich silentpush.com")
     assert isinstance(out, CommandResult)
     enrich_result = json.loads(out.stdout)
@@ -31,10 +33,70 @@ def test_enrich(app):
     jsonschema.validate(instance=enrich_result, schema=enrich_result_schema)
 
 
-def test_bulk_enrich(app):
+def test_enrich_domain_json_output(app):
+    out = app.app_cmd("enrich silentpush.com -j")
+    assert isinstance(out, CommandResult)
+    assert isinstance(out.stdout, str)
+    assert json.loads(out.stdout)
+
+
+def test_enrich_domain_csv_output(app):
+    out = app.app_cmd("enrich silentpush.com -c")
+    assert isinstance(out, CommandResult)
+    assert isinstance(out.stdout, str)
+    match = re.match(r"[a-zA-Z_0-9]*,{1}[a-zA-Z0-9\-\:.\",\s]*\n?", out.stdout)
+    assert match is not None
+
+
+def test_enrich_domain_tsv_output(app):
+    out = app.app_cmd("enrich silentpush.com -t")
+    assert isinstance(out, CommandResult)
+    assert isinstance(out.stdout, str)
+    match = re.match(r"[a-zA-Z_0-9]*\t*[a-zA-Z0-9\-\:.\",\s]*\n?", out.stdout)
+    assert match is not None
+
+
+def test_bulk_enrich_domain(app):
     out = app.app_cmd("bulk_enrich silentpush.com google.com")
     assert isinstance(out, CommandResult)
     bulk_enrich_result = json.loads(out.stdout)
     assert isinstance(bulk_enrich_result, list)
     bulk_enrich_result_schema = {"type": "array", "items": {**enrich_result_schema}}
     jsonschema.validate(instance=bulk_enrich_result, schema=bulk_enrich_result_schema)
+
+
+def test_enrich_ip(app):
+    out = app.app_cmd("enrich 8.8.4.4")
+    assert isinstance(out, CommandResult)
+    enrich_result = json.loads(out.stdout)
+    assert isinstance(enrich_result, dict)
+    jsonschema.validate(instance=enrich_result, schema=enrich_result_schema)
+
+
+def test_bulk_enrich_ip(app):
+    out = app.app_cmd("bulk_enrich 8.8.4.4 8.8.8.8")
+    assert isinstance(out, CommandResult)
+    bulk_enrich_result = json.loads(out.stdout)
+    assert isinstance(bulk_enrich_result, list)
+    bulk_enrich_result_schema = {"type": "array", "items": {**enrich_result_schema}}
+    jsonschema.validate(instance=bulk_enrich_result, schema=bulk_enrich_result_schema)
+
+
+def test_invalid_ioc(app):
+    out = app.app_cmd("enrich 0")
+    assert isinstance(out, CommandResult)
+    enrich_result = out.stdout
+    error_result = out.stderr
+    assert isinstance(enrich_result, str)
+    assert enrich_result == ''
+    assert error_result == 'Not a valid IoC\n'
+
+
+@patch("sp.commands.base.enrich.requests.get")
+def test_error_handling(mocked_get, app):
+    mocked_get.return_value.status_code = 400
+    mocked_get.return_value.content = b"error"
+    out = app.app_cmd("enrich ig.com")
+    assert isinstance(out, CommandResult)
+    error_result = out.stderr
+    assert error_result.startswith("Something went wrong")

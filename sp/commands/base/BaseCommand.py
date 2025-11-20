@@ -45,11 +45,11 @@ class BaseCommand:
 
         :return: BaseCommand
         """
-        if self._params.params:
+        if hasattr(self._params, "params") and self._params.params:
             self._URL += "&" + "&".join(self._params.params)
-        return self
         # self._commandSet._cmd.poutput(self._URL)
         # self._commandSet._cmd.pfeedback(f"\t{self._feedback}...")
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
@@ -72,15 +72,18 @@ class BaseCommand:
         if self._params.json:
             self._output = json.dumps(self._response, indent=2) + CRLF
         elif self._params.csv:
-            # @TODO: there's a weird ",0" in the 1st line output
-            dataframe = pandas.DataFrame(flattened, index=[0])
-            dataframe = dataframe.transpose()
-            self._output = dataframe.to_csv(header=False) + CRLF
+            try:
+                dataframe = pandas.DataFrame(flattened, index=[0])
+                dataframe = dataframe.transpose()
+                self._output = dataframe.to_csv(header=False) + CRLF
+            except ValueError:
+                self._output = flattened
         elif self._params.tsv:
-            # @TODO: doesn't work for IP Diversity command
-            # , index=[i for i in range(len(self._response))]
-            dataframe = PandasDataFrameTSV(flattened, index=[0])
-            self._output = dataframe.to_tsv() + CRLF
+            try:
+                dataframe = PandasDataFrameTSV(flattened, index=[0])
+                self._output = dataframe.to_tsv() + CRLF
+            except ValueError:
+                self._output = flattened
         else:
             try:
                 self._output = json.dumps(self._response, indent=2) + CRLF
@@ -110,11 +113,12 @@ class BaseCommand:
             except (json.JSONDecodeError, TypeError):
                 json_error = ""
             strip = re.compile("<.*?>|\n")
-            error = re.sub(strip, "", content[content.find("<body") :])
+            error = re.sub(strip, " ", content[content.find("<body"):])
+            error = re.sub(' +', ' ', error)
             error += json_error.__str__()
             self._commandSet._cmd.perror("Something went wrong :(")
             self._commandSet._cmd.perror(
-                f"Status Code {self._response.status_code}: " f"{error[:100]}..."
+                f"Status Code {self._response.status_code}: {error[:100]}..."
             )
             self._commandSet._cmd.pwarning("Is your API key correct?")
             return
