@@ -4,7 +4,7 @@ from typing import List
 import cmd2
 from cmd2 import CommandSetRegistrationError, Fg, style
 
-from sp.settings import get_initial_commands
+from sp.settings import get_initial_commands, MULTILINE_COMMANDS
 
 
 class BaseCmdApp(cmd2.Cmd):
@@ -34,6 +34,7 @@ class BaseCmdApp(cmd2.Cmd):
             command_sets=get_initial_commands(),
             auto_load_commands=False,
             allow_cli_args=False,  # we use our own argparse,
+            multiline_commands=MULTILINE_COMMANDS,
         )
         self.foreground_color = Fg.CYAN.name.lower()
         # Create a cache object to save url information to

@@ -114,6 +114,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     exit_code = 0
     if args.command:
+        app.interactive = False
         if args.command in SPQL_COMMANDS:
             if (
                     args.command_args[0].find('"') == -1
@@ -128,6 +129,7 @@ def main(argv=None):
         new_args = " ".join(args.command_args)
         app.onecmd_plus_hooks("{} {}".format(args.command, new_args))
     else:
+        app.interactive = True
         exit_code = app.cmdloop()
     return exit_code
 

@@ -23,9 +23,9 @@ class BaseSPQL(BaseCommand):
     """The output fields parameter"""
     limit: int = 100
     """The number of results to return"""
-    metadata: bool = False
+    verbose: bool = False
     """If should include metadata in results"""
-    sort: list = []
+    sort: list = ["first_seen_on/desc"]
     """The sort parameter"""
     payload: dict = {}
     """The final payload to post"""
@@ -49,8 +49,12 @@ class BaseSPQL(BaseCommand):
         self.fields = params.fields or self.fields
         self.sort = params.sort or self.sort
         self.limit = params.limit or 100
-        self.metadata = params.with_metadata or False
+        self.verbose = params.verbose or False
         super().__init__(params, command_set)
+
+    def __enter__(self):
+        self._feedback = "executing query"
+        return super().__enter__()
 
     def _get_query(self):
         """
@@ -59,7 +63,9 @@ class BaseSPQL(BaseCommand):
         :return: The query string
         """
         datasources = ",".join(f'"{d}"' for d in self.datasource)
-        return self.query[1:-1] + " AND datasource=[" + datasources + "]"
+        if self._commandSet._cmd.interactive or (self.query[0] == "'" and self.query[-1] == "'"):
+            self.query = self.query[1:-1]
+        return self.query + " AND datasource=[" + datasources + "]"
 
     def scan(self):
         """
@@ -95,14 +101,14 @@ class WebScan(BaseSPQL):
 
 
 class FeedScan(BaseSPQL):
-    _URL = API_URL + "v2/feed-scan/query-data/"
+    _URL = API_URL + "v2/feed-scan/query-data/?format=json"
     datasource: list = ["FEED", "DRAFT"]
     """The SPQL data source which to query for"""
 
     def scan(self):
         super().scan()
         try:
-            if self.metadata:
+            if self.verbose:
                 self._response = json.loads(self._response.content).get("response")
             else:
                 self._response = (
