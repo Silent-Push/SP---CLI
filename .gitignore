@@ -20,3 +20,4 @@ __pycache__
 .js
 .pickle
 /SilentPushSDK.egg-info/**
+/.coverage

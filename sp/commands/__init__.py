@@ -5,5 +5,6 @@ from .search import *
 # from .query import *
 # from .answer import *
 from .spql import *
+from .threatcheck import *
 
 # from .target_context import *

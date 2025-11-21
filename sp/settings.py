@@ -33,7 +33,8 @@ def get_initial_commands() -> set:
     """
     from sp.commands import (  # PADNSQueryCommandSet,; PADNSAnswerCommandSet,
         EnrichCommandSet, PADNSSearchCommandSet, ScoreCommandSet,
-        SPQLCommandSet)
+        SPQLCommandSet, ThreatCheckCommandSet,
+    )
 
     # the available initial commands
     return {
@@ -43,10 +44,13 @@ def get_initial_commands() -> set:
         # PADNSAnswerCommandSet(),
         PADNSSearchCommandSet(),
         SPQLCommandSet(),
+        ThreatCheckCommandSet(),
     }
 
 
-SPQL_COMMANDS = ["feedscan", "webscan", "livescan"]
+SPQL_COMMANDS = ["feedsearch", "websearch", "livescan"]
+
+MULTILINE_COMMANDS = ["feedsearch", "websearch", "livescan"]
 
 FEEDSCAN_FIELDS = [
     "domaininfo.registrar",
@@ -287,6 +291,7 @@ WEBSCAN_FAILURE_FIELDS = {
     "url",
 }
 
+"""SPQL data sources that can be used for the datasource parameter of webscan command"""
 SPQL_DATASOURCES = {
     "webscan",
     "torscan",
@@ -294,4 +299,12 @@ SPQL_DATASOURCES = {
     "opendirectory",
     "webscanhistory",
 }
-"""SPQL data sources that can be used for the datasource parameter of webscan command"""
+
+THREATCHECK_DATASOURCES = {
+    "iofa",
+}
+
+THREATCHECK_TYPES = {
+    "name",
+    "ip",
+}

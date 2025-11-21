@@ -21,6 +21,43 @@ class BaseCommandSet(CommandSet):
         return enrich_parser
 
     @staticmethod
+    def __set_common_threatcheck_options(
+            threatcheck_parser: Cmd2ArgumentParser,
+    ) -> Cmd2ArgumentParser:
+        """
+        Set the common options for threatcheck commands: -d, -q
+
+        :param threatcheck_parser: The parser to be overloaded
+        :return: Cmd2ArgumentParser
+        """
+        from sp.settings import THREATCHECK_DATASOURCES, THREATCHECK_TYPES
+
+        threatcheck_parser.add_argument(
+            "-d",
+            "--datasource",
+            nargs="?",
+            choices_provider=(lambda datasource: THREATCHECK_DATASOURCES),
+            default="iofa",
+            help="the datasource to threat check, default to 'IOFA'",
+        )
+        threatcheck_parser.add_argument(
+            "-q",
+            "--qtype",
+            nargs="?",
+            choices_provider=(lambda datasource: THREATCHECK_TYPES),
+            default="name",
+            help="the query type, default to 'name'",
+        )
+        threatcheck_parser.add_argument(
+            "-n",
+            "--with_cnames",
+            action="store_true",
+            default=False,
+            help="includes CNAME records in the threat check'",
+        )
+        return threatcheck_parser
+
+    @staticmethod
     def __set__common_options(parser: Cmd2ArgumentParser) -> Cmd2ArgumentParser:
         """
         Set the 'parameter' options for the majority of the commands: [params...]
@@ -39,7 +76,7 @@ class BaseCommandSet(CommandSet):
     @staticmethod
     def _get_arg_parser() -> Cmd2ArgumentParser:
         """
-        Set the common options for all commands: -j -c -t
+        Set the common options for all commands: -j -c -t, -v
 
         :return: Cmd2ArgumentParser
         """
@@ -55,6 +92,13 @@ class BaseCommandSet(CommandSet):
             "--tsv",
             help="Output as TSV (tab-separated values)",
             action="store_true",
+        )
+        base_arg_parser.add_argument(
+            "-v",
+            "--verbose",
+            action="store_true",
+            default=False,
+            help="full detailed command response",
         )
         return base_arg_parser
 
@@ -116,6 +160,34 @@ class BaseCommandSet(CommandSet):
         return BaseCommandSet.__set__common_options(bulk_enrich_parser)
 
     @staticmethod
+    def _get_threatcheck_arg_parser() -> Cmd2ArgumentParser:
+        """
+        The parser for threatcheck command: -j -c -t [ioc]
+
+        :return:
+        """
+        threatcheck_parser = BaseCommandSet._get_ioc_arg_parser()
+        return BaseCommandSet.__set_common_threatcheck_options(threatcheck_parser)
+
+    @staticmethod
+    def _get_bulk_threatcheck_arg_parser() -> Cmd2ArgumentParser:
+        """
+        The parser for bulk threatcheck command: -j -c -t [iocs...]
+
+        :return:
+        """
+        threatcheck_parser = BaseCommandSet._get_arg_parser()
+        threatcheck_parser = BaseCommandSet.__set_common_threatcheck_options(threatcheck_parser)
+        threatcheck_parser.add_argument(
+            "iocs",
+            nargs="*",
+            choices_provider=(lambda self: self._cmd._ioc_cache),
+            help="the list of IoCs to threat check, separated by space, i.e.: "
+                 "ig.com ibm.com paypal.com",
+        )
+        return threatcheck_parser
+
+    @staticmethod
     def _get_padns_arg_parser() -> Cmd2ArgumentParser:
         """
         The parser for PADNS command and sub commands: -j -c -t [ioc] [params...]
@@ -166,23 +238,23 @@ class BaseCommandSet(CommandSet):
         return spql_parser
 
     @staticmethod
-    def _get_webscan_arg_parser() -> Cmd2ArgumentParser:
+    def _get_websearch_arg_parser() -> Cmd2ArgumentParser:
         """
-        The parser for SPQL Webscan commands: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
+        The parser for SPQL Websearch commands: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
 
         :return: Cmd2ArgumentParser
         """
         from sp.settings import WEBSCAN_FIELDS
 
-        webscan_parser = BaseCommandSet._get_spql_arg_parser()
-        webscan_parser.add_argument(
+        websearch_parser = BaseCommandSet._get_spql_arg_parser()
+        websearch_parser.add_argument(
             "-f",
             "--fields",
             nargs="*",
             choices_provider=(lambda field: WEBSCAN_FIELDS),
             help="the fields to be output",
         )
-        webscan_parser.add_argument(
+        websearch_parser.add_argument(
             "-s",
             "--sort",
             nargs="*",
@@ -190,26 +262,26 @@ class BaseCommandSet(CommandSet):
             help="the sort order (multiple for nested sorting),"
             "i.e.: scan_date/desc domain/asc",
         )
-        return webscan_parser
+        return websearch_parser
 
     @staticmethod
-    def _get_feedscan_arg_parser() -> Cmd2ArgumentParser:
+    def _get_feedsearch_arg_parser() -> Cmd2ArgumentParser:
         """
-        The parser for SPQL Feed Scan commands: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
+        The parser for SPQL Feedsearch commands: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
 
         :return: Cmd2ArgumentParser
         """
         from sp.settings import FEEDSCAN_FIELDS
 
-        feedscan_parser = BaseCommandSet._get_spql_arg_parser()
-        feedscan_parser.add_argument(
+        feedsearch_parser = BaseCommandSet._get_spql_arg_parser()
+        feedsearch_parser.add_argument(
             "-f",
             "--fields",
             nargs="*",
             choices_provider=(lambda field: FEEDSCAN_FIELDS),
             help="the fields to be output",
         )
-        feedscan_parser.add_argument(
+        feedsearch_parser.add_argument(
             "-s",
             "--sort",
             nargs="*",
@@ -217,4 +289,4 @@ class BaseCommandSet(CommandSet):
             help="the sort order (multiple for nested sorting),"
             "i.e.: scan_date/desc domain/asc",
         )
-        return feedscan_parser
+        return feedsearch_parser
