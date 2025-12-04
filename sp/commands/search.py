@@ -1,15 +1,13 @@
 import argparse
 
 import cmd2
-from cmd2 import (Cmd2ArgumentParser, Statement, with_argparser,
-                  with_default_category)
+from cmd2 import (Cmd2ArgumentParser, Statement, with_argparser, )
 
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.commands.base.padns import PADNSSearch
 from sp.common.parse_ioc import IOCUtils
 
 
-@with_default_category("PADNS")
 class PADNSSearchCommandSet(BaseCommandSet):
     """
     PADNS Search Command Set, structured as:
@@ -29,17 +27,17 @@ class PADNSSearchCommandSet(BaseCommandSet):
 
     @with_argparser(_search_parser)
     @cmd2.as_subcommand_to("padns", "search", subcommand_parser)
-    def do_search(self, ns: argparse.Namespace):
+    def do_padns_search(self, ns: argparse.Namespace):
         """
         PADNS Search sub command, also contains it's own sub commands
 
         :param ns: The argument passed to the search command
         :return: None
         """
-        self._cmd.do_help("search")
+        self._cmd.do_help("padns search")
 
-    @cmd2.as_subcommand_to("search", "ipdiversity", subcommand_parser)
-    def search_ipdiversity(self, params: Statement):
+    @cmd2.as_subcommand_to("padns search", "ipdiversity", subcommand_parser)
+    def do_padns_search_ipdiversity(self, params: Statement):
         """
         IP Diversity sub command of search command
 

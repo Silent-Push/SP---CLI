@@ -35,6 +35,7 @@ class BaseCmdApp(cmd2.Cmd):
             auto_load_commands=False,
             allow_cli_args=False,  # we use our own argparse,
             multiline_commands=MULTILINE_COMMANDS,
+            shortcuts={},
         )
         self.foreground_color = Fg.CYAN.name.lower()
         # Create a cache object to save url information to
@@ -42,7 +43,7 @@ class BaseCmdApp(cmd2.Cmd):
         self.register_postparsing_hook(self.prepend_padns_main_command_hook)
 
     def prepend_padns_main_command_hook(
-        self, data: cmd2.plugin.PostparsingData
+            self, data: cmd2.plugin.PostparsingData
     ) -> cmd2.plugin.PostparsingData:
         """
         A post parsing hook to automatically precede sub commands
