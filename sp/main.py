@@ -7,7 +7,7 @@ from cmd2 import CommandSetRegistrationError, Fg, style, with_category
 
 from sp.commands import *
 from sp.commands.base.BaseCmdApp import BaseCmdApp
-from sp.common.utils import AppFileManager
+from sp.common.utils import AppFileManager, categorize_subcommands
 from sp.settings import SPQL_COMMANDS
 
 
@@ -41,13 +41,19 @@ class App(BaseCmdApp):
             )
             self.LOADED_COMMAND = "padns"
             try:
-                from sp.commands.answer import PADNSAnswerCommandSet
                 from sp.commands.query import PADNSQueryCommandSet
+                from sp.commands.answer import PADNSAnswerCommandSet
+                from sp.commands.search import PADNSSearchCommandSet
 
                 self._query = PADNSQueryCommandSet()
                 self._answer = PADNSAnswerCommandSet()
+                self._search = PADNSSearchCommandSet()
                 self.register_command_set(self._query)
                 self.register_command_set(self._answer)
+                self.register_command_set(self._search)
+                categorize_subcommands("PADNS Query", self, PADNSQueryCommandSet)
+                categorize_subcommands("PADNS Answer", self, PADNSAnswerCommandSet)
+                categorize_subcommands("PADNS Search", self, PADNSSearchCommandSet)
                 self.poutput("PADNS loaded")
             except (ValueError, CommandSetRegistrationError) as e:
                 self.poutput("PADNS already loaded")
@@ -90,7 +96,7 @@ class App(BaseCmdApp):
                 handler(ns)
             except TypeError:
                 # self.perror(e)
-                self.do_help("padns")
+                handler("")
         else:
             # No subcommand was provided, so call help
             self.do_help("padns")

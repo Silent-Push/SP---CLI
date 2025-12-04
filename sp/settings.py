@@ -31,8 +31,9 @@ def get_initial_commands() -> set:
 
     :return: The set of commands
     """
-    from sp.commands import (  # PADNSQueryCommandSet,; PADNSAnswerCommandSet,
-        EnrichCommandSet, PADNSSearchCommandSet, ScoreCommandSet,
+    from sp.commands import (
+        # PADNSQueryCommandSet, PADNSAnswerCommandSet, PADNSSearchCommandSet
+        EnrichCommandSet, ScoreCommandSet,
         SPQLCommandSet, ThreatCheckCommandSet,
     )
 
@@ -42,7 +43,7 @@ def get_initial_commands() -> set:
         ScoreCommandSet(),
         # PADNSQueryCommandSet(),
         # PADNSAnswerCommandSet(),
-        PADNSSearchCommandSet(),
+        # PADNSSearchCommandSet(),
         SPQLCommandSet(),
         ThreatCheckCommandSet(),
     }
