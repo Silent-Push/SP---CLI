@@ -16,6 +16,8 @@ The Silent Push CLI (Command Line Interface)
 
   - [The load/unload command](#the-load-and-unload-command)
 
+- [SPQL Commands](#spql-commands)
+
 - [Scripting](#scripting)
 
   - [run_pyscript command](#runpyscript-command)
@@ -28,8 +30,6 @@ The Silent Push CLI (Command Line Interface)
 
   - [Using the library](#using-the-library)
 
-  - [Extending the commands - Guidelines](#extending-the-commands---Guidelines)
-
 - [Support](#support)
 
 ## Requirements
@@ -38,22 +38,14 @@ The Silent Push CLI (Command Line Interface)
   - Microsoft Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
 ## Installation
+
+`python3 -m pip install SilentPushCLI`
 ### Linux and MacOS users
-Download the python wheel from https://labs.silentpush.com/jorgeley/
-and then install it with pip (choose correct version):
-```shell
-python -m pip install SilentPushCLI-0.0.1-py3-none-any.whl
-```
 After installed, export your Silent Push API key to your terminal:
 ```shell
 export SILENT_PUSH_API_KEY=YOUR-API-KEY
 ```
 ### Windows Users
-Download the python wheel from https://labs.silentpush.com/jorgeley/ (there are different
-versions for Win32 and AMD64), open your CMD - Command Prompt and then install it with pip:
-```shell
-python -m pip install SilentPushCLI-0.0.1-py3-none-win32.whl
-```
 After installed, export your Silent Push API key to your terminal:
 ```shell
 setx /m SILENT_PUSH_API_KEY YOUR-API-KEY
@@ -112,9 +104,11 @@ sp padns query a ig.com limit=2 sort=last_seen/- -t
     - soahash
     - txt
     - txthash
-- spql
-  - feedscan
-  - webscan
+- spql (multiline commands)
+  - feedsearch
+  - websearch
+- threatcheck
+- bulk_threatcheck
 - load
 - unload
 ### Options
@@ -123,6 +117,7 @@ sp padns query a ig.com limit=2 sort=last_seen/- -t
   - **-c, --csv**: CSV output
   - **-t, --tsv**: TSV output
   - **-h, --help**: show help
+  - **-v, --verbose**: verbosity output
 - enrich/bulk_enrich
   - **-e, --explain**: show details of data used to calculate the different scores in the response
   - **-s, --scan_data**: show details of data collected from host scanning
@@ -152,8 +147,6 @@ SP# padns query a ig.com limit=1
     }
   ]
 }
-
-SP#
 ```
 
 ### The load and unload command
@@ -196,9 +189,33 @@ SP (PADNS)# answer ns dns1.p09.nsone.net limit=1
 
 SP (PADNS)# unload padns
 PADNS unloaded
-SP#
 ```
 You still can use any other command normally.
+
+## SPQL Commands
+
+SPQL commands are multiline, since they can be quite complex. Use single quotes to span the query along the lines and
+use semicolon to finish it, example in interactive mode:
+
+```shell
+SP# websearch 'domain="ibm.com" 
+  AND scan_date > "2025-01-01"' limit=2 -tv;
+[
+  {
+    "HHV": "8c95d8a118b637509273f7a5d3",
+    "adtech": {
+      "ads_txt": false,
+      "app_ads_txt": false,
+      "sellers_json": false
+    },
+... (lots of results)
+```
+
+The same example but in a single line:
+
+```shell
+websearch 'domain="ibm.com" AND scan_date > "2025-01-01"' limit=2 -tv;
+```
 
 ## Scripting
 ### run_pyscript command
@@ -257,61 +274,6 @@ print(app.last_result)
 app.onecmd_plus_hooks('padns query ns ig.com limit=2')
 print(app.last_result)
 ```
-
-### Extending the commands - Guidelines
-The commands are stored in the sp/commands directory, you can add more commands there, follow the existing ones as example.
-The main library used for the project is [CMD2](https://cmd2.readthedocs.io/).
-If you want to extend the commands, follow these steps:
-1. create your new command python file inside sp/commands directory
-2. follow the pattern of the
-existing ones inside the same directory, per example, look at the [enrich.py](sp/commands/enrich.py), basically you need to
-follow this template:
-```python
-@with_default_category("My New Category")
-class MyNewCommandSet(BaseCommandSet):
-  my_new_parser = BaseCommandSet._get_arg_parser()
-  my_new_parser.add_argument("-s", "--some_argument")
-  
-  @with_argparser(my_new_parser)
-  def do_something(self, params: Statement):
-    with self.MyNewCommand(params, self) as my_new_command:
-      my_new_command.something()
-  
-  class MyNewCommand(BaseCommand):
-    
-    def __enter__(self):
-      # use this method if you need anything done before executing the command
-      super().__enter__()
-      return self
-
-    def something(self):
-      # your logic goes here, important to assign the response
-      self._response = {"result": "your command result"}
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-      # use this method if you need anything done after executing the command
-      super().__exit__(exc_type, exc_val, exc_tb)
-```
-3. add your new command to the commands package in the [sp/commands/\_\_init\_\_.py](sp/commands/__init__.py):
-```python
-# after the existing imports
-from .my_new_command.py import *
-```
-4. add your new command to the initial loaded commands in [sp/settings.py](sp/settings.py):
-```python
-def get_initial_commands():
-    from sp.commands import (
-        # other imports
-        MyNewCommandSet
-    )
-    # the available initial commands
-    return {
-        # other commands
-        MyNewCommandSet(),
-    }
-```
-
-That's it, your new command should be available, try `sp your_command --help`
 
 ## Support
 Don't hesitate to contact me at [jorgeley@silentpush.com](jorgeley@silentpush.com) if you need any help

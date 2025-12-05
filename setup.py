@@ -18,7 +18,7 @@ here = pathlib.Path(__file__).parent.resolve()
 # Get the long description from the README file
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
-with open("./requirements.txt") as fd:
+with open(f"{here}/requirements.txt") as fd:
     required = fd.read().splitlines()
 
 for not_required in ["pytest", "packaging", "tomli", "cx_Freeze"]:
@@ -86,6 +86,9 @@ setup(
     author_email="jorgeley@silentpush.com",  # Optional
     # Classifiers help users find your project by categorizing it.
     #
+    # license
+    license="https://www.silentpush.com/terms-of-use/",
+    # license=(here / "LICENSE.txt").read_text(encoding="utf-8"),
     # For a list of valid classifiers, see https://pypi.org/classifiers/
     classifiers=[  # Optional
         # How mature is this project? Common values are
@@ -94,10 +97,13 @@ setup(
         #   5 - Production/Stable
         "Development Status :: 3 - Alpha",
         # Indicate who your project is intended for
-        "Intended Audience :: Threat Analysts",
-        "Topic :: Cyber Security :: Passive DNS",
-        # Pick your license as you wish
-        "License :: OSI Approved :: MIT License",
+        "Intended Audience :: Information Technology",
+        "Intended Audience :: System Administrators",
+        "Topic :: Internet :: Name Service (DNS)",
+        "Topic :: Security",
+        "Topic :: System :: Networking :: Firewalls",
+        "Topic :: System :: System Shells",
+        "Topic :: Terminals",
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate you support Python 3. These classifiers are *not*
         # checked by 'pip install'. See instead 'python_requires' below.
