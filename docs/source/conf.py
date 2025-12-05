@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 project = "SP - CLI"
 copyright = "2024, Silent Push"
 author = "Jorgeley<jorgeley@silentpush.com>"
-version = release = "0.0.1"
+version = release = "1.3.0"
 show_authors = True
 
 extensions = [
