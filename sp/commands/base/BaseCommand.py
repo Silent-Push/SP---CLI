@@ -4,6 +4,7 @@ import pandas
 from cmd2 import CommandSet, Statement
 from cmd2.ansi import style_success
 
+from sp import settings
 from sp.common.utils import (
     PandasDataFrameTSV, encode_query_params, flatten_dict, flatten_list,
 )
@@ -34,6 +35,8 @@ class BaseCommand:
         :param params: The passed command options
         :param command_set: The CommandSet object related to the command
         """
+        if not settings.API_KEY:
+            raise EnvironmentError(settings.MISSING_API_KEY_MESSAGE)
         self._commandSet = command_set
         self._params = params
 

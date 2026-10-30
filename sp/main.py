@@ -55,8 +55,9 @@ class App(BaseCmdApp):
                 categorize_subcommands("PADNS Answer", self, PADNSAnswerCommandSet)
                 categorize_subcommands("PADNS Search", self, PADNSSearchCommandSet)
                 self.poutput("PADNS loaded")
-            except (ValueError, CommandSetRegistrationError) as e:
-                self.poutput("PADNS already loaded")
+            except (ValueError, CommandSetRegistrationError):
+                # already registered by a previous load or a 'padns ...' command
+                self.poutput("PADNS loaded")
 
     @with_argparser(load_parser)
     @with_category("Command Loading")
@@ -68,9 +69,12 @@ class App(BaseCmdApp):
         :return: None
         """
         if ns.cmds == "padns":
+            if self.LOADED_COMMAND != "padns":
+                self.pwarning("PADNS is not loaded")
+                return
+            # The PADNS command sets stay registered: cmd2 can't unregister nested
+            # subcommands ('padns query a'), and 'padns ...' keeps working anyway
             self.prompt = style("SP# ", fg=Fg[Fg.LIGHT_GRAY.name.upper()], bold=True)
-            self.unregister_command_set(self._query)
-            self.unregister_command_set(self._answer)
             self.LOADED_COMMAND = ""
             self.poutput("PADNS unloaded")
 
@@ -121,7 +125,7 @@ def main(argv=None):
     exit_code = 0
     if args.command:
         app.interactive = False
-        if args.command in SPQL_COMMANDS:
+        if args.command in SPQL_COMMANDS and args.command_args:
             if (
                     args.command_args[0].find('"') == -1
                     and args.command_args[0].find("'") == -1

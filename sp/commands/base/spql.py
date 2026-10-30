@@ -92,6 +92,8 @@ class WebScan(BaseSPQL):
     _URL = API_URL + "v1/merge-api/explore/scandata/search/raw?format=json"
     datasource: list = ["webscan"]
     """The SPQL data source which to query for"""
+    sort: list = ["scan_date/desc"]
+    """The default sort, first_seen_on is a feed field, not a webscan one"""
 
     def scan(self):
         super().scan()

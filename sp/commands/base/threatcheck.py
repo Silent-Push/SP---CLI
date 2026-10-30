@@ -47,8 +47,8 @@ class ThreatCheck(BaseCommand):
                 self._response = json.loads(self._response.content)
                 return
             self._response = json.loads(self._response.content).get("listed_details")[0]
-        except (json.JSONDecodeError, IndexError) as e:
-            self._commandSet._cmd.perror(f"Can't parse command response: {e.msg}")
+        except (json.JSONDecodeError, IndexError, TypeError) as e:
+            self._commandSet._cmd.perror(f"Can't parse command response: {e}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """

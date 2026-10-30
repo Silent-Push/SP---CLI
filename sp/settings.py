@@ -20,11 +20,11 @@ if API_URL is None:
         'https://app.silentpush.com/api/"'
     )
 
-if API_KEY is None:
-    raise EnvironmentError(
-        "Please set your Silent Push API key in your environment.\n"
-        '\texport SILENT_PUSH_API_KEY="YOUR-API-KEY"'
-    )
+MISSING_API_KEY_MESSAGE = (
+    "Please set your Silent Push API key in your environment.\n"
+    '\texport SILENT_PUSH_API_KEY="YOUR-API-KEY"'
+)
+"""Shown when a command that calls the API runs without an API key"""
 
 
 def get_initial_commands() -> set:

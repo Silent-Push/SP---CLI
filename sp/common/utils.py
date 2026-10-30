@@ -104,13 +104,6 @@ def encode_query_params(params: list) -> str:
     return urlencode(pairs)
 
 
-def strip_command_options(command_set, args):
-    for action in command_set._get_arg_parser()._get_optional_actions():
-        for option in action.option_strings:
-            args = args.strip(option)
-    return args.strip()
-
-
 def flatten_list(data):
     merged_list = dict()
     prefix = 0

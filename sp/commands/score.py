@@ -74,8 +74,8 @@ class ScoreCommandSet(BaseCommandSet):
                     self._response = response.get("sp_risk_score")
                 else:
                     self._response = response.get("ip2asn")[0].get("sp_risk_score")
-            except (json.JSONDecodeError, IndexError) as e:
-                self._commandSet._cmd.perror(f"Can't parse command response: {e.msg}")
+            except (json.JSONDecodeError, IndexError, TypeError, AttributeError) as e:
+                self._commandSet._cmd.perror(f"Can't parse command response: {e}")
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             """

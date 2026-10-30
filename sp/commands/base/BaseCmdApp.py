@@ -90,7 +90,7 @@ class BaseCmdApp(cmd2.Cmd):
         data.statement = self.statement_parser.parse(new_command)
         return data
 
-    @functools.singledispatch
+    @functools.singledispatchmethod
     def _add_ioc_to_cache(self, ioc: str) -> None:
         """
         Adds IoCs to cache, so they can be part of the command history and
@@ -104,7 +104,8 @@ class BaseCmdApp(cmd2.Cmd):
 
     @_add_ioc_to_cache.register(list)
     def _(self, iocs: list):  # _add_ioc_to_cache overloaded method
-        self._ioc_cache.extend(iocs)
+        for ioc in iocs:
+            self._add_ioc_to_cache(ioc)
 
     def _get_iocs_from_history(self) -> List[str]:
         """
