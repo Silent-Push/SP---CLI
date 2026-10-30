@@ -4,7 +4,9 @@ import pandas
 from cmd2 import CommandSet, Statement
 from cmd2.ansi import style_success
 
-from sp.common.utils import PandasDataFrameTSV, flatten_dict, flatten_list
+from sp.common.utils import (
+    PandasDataFrameTSV, encode_query_params, flatten_dict, flatten_list,
+)
 from sp.settings import CRLF
 
 
@@ -46,7 +48,7 @@ class BaseCommand:
         :return: BaseCommand
         """
         if hasattr(self._params, "params") and self._params.params:
-            self._URL += "&" + "&".join(self._params.params)
+            self._URL += "&" + encode_query_params(self._params.params)
         # self._commandSet._cmd.poutput(self._URL)
         # self._commandSet._cmd.pfeedback(f"\t{self._feedback}...")
         return self

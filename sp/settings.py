@@ -1,8 +1,10 @@
 import os
 
 from dotenv import load_dotenv
+from xdg import XDG_CONFIG_HOME
 
-load_dotenv()
+CONFIG_FILE = XDG_CONFIG_HOME.joinpath("SP-CLI", ".env")  # Optional config file, i.e.: ~/.config/SP-CLI/.env
+load_dotenv(CONFIG_FILE)
 
 CRLF = "\r\n"
 """The prompt line break"""

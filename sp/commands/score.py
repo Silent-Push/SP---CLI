@@ -6,6 +6,7 @@ from cmd2 import Statement, with_argparser, with_default_category
 from sp.commands.base.BaseCommand import BaseCommand
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.common.parse_ioc import IOCUtils
+from sp.common.utils import encode_path_segment
 from sp.settings import API_KEY, API_URL
 
 
@@ -50,7 +51,7 @@ class ScoreCommandSet(BaseCommandSet):
             """
             self.ioc_type = IOCUtils(self._params.ioc).type
             self._URL = self._URL.format(
-                type=self.ioc_type, ioc=self._params.ioc
+                type=self.ioc_type, ioc=encode_path_segment(self._params.ioc)
             )
             # self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
             super().__enter__()

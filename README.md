@@ -52,6 +52,8 @@ setx /m SILENT_PUSH_API_KEY YOUR-API-KEY
 ```
 Restart your CMD - Command Prompt
 
+There's a demo video if you need more detailed instructions https://youtu.be/d4WApEZcXFg
+
 ## Usage
 Syntax:
 ```shell
@@ -198,7 +200,7 @@ SPQL commands are multiline, since they can be quite complex. Use single quotes 
 use semicolon to finish it, example in interactive mode:
 
 ```shell
-SP# websearch 'domain="ibm.com" 
+SP# websearch 'domain="ibm.com"
   AND scan_date > "2025-01-01"' limit=2 -tv;
 [
   {
@@ -235,7 +237,7 @@ Also, you can create a file with batch commands one per line and easily execute 
 ```text
 # my_script.txt
 padns query mx ig.com limit=2
-score ig.com -c 
+score ig.com -c
 ```
 and then you can execute this batch commands file with:
 ```shell
@@ -251,7 +253,9 @@ Here's one idea for the bulk_enrich command:
 ```shell
 cat to_enrich.txt | xargs sp bulk_enrich
 ```
-Everything inside to_enrich.txt file will be treated as one parameter for the bulk_enrich command, don't mix domains with IPs though, 
+
+Everything inside to_enrich.txt file will be treated as one parameter for the bulk_enrich command, don't mix domains
+with IPs though,
 since the command will depend on the type of enrichment being executed.
 
 ## For Devs

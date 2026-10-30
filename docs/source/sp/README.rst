@@ -67,6 +67,8 @@ After installed, export your Silent Push API key to your terminal:
 
 Restart your CMD - Command Prompt
 
+There's a demo video if you need more detailed instructions https://labs.silentpush.com/jorgeley/SP%20CLI%20-%20demo.mov
+
 Usage
 -----
 

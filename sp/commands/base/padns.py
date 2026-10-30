@@ -4,6 +4,7 @@ import requests
 from cmd2 import CommandSet, Statement
 
 from sp.commands.base.BaseCommand import BaseCommand
+from sp.common.utils import encode_path_segment, encode_query_value
 from sp.settings import API_KEY, API_URL
 
 
@@ -80,7 +81,9 @@ class PADNSLookup(BasePADNS):
         :return: PADNS
         """
         self._URL = self._URL.format(
-            type=self._type, qtype=self._qtype, ioc=self._params.ioc
+            type=self._type,
+            qtype=self._qtype,
+            ioc=encode_path_segment(self._params.ioc),
         )
         super().__enter__()
         # self._feedback = f"{self._URL[self._URL.index('lookup/') + 7:]}"
@@ -131,7 +134,7 @@ class PADNSSearch(BasePADNS):
         """
         qtype = f"/{self._qtype}" if self._qtype else ""
         self._URL = self._URL.format(type=self._type, qtype=qtype)
-        self._URL += f"&domain={self._params.ioc}"
+        self._URL += f"&domain={encode_query_value(self._params.ioc)}"
         super().__enter__()
         # self._feedback = f"{self._URL[self._URL.index('search/') + 7:]}"
         return self

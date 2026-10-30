@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Callable
+from urllib.parse import quote, urlencode
 
 import cmd2
 import pandas
@@ -69,6 +70,38 @@ def categorize_subcommands(category: str, app: cmd2.Cmd, command_set: cmd2.Comma
         setattr(app, help_func_name, help_func)
         delattr(app, func_name)  # delete old method do_a_b_c()
         cmd2.categorize(getattr(app, cmd_func_name), category)
+
+
+def encode_path_segment(value) -> str:
+    """
+    URL-encode a value that goes into a URL path, i.e.: an IoC,
+    keeping '*' (wildcards) and ':' (IPv6) as they are
+
+    :param value: The value to encode
+    :return: The encoded value
+    """
+    return quote(str(value or ""), safe="*:")
+
+
+def encode_query_value(value) -> str:
+    """
+    URL-encode a value that goes into a URL query string, i.e.: ?query=<value>
+
+    :param value: The value to encode
+    :return: The encoded value
+    """
+    return quote(str(value or ""), safe="")
+
+
+def encode_query_params(params: list) -> str:
+    """
+    URL-encode the 'key=value' parameters typed by the user, i.e.: limit=2 sort=last_seen/-
+
+    :param params: The list of 'key=value' strings
+    :return: The encoded query string, without the leading '&'
+    """
+    pairs = [tuple(param.split("=", 1)) if "=" in param else (param, "") for param in params]
+    return urlencode(pairs)
 
 
 def strip_command_options(command_set, args):

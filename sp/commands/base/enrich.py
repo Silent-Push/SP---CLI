@@ -4,6 +4,7 @@ import requests
 
 from sp.commands.base.BaseCommand import BaseCommand
 from sp.common.parse_ioc import IOCUtils
+from sp.common.utils import encode_path_segment
 from sp.settings import API_KEY, API_URL
 
 
@@ -22,7 +23,8 @@ class Enrich(BaseCommand):
         :return: Enrich
         """
         self._URL = self._URL.format(
-            type=IOCUtils(self._params.ioc).type, ioc=self._params.ioc
+            type=IOCUtils(self._params.ioc).type,
+            ioc=encode_path_segment(self._params.ioc),
         )
         # self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
         if self._params.explain:

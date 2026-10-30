@@ -3,6 +3,7 @@ import json
 import requests
 
 from sp.commands.base.BaseCommand import BaseCommand
+from sp.common.utils import encode_query_value
 from sp.settings import API_KEY, API_URL
 
 
@@ -24,9 +25,9 @@ class ThreatCheck(BaseCommand):
         :return: ThreatCheck
         """
         self._URL = self._URL.format(
-            datasource=self._params.datasource,
-            query_type=self._params.qtype,
-            query=self._params.ioc,
+            datasource=encode_query_value(self._params.datasource),
+            query_type=encode_query_value(self._params.qtype),
+            query=encode_query_value(self._params.ioc),
             with_cnames=self._params.with_cnames,
         )
         # self._feedback = f"{self._URL[self._URL.index('threat-check') + 12:]}"
