@@ -12,7 +12,7 @@ class BaseSPQL(BaseCommand):
     SPQL main command
     """
 
-    _URL = API_URL + "v1/merge-api/explore/scandata/search/raw?format=json"
+    _URL = API_URL + "v1/spql-search?format=json"
     """The SPQL endpoint URL"""
     query: str = ""
     """The SPQL query string i.e.: 'domain=ig.com'"""
@@ -89,7 +89,7 @@ class BaseSPQL(BaseCommand):
 
 
 class WebScan(BaseSPQL):
-    _URL = API_URL + "v1/merge-api/explore/scandata/search/raw?format=json"
+    _URL = API_URL + "v1/explore/scandata/search/raw?format=json"
     datasource: list = ["webscan"]
     """The SPQL data source which to query for"""
     sort: list = ["scan_date/desc"]

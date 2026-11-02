@@ -8,7 +8,7 @@ load_dotenv(CONFIG_FILE)
 
 CRLF = "\r\n"
 """The prompt line break"""
-API_URL = os.environ.get("SILENT_PUSH_API_URL", "https://app.silentpush.com/api/")
+API_URL = os.environ.get("SILENT_PUSH_API_URL", "https://api.silentpush.com/api/")
 """The Silent Push API URL, you can export it to your prompt if needs to change or use .env"""
 API_KEY = os.environ.get("SILENT_PUSH_API_KEY")
 """Your Silent Push API key"""
@@ -34,7 +34,8 @@ def get_initial_commands() -> set:
     :return: The set of commands
     """
     from sp.commands import (
-        # PADNSQueryCommandSet, PADNSAnswerCommandSet, PADNSSearchCommandSet
+        # PADNSQueryCommandSet, PADNSAnswerCommandSet,
+        PADNSSearchCommandSet,
         EnrichCommandSet, ScoreCommandSet,
         SPQLCommandSet, ThreatCheckCommandSet,
     )
@@ -45,7 +46,7 @@ def get_initial_commands() -> set:
         ScoreCommandSet(),
         # PADNSQueryCommandSet(),
         # PADNSAnswerCommandSet(),
-        # PADNSSearchCommandSet(),
+        PADNSSearchCommandSet(),
         SPQLCommandSet(),
         ThreatCheckCommandSet(),
     }

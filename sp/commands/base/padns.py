@@ -46,7 +46,7 @@ class PADNSLookup(BasePADNS):
     """
 
     _URL = (
-            API_URL + "v1/merge-api/explore/padns/lookup/{type}/{qtype}/{ioc}/?format=json"
+            API_URL + "v1/explore/padns/lookup/{type}/{qtype}/{ioc}/?format=json"
     )
     """The PADNS endpoint URL"""
     _type: str = "query"
@@ -95,7 +95,7 @@ class PADNSSearch(BasePADNS):
     PADNS Search main command
     """
 
-    _URL = API_URL + "v1/merge-api/explore/padns/search/{type}{qtype}/?format=json"
+    _URL = API_URL + "v1/explore/padns/search/{type}{qtype}/?format=json"
     """The PADNS endpoint URL"""
     _type: str = "ipdiversity"
     """The type of the PADNS query"""

@@ -3,12 +3,18 @@ import re
 from unittest.mock import patch
 
 import jsonschema
+import pytest
 from cmd2 import CommandResult
 
 from tests.fixtures.app import app
 
-enrich_result_schema = {
+enrich_domain_result_schema = {
     "type": "object",
+    "required": [
+        "domain_string_frequency_probability", "domain_urls", "domaininfo",
+        "host_flags", "ip_diversity", "is_private_suffix", "listing_score",
+        "ns_reputation", "nschanges", "private_suffix_info", "sp_risk_score",
+    ],
     "properties": {
         "domain_string_frequency_probability": {"type": "object"},
         "domain_urls": {"type": "object"},
@@ -24,15 +30,32 @@ enrich_result_schema = {
     },
 }
 
+enrich_ip_result_schema = {
+    "type": "object",
+    "required": ["ip", "asn", "asname", "subnet", "ip_location", "ip_flags", "listing_score", "sp_risk_score"],
+    "properties": {
+        "ip": {"type": "string"},
+        "asn": {"type": "number"},
+        "asname": {"type": "string"},
+        "subnet": {"type": "string"},
+        "ip_location": {"type": "object"},
+        "ip_flags": {"type": "object"},
+        "listing_score": {"type": "number"},
+        "sp_risk_score": {"type": "number"},
+    },
+}
 
+
+@pytest.mark.live
 def test_enrich_domain(app):
     out = app.app_cmd("enrich silentpush.com")
     assert isinstance(out, CommandResult)
     enrich_result = json.loads(out.stdout)
     assert isinstance(enrich_result, dict)
-    jsonschema.validate(instance=enrich_result, schema=enrich_result_schema)
+    jsonschema.validate(instance=enrich_result, schema=enrich_domain_result_schema)
 
 
+@pytest.mark.live
 def test_enrich_domain_json_output(app):
     out = app.app_cmd("enrich silentpush.com -j")
     assert isinstance(out, CommandResult)
@@ -40,6 +63,7 @@ def test_enrich_domain_json_output(app):
     assert json.loads(out.stdout)
 
 
+@pytest.mark.live
 def test_enrich_domain_csv_output(app):
     out = app.app_cmd("enrich silentpush.com -c")
     assert isinstance(out, CommandResult)
@@ -48,6 +72,7 @@ def test_enrich_domain_csv_output(app):
     assert match is not None
 
 
+@pytest.mark.live
 def test_enrich_domain_tsv_output(app):
     out = app.app_cmd("enrich silentpush.com -t")
     assert isinstance(out, CommandResult)
@@ -56,29 +81,32 @@ def test_enrich_domain_tsv_output(app):
     assert match is not None
 
 
+@pytest.mark.live
 def test_bulk_enrich_domain(app):
     out = app.app_cmd("bulk_enrich silentpush.com google.com")
     assert isinstance(out, CommandResult)
     bulk_enrich_result = json.loads(out.stdout)
     assert isinstance(bulk_enrich_result, list)
-    bulk_enrich_result_schema = {"type": "array", "items": {**enrich_result_schema}}
+    bulk_enrich_result_schema = {"type": "array", "items": {**enrich_domain_result_schema}}
     jsonschema.validate(instance=bulk_enrich_result, schema=bulk_enrich_result_schema)
 
 
+@pytest.mark.live
 def test_enrich_ip(app):
     out = app.app_cmd("enrich 8.8.4.4")
     assert isinstance(out, CommandResult)
     enrich_result = json.loads(out.stdout)
     assert isinstance(enrich_result, dict)
-    jsonschema.validate(instance=enrich_result, schema=enrich_result_schema)
+    jsonschema.validate(instance=enrich_result, schema=enrich_ip_result_schema)
 
 
+@pytest.mark.live
 def test_bulk_enrich_ip(app):
     out = app.app_cmd("bulk_enrich 8.8.4.4 8.8.8.8")
     assert isinstance(out, CommandResult)
     bulk_enrich_result = json.loads(out.stdout)
     assert isinstance(bulk_enrich_result, list)
-    bulk_enrich_result_schema = {"type": "array", "items": {**enrich_result_schema}}
+    bulk_enrich_result_schema = {"type": "array", "items": {**enrich_ip_result_schema}}
     jsonschema.validate(instance=bulk_enrich_result, schema=bulk_enrich_result_schema)
 
 

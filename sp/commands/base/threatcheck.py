@@ -13,7 +13,7 @@ class ThreatCheck(BaseCommand):
     """
 
     _URL = API_URL + (
-        "v2/threat-check?data_source={datasource}&query_type={query_type}"
+        "v1/threat-check?data_source={datasource}&query_type={query_type}"
         "&query={query}&with_cnames={with_cnames}&format=json"
     )
     """The threat check endpoint URL"""
@@ -67,7 +67,7 @@ class BulkThreatCheck(BaseCommand):
     Bulk Threat Check command
     """
 
-    _URL = API_URL + "v2/threat-check/bulk?with_cnames={with_cnames}&format=json"
+    _URL = API_URL + "v1/threat-check/bulk?with_cnames={with_cnames}&format=json"
     """The bulk threat check endpoint URL"""
     payload = None
     """The post payload for the threat check endpoint"""

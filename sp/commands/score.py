@@ -40,7 +40,7 @@ class ScoreCommandSet(BaseCommandSet):
         The Score command, it's a context manager class
         """
 
-        _URL = API_URL + "v1/merge-api/explore/{type}/riskscore/{ioc}/?format=json"
+        _URL = API_URL + "v1/explore/{type}/riskscore/{ioc}/?format=json"
         """The score endpoint URL"""
 
         def __enter__(self):

@@ -1,9 +1,12 @@
 import json
 
 import jsonschema
+import pytest
 from cmd2 import CommandResult
 
 from tests.fixtures.app import app
+
+pytestmark = pytest.mark.live
 
 
 def test_score_domain(app):
