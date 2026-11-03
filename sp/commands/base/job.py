@@ -32,7 +32,7 @@ class Job(BaseCommand):
         :return: None
         """
         self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
-        if self.check_response():
+        if self.check_error():
             return
         try:
             self._response = json.loads(self._response.content)
