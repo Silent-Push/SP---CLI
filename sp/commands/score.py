@@ -64,7 +64,8 @@ class ScoreCommandSet(BaseCommandSet):
             :return: None
             """
             self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
-            self.check_error()
+            if self.check_response():
+                return
             try:
                 response = json.loads(self._response.content).get("response")
                 if self._params.verbose:

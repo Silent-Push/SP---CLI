@@ -1,5 +1,4 @@
 import json
-import re
 from unittest.mock import patch
 
 import jsonschema
@@ -45,6 +44,14 @@ enrich_ip_result_schema = {
     },
 }
 
+enrich_domain_output_keys = {"sp_risk_score", "listing_score", "is_private_suffix"}
+"""Top level keys expected as rows in the csv/tsv output"""
+
+
+def get_output_keys(output: str, separator=None) -> set:
+    """The first column of each csv/tsv output row"""
+    return {line.split(separator, 1)[0] for line in output.splitlines() if line.strip()}
+
 
 @pytest.mark.live
 def test_enrich_domain(app):
@@ -60,7 +67,7 @@ def test_enrich_domain_json_output(app):
     out = app.app_cmd("enrich silentpush.com -j")
     assert isinstance(out, CommandResult)
     assert isinstance(out.stdout, str)
-    assert json.loads(out.stdout)
+    jsonschema.validate(instance=json.loads(out.stdout), schema=enrich_domain_result_schema)
 
 
 @pytest.mark.live
@@ -68,8 +75,7 @@ def test_enrich_domain_csv_output(app):
     out = app.app_cmd("enrich silentpush.com -c")
     assert isinstance(out, CommandResult)
     assert isinstance(out.stdout, str)
-    match = re.match(r"[a-zA-Z_0-9]*,{1}[a-zA-Z0-9\-\:.\",\s]*\n?", out.stdout)
-    assert match is not None
+    assert enrich_domain_output_keys <= get_output_keys(out.stdout, ",")
 
 
 @pytest.mark.live
@@ -77,8 +83,7 @@ def test_enrich_domain_tsv_output(app):
     out = app.app_cmd("enrich silentpush.com -t")
     assert isinstance(out, CommandResult)
     assert isinstance(out.stdout, str)
-    match = re.match(r"[a-zA-Z_0-9]*\t*[a-zA-Z0-9\-\:.\",\s]*\n?", out.stdout)
-    assert match is not None
+    assert enrich_domain_output_keys <= get_output_keys(out.stdout)
 
 
 @pytest.mark.live

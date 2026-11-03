@@ -69,6 +69,8 @@ class BaseCommand:
         :param exc_tb:
         :return: None
         """
+        if self._response is None:
+            return
         flattened = self._response
         if isinstance(self._response, dict):
             flattened = flatten_dict(self._response)
@@ -101,11 +103,48 @@ class BaseCommand:
         self._commandSet._cmd.last_result = self._output
         # self._commandSet._cmd.pfeedback(f"\t*{self._feedback}")
 
-    def check_error(self):
+    def check_response(self) -> bool:
+        """
+        Checks the API response for errors or long running jobs, call it right after the request
+
+        >>> if self.check_response():
+        ...     return
+
+        :return: True if the command should stop, there are no results to parse
+        """
+        if self.check_error():
+            self._response = None
+            return True
+        return self.check_job()
+
+    def check_job(self) -> bool:
+        """
+        Long running tasks return a job instead of the result, warns how to get it later with the job command
+
+        :return: True if the response is a job, so the command can stop parsing it
+        """
+        try:
+            content = json.loads(self._response.content)
+        except (json.JSONDecodeError, AttributeError, TypeError):
+            return False
+        if not isinstance(content, dict):
+            return False
+        # newer endpoints return the job at the top level, older ones wrap it in "response"
+        response = content.get("response")
+        job_status = content.get("job_status") or (response.get("job_status") if isinstance(response, dict) else None)
+        if not job_status:
+            return False
+        self._commandSet._cmd.pwarning(
+            f"This command is taking too long, try again later using the command: `job {job_status.get('job_id')}`"
+        )
+        self._response = job_status
+        return True
+
+    def check_error(self) -> bool:
         """
         Tries to extract as much error from the response payload as possible
 
-        :return: None
+        :return: True if the API returned an error
         """
         if not self._response.status_code == 200:
             import json
@@ -126,4 +165,5 @@ class BaseCommand:
                 f"Status Code {self._response.status_code}: {error[:100]}..."
             )
             self._commandSet._cmd.pwarning("Is your API key correct?")
-            return
+            return True
+        return False

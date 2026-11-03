@@ -290,3 +290,17 @@ class BaseCommandSet(CommandSet):
             "i.e.: scan_date/desc domain/asc",
         )
         return feedsearch_parser
+
+    @staticmethod
+    def _get_job_arg_parser() -> Cmd2ArgumentParser:
+        """
+        The parser for job command: -j -c -t [job_id]
+
+        :return: Cmd2ArgumentParser
+        """
+        job_parser = BaseCommandSet._get_arg_parser()
+        job_parser.add_argument(
+            "job_id",
+            help="The job ID in the format '01234567-0123-0123-abcd-0123456789ab' to get status",
+        )
+        return job_parser

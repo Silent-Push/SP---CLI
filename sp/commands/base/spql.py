@@ -71,7 +71,7 @@ class BaseSPQL(BaseCommand):
         """
         The SPQL main command logic
 
-        :return: None
+        :return: True if the API returned a job instead of the results
         """
         if not self.query:
             self._commandSet._cmd.perror("You need to specify a query")
@@ -85,7 +85,7 @@ class BaseSPQL(BaseCommand):
         self._response = requests.post(
             self._URL, json=self.payload, headers={"x-api-key": API_KEY}
         )
-        self.check_error()
+        return self.check_response()
 
 
 class WebScan(BaseSPQL):
@@ -96,7 +96,8 @@ class WebScan(BaseSPQL):
     """The default sort, first_seen_on is a feed field, not a webscan one"""
 
     def scan(self):
-        super().scan()
+        if super().scan():
+            return
         self._response = (
                 json.loads(self._response.content).get("response", {}) or {}
         ).get("scandata_raw")
@@ -108,7 +109,8 @@ class FeedScan(BaseSPQL):
     """The SPQL data source which to query for"""
 
     def scan(self):
-        super().scan()
+        if super().scan():
+            return
         try:
             if self.verbose:
                 self._response = json.loads(self._response.content).get("response")

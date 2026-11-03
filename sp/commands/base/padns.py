@@ -22,7 +22,8 @@ class BasePADNS(BaseCommand):
             self._URL,
             headers={"x-api-key": API_KEY, "User-Agent": "SP-CLI"},
         )
-        self.check_error()
+        if self.check_response():
+            return
         try:
             self._response = json.loads(self._response.content).get("response")
         except json.JSONDecodeError as e:

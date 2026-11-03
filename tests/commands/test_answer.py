@@ -16,15 +16,17 @@ common_properties = {
     "query": {"type": "string"},
     "type": {"type": "string"},
 }
+required_record_keys = ["answer", "count", "first_seen", "last_seen", "query", "type"]
 
 
 def get_answer_result_schema(properties: dict = common_properties):
     return {
         "type": "object",
+        "required": ["records"],
         "properties": {
             "records": {
                 "type": "array",
-                "items": {"type": "object", "properties": {**properties}},
+                "items": {"type": "object", "required": required_record_keys, "properties": {**properties}},
             }
         },
     }

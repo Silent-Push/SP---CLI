@@ -41,7 +41,8 @@ class ThreatCheck(BaseCommand):
         :return: None
         """
         self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
-        self.check_error()
+        if self.check_response():
+            return
         try:
             if self._params.verbose:
                 self._response = json.loads(self._response.content)
@@ -99,7 +100,8 @@ class BulkThreatCheck(BaseCommand):
             self._response = requests.post(
                 self._URL, json=self.payload, headers={"x-api-key": API_KEY}
             )
-        self.check_error()
+        if self.check_response():
+            return
         try:
             self._response = json.loads(self._response.content)
             if not self._params.verbose:

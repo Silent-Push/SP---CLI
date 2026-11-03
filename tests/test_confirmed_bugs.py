@@ -83,3 +83,13 @@ def test_load_unload_load_again(app):
     assert "PADNS loaded" in out.stdout
     assert "EXCEPTION" not in out.stderr
     assert app.LOADED_COMMAND == "padns"
+
+
+def test_api_error_stops_command(app):
+    content = json.dumps({"errors": [{"code": "not_authenticated"}]}).encode()
+    response = MagicMock(status_code=401, content=content)
+    with patch("sp.commands.score.requests.get", return_value=response):
+        out = app.app_cmd("score ig.com")
+    assert out.stdout == ""  # used to print the error body as if it was the result
+    assert "Something went wrong :(" in out.stderr
+    assert "Can't parse command response" not in out.stderr

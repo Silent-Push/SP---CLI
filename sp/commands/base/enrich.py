@@ -46,7 +46,8 @@ class Enrich(BaseCommand):
         :return: None
         """
         self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
-        self.check_error()
+        if self.check_response():
+            return
         try:
             self._response = json.loads(self._response.content)
             if self.ioc_type in ["ipv4", "ipv6"]:
@@ -109,7 +110,8 @@ class BulkEnrich(BaseCommand):
             self._response = requests.post(
                 self._URL, json=self.payload, headers={"x-api-key": API_KEY}
             )
-        self.check_error()
+        if self.check_response():
+            return
         try:
             self._response = json.loads(self._response.content).get("response")
             if self.ioc_type in ["ipv4", "ipv6"]:
