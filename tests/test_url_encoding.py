@@ -1,9 +1,11 @@
 from unittest.mock import MagicMock, patch
 
 from sp.common.utils import (
-    encode_path_segment, encode_query_params, encode_query_value,
+    encode_path_segment,
+    encode_query_params,
+    encode_query_value,
 )
-from tests.fixtures.app import API_REQUEST, app
+from tests.fixtures.app import API_REQUEST
 
 
 def test_encode_path_segment_keeps_plain_iocs():

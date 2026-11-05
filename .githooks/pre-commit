@@ -1,0 +1,10 @@
+#!/bin/sh
+# Lints the code before every commit, enable it once per clone with:
+#   git config core.hooksPath .githooks
+
+if ! command -v ruff >/dev/null 2>&1; then
+    echo "ruff not found, install the dev dependencies: pip install -r requirements-dev.txt" >&2
+    exit 1
+fi
+
+exec ruff check .

@@ -7,7 +7,7 @@ import requests
 from sp import settings
 from sp.common.api import RETRY_STATUSES, USER_AGENT, api
 from sp.main import main
-from tests.fixtures.app import API_REQUEST, app
+from tests.fixtures.app import API_REQUEST
 
 
 def mocked_response(status_code: int, body, headers: dict = None) -> MagicMock:

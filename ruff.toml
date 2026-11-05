@@ -1,0 +1,9 @@
+target-version = "py39"
+line-length = 120
+extend-exclude = ["build", "dist", "docs"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]  # package exports

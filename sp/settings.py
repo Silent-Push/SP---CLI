@@ -16,7 +16,7 @@ API_TIMEOUT = float(os.environ.get("SILENT_PUSH_API_TIMEOUT", 30))
 """Seconds to wait for the API before giving up"""
 
 if API_URL is None:
-    raise EnvironmentError(
+    raise OSError(
         "Please set the Silent Push API URL in your environment.\n"
         '\texport SILENT_PUSH_API_URL="'
         'https://app.silentpush.com/api/"'
@@ -36,11 +36,14 @@ def get_initial_commands() -> set:
     :return: The set of commands
     """
     from sp.commands import (
+        EnrichCommandSet,
+        JobCommandSet,
         # PADNSQueryCommandSet, PADNSAnswerCommandSet,
         PADNSSearchCommandSet,
-        EnrichCommandSet, ScoreCommandSet,
-        SPQLCommandSet, ThreatCheckCommandSet,
-        JobCommandSet, WhoisCommandSet,
+        ScoreCommandSet,
+        SPQLCommandSet,
+        ThreatCheckCommandSet,
+        WhoisCommandSet,
     )
 
     # the available initial commands

@@ -1,13 +1,12 @@
 import ipaddress
 import re
-from abc import ABC
 from urllib.parse import quote, urlparse
 
 import validators
 from tldextract import tldextract
 
 
-class IOCUtils(ABC):
+class IOCUtils:
     __SAFE_CHARS = ":/?!=#&$+@*"
     type = "unknown"
     valid = False

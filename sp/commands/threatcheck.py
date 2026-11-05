@@ -1,7 +1,7 @@
 from cmd2 import Statement, with_argparser, with_default_category
 
 from sp.commands.base.BaseCommandSet import BaseCommandSet
-from sp.commands.base.threatcheck import ThreatCheck, BulkThreatCheck
+from sp.commands.base.threatcheck import BulkThreatCheck, ThreatCheck
 from sp.common.parse_ioc import IOCUtils
 
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-# coding=utf-8
 
 __app_name__ = "SP-CLI"
 
-from cmd2 import CommandSetRegistrationError, Fg, style, with_category
+import argparse
 
-from sp.commands import *
+import cmd2
+from cmd2 import CommandSetRegistrationError, Fg, style, with_argparser, with_category
+
 from sp.commands.base.BaseCmdApp import BaseCmdApp
 from sp.common.utils import AppFileManager, categorize_subcommands
 from sp.settings import SPQL_COMMANDS
@@ -41,8 +42,8 @@ class App(BaseCmdApp):
             )
             self.LOADED_COMMAND = "padns"
             try:
-                from sp.commands.query import PADNSQueryCommandSet
                 from sp.commands.answer import PADNSAnswerCommandSet
+                from sp.commands.query import PADNSQueryCommandSet
                 from sp.commands.search import PADNSSearchCommandSet
 
                 self._query = PADNSQueryCommandSet()
@@ -138,7 +139,7 @@ def main(argv=None):
                 args.command_args[0] = f'"{args.command_args[0]}"'
         new_args = " ".join(args.command_args)
         # the line break ends multiline commands, otherwise cmd2 waits for more input
-        app.onecmd_plus_hooks("{} {}\n".format(args.command, new_args))
+        app.onecmd_plus_hooks(f"{args.command} {new_args}\n")
         exit_code = app.exit_code
     else:
         app.interactive = True

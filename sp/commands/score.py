@@ -70,7 +70,7 @@ class ScoreCommandSet(BaseCommandSet):
                 else:
                     self._result = response.get("ip2asn")[0].get("sp_risk_score")
             except (IndexError, TypeError, AttributeError) as e:
-                raise ResponseParseError(e)
+                raise ResponseParseError(e) from e
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             """

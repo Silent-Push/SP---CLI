@@ -272,7 +272,8 @@ class BaseCommandSet(CommandSet):
     @staticmethod
     def _get_websearch_arg_parser() -> Cmd2ArgumentParser:
         """
-        The parser for SPQL Websearch commands: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
+        The parser for SPQL Websearch commands:
+        -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
 
         :return: Cmd2ArgumentParser
         """
@@ -299,7 +300,8 @@ class BaseCommandSet(CommandSet):
     @staticmethod
     def _get_feedsearch_arg_parser() -> Cmd2ArgumentParser:
         """
-        The parser for SPQL Feedsearch commands: -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
+        The parser for SPQL Feedsearch commands:
+        -j -c -t [-f [fields...]] [-s [sorts...]] [-d [datasource]] [query] [params...]
 
         :return: Cmd2ArgumentParser
         """

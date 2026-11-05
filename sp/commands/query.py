@@ -1,7 +1,11 @@
 import argparse
 
 import cmd2
-from cmd2 import (Cmd2ArgumentParser, Statement, with_argparser, )
+from cmd2 import (
+    Cmd2ArgumentParser,
+    Statement,
+    with_argparser,
+)
 
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.commands.base.padns import PADNSLookup

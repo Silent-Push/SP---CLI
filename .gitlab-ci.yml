@@ -16,6 +16,16 @@ test:
   tags:
     - docker
 
+lint:
+  stage: test
+  image: python:3.9
+  before_script:
+    - pip install ruff==0.17.3
+  script:
+    ruff check .
+  tags:
+    - docker
+
 build:
   stage: build
   image: python:3.9

@@ -45,7 +45,7 @@ class Enrich(BaseCommand):
         try:
             self._result = response.get("ip2asn")[0] if self.ioc_type in ["ipv4", "ipv6"] else response
         except (IndexError, TypeError) as e:
-            raise ResponseParseError(e)
+            raise ResponseParseError(e) from e
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """

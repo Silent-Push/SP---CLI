@@ -1,3 +1,4 @@
+from functools import partial
 from pathlib import Path
 from typing import Callable
 from urllib.parse import quote, urlencode
@@ -50,6 +51,7 @@ def categorize_subcommands(category: str, app: cmd2.Cmd, command_set: cmd2.Comma
     :return:
     """
     import inspect
+
     from cmd2.constants import COMMAND_FUNC_PREFIX, HELP_FUNC_PREFIX
 
     methods = inspect.getmembers(
@@ -65,7 +67,7 @@ def categorize_subcommands(category: str, app: cmd2.Cmd, command_set: cmd2.Comma
         cmd_func_name = COMMAND_FUNC_PREFIX + command_suffix
         setattr(app, cmd_func_name, func_)
         # Add help function to CLI object
-        help_func = lambda: app.poutput(func_.__doc__)
+        help_func = partial(app.poutput, func_.__doc__)
         help_func_name = HELP_FUNC_PREFIX + command_suffix
         setattr(app, help_func_name, help_func)
         delattr(app, func_name)  # delete old method do_a_b_c()

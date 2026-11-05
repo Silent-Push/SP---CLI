@@ -1,11 +1,11 @@
 import functools
-from typing import Any, List
+from typing import Any
 
 import cmd2
 from cmd2 import CommandSetRegistrationError, Fg, style
 
 from sp.common.exceptions import CommandError
-from sp.settings import get_initial_commands, MULTILINE_COMMANDS
+from sp.settings import MULTILINE_COMMANDS, get_initial_commands
 
 
 class BaseCmdApp(cmd2.Cmd):
@@ -40,7 +40,7 @@ class BaseCmdApp(cmd2.Cmd):
         )
         self.foreground_color = Fg.CYAN.name.lower()
         # Create a cache object to save url information to
-        self._ioc_cache: List = self._get_iocs_from_history()
+        self._ioc_cache: list = self._get_iocs_from_history()
         self.register_postparsing_hook(self.prepend_padns_main_command_hook)
 
     def perror(self, *args, **kwargs) -> None:
@@ -67,7 +67,8 @@ class BaseCmdApp(cmd2.Cmd):
 
     def pexcept(self, msg, *args, **kwargs) -> None:
         """
-        Overrides cmd2.Cmd.pexcept: cmd2 calls it for any exception raised by a command, it's what stops a command with a CommandError
+        Overrides cmd2.Cmd.pexcept: cmd2 calls it for any exception raised by a command,
+        it's what stops a command with a CommandError
 
         :param msg: The exception
         :return: None
@@ -142,7 +143,7 @@ class BaseCmdApp(cmd2.Cmd):
         for ioc in iocs:
             self._add_ioc_to_cache(ioc)
 
-    def _get_iocs_from_history(self) -> List[str]:
+    def _get_iocs_from_history(self) -> list[str]:
         """
         The initial IoCs history
 

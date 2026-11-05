@@ -5,7 +5,7 @@ import jsonschema
 import pytest
 from cmd2 import CommandResult
 
-from tests.fixtures.app import API_REQUEST, app
+from tests.fixtures.app import API_REQUEST
 
 whois_result_schema = {
     "type": "object",

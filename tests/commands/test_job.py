@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from tests.fixtures.app import API_REQUEST, app
+from tests.fixtures.app import API_REQUEST
 
 JOB_ID = "01234567-0123-0123-abcd-0123456789ab"
 JOB_STATUS = {"job_id": JOB_ID, "status": "STARTED"}

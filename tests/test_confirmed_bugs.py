@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from sp.main import main
-from tests.fixtures.app import API_REQUEST, app
+from tests.fixtures.app import API_REQUEST
 
 
 def test_add_list_of_iocs_to_cache(app):

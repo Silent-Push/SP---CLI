@@ -42,7 +42,7 @@ class ThreatCheck(BaseCommand):
         try:
             self._result = response.get("listed_details")[0]
         except (IndexError, TypeError) as e:
-            raise ResponseParseError(e)
+            raise ResponseParseError(e) from e
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
@@ -99,7 +99,7 @@ class BulkThreatCheck(BaseCommand):
                 for i in response
             ]
         except (IndexError, AttributeError) as e:
-            raise ResponseParseError(e)
+            raise ResponseParseError(e) from e
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """

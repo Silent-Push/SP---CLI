@@ -75,7 +75,8 @@ class ApiError(CommandError):
         if self.status == 404:
             return "Not found, check the IoC or the command options"
         if self.status == 429:
-            return f"Rate limited, try again in {self.retry_after}s" if self.retry_after else "Rate limited, try again later"
+            when = f"in {self.retry_after}s" if self.retry_after else "later"
+            return f"Rate limited, try again {when}"
         if self.status >= 500:
             return "The Silent Push API is having problems, try again later"
         return "Check the command options, try 'help <command>'"

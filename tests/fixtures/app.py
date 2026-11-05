@@ -3,7 +3,6 @@ import re
 import cmd2_ext_test
 import pytest
 
-from sp.common.utils import AppFileManager
 from sp.main import App
 
 API_REQUEST = "sp.common.api.api.request"
@@ -23,12 +22,3 @@ class AppTester(cmd2_ext_test.ExternalTestMixin, App):
         if self.skip_on_job and job:
             pytest.skip(f"The API returned job {job.group(1)} instead of results, try later: `job {job.group(1)}`")
         return out
-
-
-@pytest.fixture
-def app(request):
-    app = AppTester(application_manager=AppFileManager("test app"))
-    app.skip_on_job = request.node.get_closest_marker("live") is not None
-    app.fixture_setup()
-    yield app
-    app.fixture_teardown()

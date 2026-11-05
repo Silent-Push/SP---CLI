@@ -9,10 +9,18 @@ from cmd2.ansi import style_success
 from sp import settings
 from sp.common.api import api
 from sp.common.exceptions import (
-    ApiConnectionError, ApiError, ApiTimeoutError, CommandError, JobPending, ResponseParseError,
+    ApiConnectionError,
+    ApiError,
+    ApiTimeoutError,
+    CommandError,
+    JobPending,
+    ResponseParseError,
 )
 from sp.common.utils import (
-    PandasDataFrameTSV, encode_query_params, flatten_dict, flatten_list,
+    PandasDataFrameTSV,
+    encode_query_params,
+    flatten_dict,
+    flatten_list,
 )
 from sp.settings import CRLF
 
@@ -117,16 +125,16 @@ class BaseCommand:
         """
         try:
             response = api.request(method, self._URL, payload)
-        except requests.Timeout:
-            raise ApiTimeoutError(settings.API_TIMEOUT)
+        except requests.Timeout as e:
+            raise ApiTimeoutError(settings.API_TIMEOUT) from e
         except requests.RequestException as e:
-            raise ApiConnectionError(e)
+            raise ApiConnectionError(e) from e
         if response.status_code != 200:
             raise ApiError(response)
         try:
             content = json.loads(response.content)
         except json.JSONDecodeError as e:
-            raise ResponseParseError(e)
+            raise ResponseParseError(e) from e
         job_id = self.get_job_id(content)
         if job_id:
             raise JobPending(job_id)
