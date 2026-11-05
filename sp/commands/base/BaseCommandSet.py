@@ -1,5 +1,8 @@
 from cmd2 import Cmd2ArgumentParser, CommandSet
 
+from sp.common.exceptions import CommandError
+from sp.common.parse_ioc import IOCUtils
+
 
 class BaseCommandSet(CommandSet):
     """
@@ -101,6 +104,35 @@ class BaseCommandSet(CommandSet):
             help="full detailed command response",
         )
         return base_arg_parser
+
+    @staticmethod
+    def _domain(value: str) -> str:
+        """
+        The argparse type for options that only accept domains
+
+        :param value: The option value
+        :return: The domain
+        :raises CommandError: If it's not a domain
+        """
+        if IOCUtils(value).type != "domain":
+            raise CommandError(f"'{value}' is not a domain")
+        return value
+
+    @staticmethod
+    def _get_domain_arg_parser() -> Cmd2ArgumentParser:
+        """
+        Set the 'domain' option for the commands that only accept domains: [domain]
+
+        :return: Cmd2ArgumentParser
+        """
+        domain_parser = BaseCommandSet._get_arg_parser()
+        domain_parser.add_argument(
+            "domain",
+            type=BaseCommandSet._domain,
+            choices_provider=(lambda self: self._cmd._ioc_cache),
+            help="The domain to target command",
+        )
+        return domain_parser
 
     @staticmethod
     def _get_ioc_arg_parser() -> Cmd2ArgumentParser:
@@ -218,7 +250,7 @@ class BaseCommandSet(CommandSet):
             nargs="?",
             type=str,
             # choices_provider=(lambda field: WEBSCAN_FIELDS),
-            help='the query to run, i.e.: ""domain"="ig.com""',
+            help='the query to run, enclosed by single quotes, i.e.: \'domain="ig.com"\'',
         )
         spql_parser = BaseCommandSet.__set__common_options(spql_parser)
         spql_parser.add_argument(

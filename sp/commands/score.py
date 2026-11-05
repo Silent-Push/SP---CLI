@@ -1,5 +1,3 @@
-import json
-
 from cmd2 import Statement, with_argparser, with_default_category
 
 from sp.commands.base.BaseCommand import BaseCommand
@@ -53,7 +51,6 @@ class ScoreCommandSet(BaseCommandSet):
             self._URL = self._URL.format(
                 type=self.ioc_type, ioc=encode_path_segment(self._params.ioc)
             )
-            # self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
             super().__enter__()
             return self
 
@@ -63,17 +60,16 @@ class ScoreCommandSet(BaseCommandSet):
 
             :return: None
             """
-            self.call_api()
+            response = self.call_api().get("response")
+            if self._params.verbose:
+                self._result = response
+                return
             try:
-                response = json.loads(self._response.content).get("response")
-                if self._params.verbose:
-                    self._response = response
-                    return
                 if self.ioc_type == "domain":
-                    self._response = response.get("sp_risk_score")
+                    self._result = response.get("sp_risk_score")
                 else:
-                    self._response = response.get("ip2asn")[0].get("sp_risk_score")
-            except (json.JSONDecodeError, IndexError, TypeError, AttributeError) as e:
+                    self._result = response.get("ip2asn")[0].get("sp_risk_score")
+            except (IndexError, TypeError, AttributeError) as e:
                 raise ResponseParseError(e)
 
         def __exit__(self, exc_type, exc_val, exc_tb):

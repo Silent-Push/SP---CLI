@@ -1,9 +1,7 @@
-import json
-
 from cmd2 import CommandSet, Statement
 
 from sp.commands.base.BaseCommand import BaseCommand
-from sp.common.exceptions import CommandError, ResponseParseError
+from sp.common.exceptions import CommandError
 from sp.settings import API_URL
 
 
@@ -50,15 +48,6 @@ class BaseSPQL(BaseCommand):
         self.verbose = params.verbose or False
         super().__init__(params, command_set)
 
-    def __enter__(self):
-        """
-        Overrides BaseCommand.__enter__: sets the feedback message
-
-        :return: BaseSPQL
-        """
-        self._feedback = "executing query"
-        return super().__enter__()
-
     def _get_query(self):
         """
         Prepares the query string according to the syntax
@@ -74,7 +63,7 @@ class BaseSPQL(BaseCommand):
         """
         The SPQL main command logic
 
-        :return: None
+        :return: The parsed JSON response
         """
         if not self.query:
             raise CommandError("You need to specify a query")
@@ -84,7 +73,7 @@ class BaseSPQL(BaseCommand):
             "sorting": self.sort,
             "limit": self.limit,
         }
-        self.call_api("POST", self.payload)
+        return self.call_api("POST", self.payload)
 
 
 class WebScan(BaseSPQL):
@@ -100,10 +89,7 @@ class WebScan(BaseSPQL):
 
         :return: None
         """
-        super().scan()
-        self._response = (
-                json.loads(self._response.content).get("response", {}) or {}
-        ).get("scandata_raw")
+        self._result = (super().scan().get("response", {}) or {}).get("scandata_raw")
 
 
 class FeedScan(BaseSPQL):
@@ -117,13 +103,5 @@ class FeedScan(BaseSPQL):
 
         :return: None
         """
-        super().scan()
-        try:
-            if self.verbose:
-                self._response = json.loads(self._response.content).get("response")
-            else:
-                self._response = (
-                        json.loads(self._response.content).get("response", {}) or {}
-                ).get("data")
-        except json.JSONDecodeError as e:
-            raise ResponseParseError(e)
+        response = super().scan().get("response", {}) or {}
+        self._result = response if self.verbose else response.get("data")

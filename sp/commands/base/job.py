@@ -1,7 +1,6 @@
-import json
+from typing import Any
 
 from sp.commands.base.BaseCommand import BaseCommand
-from sp.common.exceptions import ResponseParseError
 from sp.common.utils import encode_path_segment
 from sp.settings import API_URL
 
@@ -24,10 +23,11 @@ class Job(BaseCommand):
         super().__enter__()
         return self
 
-    def get_job_id(self) -> None:
+    def get_job_id(self, content: Any) -> None:
         """
         Overrides BaseCommand.get_job_id: the job command doesn't need it
 
+        :param content: The parsed JSON response
         :return: None, never stops the job command
         """
         return None
@@ -38,8 +38,4 @@ class Job(BaseCommand):
 
         :return: None
         """
-        self.call_api()
-        try:
-            self._response = json.loads(self._response.content)
-        except json.JSONDecodeError as e:
-            raise ResponseParseError(e)
+        self._result = self.call_api()

@@ -1,5 +1,3 @@
-import json
-
 from sp.commands.base.BaseCommand import BaseCommand
 from sp.common.exceptions import CommandError, ResponseParseError
 from sp.common.utils import encode_query_value
@@ -29,7 +27,6 @@ class ThreatCheck(BaseCommand):
             query=encode_query_value(self._params.ioc),
             with_cnames=self._params.with_cnames,
         )
-        # self._feedback = f"{self._URL[self._URL.index('threat-check') + 12:]}"
         super().__enter__()
         return self
 
@@ -39,13 +36,12 @@ class ThreatCheck(BaseCommand):
 
         :return: None
         """
-        self.call_api()
+        self._result = response = self.call_api()
+        if self._params.verbose:
+            return
         try:
-            if self._params.verbose:
-                self._response = json.loads(self._response.content)
-                return
-            self._response = json.loads(self._response.content).get("listed_details")[0]
-        except (json.JSONDecodeError, IndexError, TypeError) as e:
+            self._result = response.get("listed_details")[0]
+        except (IndexError, TypeError) as e:
             raise ResponseParseError(e)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -77,7 +73,6 @@ class BulkThreatCheck(BaseCommand):
         :return: BulkThreatCheck
         """
         self._URL = self._URL.format(with_cnames=self._params.with_cnames)
-        self._feedback = f"{self._URL[self._URL.index('threat-check/bulk') + 17:]}"
         if self._params.iocs:
             self.payload = {
                 "data_source": self._params.datasource,
@@ -95,15 +90,15 @@ class BulkThreatCheck(BaseCommand):
         """
         if not self.payload:
             raise CommandError("You need to pass the IoCs")
-        self.call_api("POST", self.payload)
+        self._result = response = self.call_api("POST", self.payload)
+        if self._params.verbose:
+            return
         try:
-            self._response = json.loads(self._response.content)
-            if not self._params.verbose:
-                self._response = [
-                    {i.get("value"): i.get("listed_details")[0]}
-                    for i in self._response
-                ]
-        except (json.JSONDecodeError, IndexError, AttributeError) as e:
+            self._result = [
+                {i.get("value"): i.get("listed_details")[0]}
+                for i in response
+            ]
+        except (IndexError, AttributeError) as e:
             raise ResponseParseError(e)
 
     def __exit__(self, exc_type, exc_val, exc_tb):

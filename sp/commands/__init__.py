@@ -7,5 +7,6 @@ from .search import *
 # from .answer import *
 from .spql import *
 from .threatcheck import *
+from .whois import *
 
 # from .target_context import *

@@ -40,7 +40,7 @@ def get_initial_commands() -> set:
         PADNSSearchCommandSet,
         EnrichCommandSet, ScoreCommandSet,
         SPQLCommandSet, ThreatCheckCommandSet,
-        JobCommandSet,
+        JobCommandSet, WhoisCommandSet,
     )
 
     # the available initial commands
@@ -52,7 +52,8 @@ def get_initial_commands() -> set:
         PADNSSearchCommandSet(),
         SPQLCommandSet(),
         ThreatCheckCommandSet(),
-        JobCommandSet()
+        JobCommandSet(),
+        WhoisCommandSet(),
     }
 
 

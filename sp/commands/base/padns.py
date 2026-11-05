@@ -1,9 +1,7 @@
-import json
-
 from cmd2 import CommandSet, Statement
 
 from sp.commands.base.BaseCommand import BaseCommand
-from sp.common.exceptions import CommandError, ResponseParseError
+from sp.common.exceptions import CommandError
 from sp.common.utils import encode_path_segment, encode_query_value
 from sp.settings import API_URL
 
@@ -17,11 +15,7 @@ class BasePADNS(BaseCommand):
         """
         if not self._params.ioc:
             raise CommandError("You need to pass the IoC")
-        self.call_api()
-        try:
-            self._response = json.loads(self._response.content).get("response")
-        except json.JSONDecodeError as e:
-            raise ResponseParseError(e)
+        self._result = self.call_api().get("response")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
@@ -81,7 +75,6 @@ class PADNSLookup(BasePADNS):
             ioc=encode_path_segment(self._params.ioc),
         )
         super().__enter__()
-        # self._feedback = f"{self._URL[self._URL.index('lookup/') + 7:]}"
         return self
 
 
@@ -117,15 +110,6 @@ class PADNSSearch(BasePADNS):
         self._qtype = qtype
         super().__init__(params, command_set)
 
-    def lookup(self):
-        """
-        Overrides BasePADNS.lookup: extracts the records from the response
-
-        :return: None
-        """
-        super().lookup()
-        self._response = self._response.get("records")
-
     def __enter__(self):
         """
         Overrides BaseCommand.__enter__: the logic before executing the command
@@ -136,5 +120,13 @@ class PADNSSearch(BasePADNS):
         self._URL = self._URL.format(type=self._type, qtype=qtype)
         self._URL += f"&domain={encode_query_value(self._params.ioc)}"
         super().__enter__()
-        # self._feedback = f"{self._URL[self._URL.index('search/') + 7:]}"
         return self
+
+    def lookup(self):
+        """
+        Overrides BasePADNS.lookup: extracts the records from the response
+
+        :return: None
+        """
+        super().lookup()
+        self._result = self._result.get("records")

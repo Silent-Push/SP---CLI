@@ -73,6 +73,21 @@ def test_unexpected_exceptions_are_still_reported(app):
     assert "EXCEPTION of type 'ZeroDivisionError'" in out.stderr
 
 
+@pytest.mark.parametrize("command", ["score ig.com", "enrich ig.com", "threatcheck ig.com", "whoislive ig.com"])
+def test_invalid_json_stops_command(app, command):
+    with patch(API_REQUEST, return_value=mocked_response(200, b"not json")):
+        out = app.app_cmd(command)
+    assert out.stdout == ""
+    assert "Can't parse command response" in out.stderr
+
+
+def test_enrich_ip_without_ip2asn(app):
+    with patch(API_REQUEST, return_value=mocked_response(200, {"response": {}})):
+        out = app.app_cmd("enrich 8.8.8.8")
+    assert out.stdout == ""
+    assert "Can't parse command response" in out.stderr
+
+
 def test_error_message_from_json_and_html(app):
     with patch(API_REQUEST, return_value=mocked_response(401, {"errors": [{"code": "not_authenticated"}]})):
         out = app.app_cmd("score ig.com")

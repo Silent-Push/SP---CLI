@@ -1,5 +1,3 @@
-import json
-
 from sp.commands.base.BaseCommand import BaseCommand
 from sp.common.exceptions import CommandError, ResponseParseError
 from sp.common.parse_ioc import IOCUtils
@@ -26,7 +24,6 @@ class Enrich(BaseCommand):
             type=self.ioc_type,
             ioc=encode_path_segment(self._params.ioc),
         )
-        # self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
         if self._params.explain:
             self._params.params.append("explain=1")
         else:
@@ -44,12 +41,10 @@ class Enrich(BaseCommand):
 
         :return: None
         """
-        self.call_api()
+        response = self.call_api()
         try:
-            self._response = json.loads(self._response.content)
-            if self.ioc_type in ["ipv4", "ipv6"]:
-                self._response = self._response.get("ip2asn")[0]
-        except (json.JSONDecodeError, IndexError, KeyError) as e:
+            self._result = response.get("ip2asn")[0] if self.ioc_type in ["ipv4", "ipv6"] else response
+        except (IndexError, TypeError) as e:
             raise ResponseParseError(e)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -89,7 +84,6 @@ class BulkEnrich(BaseCommand):
             payload_key = "ipv4s"
         elif self.ioc_type == "ipv6":
             payload_key = "ipv6s"
-        # self._feedback = f"{self._URL[self._URL.index('explore/') + 7:]}"
         if self._params.iocs:
             self.payload = {
                 payload_key: list(set(self._params.iocs))
@@ -105,13 +99,8 @@ class BulkEnrich(BaseCommand):
         """
         if not self.payload:
             raise CommandError("You need to pass the IoCs")
-        self.call_api("POST", self.payload)
-        try:
-            self._response = json.loads(self._response.content).get("response")
-            if self.ioc_type in ["ipv4", "ipv6"]:
-                self._response = self._response.get("ip2asn")
-        except json.JSONDecodeError as e:
-            raise ResponseParseError(e)
+        response = self.call_api("POST", self.payload).get("response")
+        self._result = response.get("ip2asn") if self.ioc_type in ["ipv4", "ipv6"] else response
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
