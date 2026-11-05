@@ -279,5 +279,15 @@ app.onecmd_plus_hooks('padns query ns ig.com limit=2')
 print(app.last_result)
 ```
 
+### Linting
+
+The project uses [ruff](https://docs.astral.sh/ruff/), which also runs on GitLab CI. To lint before every commit, enable
+the git hook once per clone:
+
+```bash
+pip install -r requirements-dev.txt
+git config core.hooksPath .githooks
+```
+
 ## Support
 Don't hesitate to contact me at [jorgeley@silentpush.com](jorgeley@silentpush.com) if you need any help
