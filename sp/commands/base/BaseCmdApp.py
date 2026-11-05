@@ -1,9 +1,10 @@
 import functools
-from typing import List
+from typing import Any, List
 
 import cmd2
 from cmd2 import CommandSetRegistrationError, Fg, style
 
+from sp.common.exceptions import CommandError
 from sp.settings import get_initial_commands, MULTILINE_COMMANDS
 
 
@@ -41,6 +42,40 @@ class BaseCmdApp(cmd2.Cmd):
         # Create a cache object to save url information to
         self._ioc_cache: List = self._get_iocs_from_history()
         self.register_postparsing_hook(self.prepend_padns_main_command_hook)
+
+    def perror(self, *args, **kwargs) -> None:
+        """
+        Overrides cmd2.Cmd.perror: prints the error and, when running a single command like `score x.ie`, exit with 1
+        so shell scripts can detect the failure
+
+        :return: None
+        """
+        if not getattr(self, "interactive", False):
+            self.exit_code = 1
+        super().perror(*args, **kwargs)
+
+    def pwarning(self, msg: Any = "", *, end: str = "\n") -> None:
+        """
+        Overrides cmd2.Cmd.pwarning: cmd2 prints warnings through perror, a warning isn't a failure
+        so it skips our perror and keeps the exit code
+
+        :param msg: The warning to print
+        :param end: The string appended after the message
+        :return: None
+        """
+        super().perror(cmd2.ansi.style_warning(msg), end=end, apply_style=False)
+
+    def pexcept(self, msg, *args, **kwargs) -> None:
+        """
+        Overrides cmd2.Cmd.pexcept: cmd2 calls it for any exception raised by a command, it's what stops a command with a CommandError
+
+        :param msg: The exception
+        :return: None
+        """
+        if isinstance(msg, CommandError):
+            msg.show(self)
+            return
+        super().pexcept(msg, *args, **kwargs)
 
     def prepend_padns_main_command_hook(
             self, data: cmd2.plugin.PostparsingData

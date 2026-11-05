@@ -1,10 +1,9 @@
 import json
 
-import requests
-
 from sp.commands.base.BaseCommand import BaseCommand
+from sp.common.exceptions import CommandError, ResponseParseError
 from sp.common.utils import encode_query_value
-from sp.settings import API_KEY, API_URL
+from sp.settings import API_URL
 
 
 class ThreatCheck(BaseCommand):
@@ -20,7 +19,7 @@ class ThreatCheck(BaseCommand):
 
     def __enter__(self):
         """
-        The logic before executing the command
+        Overrides BaseCommand.__enter__: the logic before executing the command
 
         :return: ThreatCheck
         """
@@ -40,20 +39,18 @@ class ThreatCheck(BaseCommand):
 
         :return: None
         """
-        self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
-        if self.check_response():
-            return
+        self.call_api()
         try:
             if self._params.verbose:
                 self._response = json.loads(self._response.content)
                 return
             self._response = json.loads(self._response.content).get("listed_details")[0]
         except (json.JSONDecodeError, IndexError, TypeError) as e:
-            self._commandSet._cmd.perror(f"Can't parse command response: {e}")
+            raise ResponseParseError(e)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
-        The logic after executing the command
+        Overrides BaseCommand.__exit__: the logic after executing the command
 
         :param exc_type: Exception type, if need to catch
         :param exc_val: Exception value
@@ -75,7 +72,7 @@ class BulkThreatCheck(BaseCommand):
 
     def __enter__(self):
         """
-        The logic before executing the command
+        Overrides BaseCommand.__enter__: the logic before executing the command
 
         :return: BulkThreatCheck
         """
@@ -96,12 +93,9 @@ class BulkThreatCheck(BaseCommand):
 
         :return: None
         """
-        if self.payload:
-            self._response = requests.post(
-                self._URL, json=self.payload, headers={"x-api-key": API_KEY}
-            )
-        if self.check_response():
-            return
+        if not self.payload:
+            raise CommandError("You need to pass the IoCs")
+        self.call_api("POST", self.payload)
         try:
             self._response = json.loads(self._response.content)
             if not self._params.verbose:
@@ -110,11 +104,11 @@ class BulkThreatCheck(BaseCommand):
                     for i in self._response
                 ]
         except (json.JSONDecodeError, IndexError, AttributeError) as e:
-            self._commandSet._cmd.perror(f"Can't parse command response: {e}")
+            raise ResponseParseError(e)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
-        The logic after executing the command
+        Overrides BaseCommand.__exit__: the logic after executing the command
 
         :param exc_type: Exception type, if need to catch
         :param exc_val: Exception value

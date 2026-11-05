@@ -1,13 +1,13 @@
 import json
 
-import requests
 from cmd2 import Statement, with_argparser, with_default_category
 
 from sp.commands.base.BaseCommand import BaseCommand
 from sp.commands.base.BaseCommandSet import BaseCommandSet
+from sp.common.exceptions import ResponseParseError
 from sp.common.parse_ioc import IOCUtils
 from sp.common.utils import encode_path_segment
-from sp.settings import API_KEY, API_URL
+from sp.settings import API_URL
 
 
 # @TODO: rename to riskscore
@@ -45,7 +45,7 @@ class ScoreCommandSet(BaseCommandSet):
 
         def __enter__(self):
             """
-            The logic before executing the command
+            Overrides BaseCommand.__enter__: the logic before executing the command
 
             :return: Score
             """
@@ -63,9 +63,7 @@ class ScoreCommandSet(BaseCommandSet):
 
             :return: None
             """
-            self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
-            if self.check_response():
-                return
+            self.call_api()
             try:
                 response = json.loads(self._response.content).get("response")
                 if self._params.verbose:
@@ -76,11 +74,11 @@ class ScoreCommandSet(BaseCommandSet):
                 else:
                     self._response = response.get("ip2asn")[0].get("sp_risk_score")
             except (json.JSONDecodeError, IndexError, TypeError, AttributeError) as e:
-                self._commandSet._cmd.perror(f"Can't parse command response: {e}")
+                raise ResponseParseError(e)
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             """
-            The logic after executing the command
+            Overrides BaseCommand.__exit__: the logic after executing the command
 
             :param exc_type: Exception type, if need to catch
             :param exc_val: Exception value

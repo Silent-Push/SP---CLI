@@ -1,11 +1,11 @@
 import json
 
-import requests
 from cmd2 import CommandSet, Statement
 
 from sp.commands.base.BaseCommand import BaseCommand
+from sp.common.exceptions import CommandError, ResponseParseError
 from sp.common.utils import encode_path_segment, encode_query_value
-from sp.settings import API_KEY, API_URL
+from sp.settings import API_URL
 
 
 class BasePADNS(BaseCommand):
@@ -16,22 +16,16 @@ class BasePADNS(BaseCommand):
         :return: None
         """
         if not self._params.ioc:
-            self._commandSet._cmd.perror("You need to pass the IoC")
-            return
-        self._response = requests.get(
-            self._URL,
-            headers={"x-api-key": API_KEY, "User-Agent": "SP-CLI"},
-        )
-        if self.check_response():
-            return
+            raise CommandError("You need to pass the IoC")
+        self.call_api()
         try:
             self._response = json.loads(self._response.content).get("response")
         except json.JSONDecodeError as e:
-            self._commandSet._cmd.perror(f"Can't parse command response: {e.msg}")
+            raise ResponseParseError(e)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
-        The logic after executing the command
+        Overrides BaseCommand.__exit__: the logic after executing the command
 
         :param exc_type: Exception type, if need to catch
         :param exc_val: Exception value
@@ -77,7 +71,7 @@ class PADNSLookup(BasePADNS):
 
     def __enter__(self):
         """
-        The logic before executing the command
+        Overrides BaseCommand.__enter__: the logic before executing the command
 
         :return: PADNS
         """
@@ -124,12 +118,17 @@ class PADNSSearch(BasePADNS):
         super().__init__(params, command_set)
 
     def lookup(self):
+        """
+        Overrides BasePADNS.lookup: extracts the records from the response
+
+        :return: None
+        """
         super().lookup()
         self._response = self._response.get("records")
 
     def __enter__(self):
         """
-        The logic before executing the command
+        Overrides BaseCommand.__enter__: the logic before executing the command
 
         :return: PADNS
         """

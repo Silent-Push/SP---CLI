@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from tests.fixtures.app import app
+from tests.fixtures.app import API_REQUEST, app
 
 JOB_ID = "01234567-0123-0123-abcd-0123456789ab"
 JOB_STATUS = {"job_id": JOB_ID, "status": "STARTED"}
@@ -15,25 +15,25 @@ def mocked_response(body: dict) -> MagicMock:
 
 
 @pytest.mark.parametrize(
-    "command, target, body",
+    "command, body",
     [
         # newer endpoints return the job at the top level
-        ("enrich ig.com", "sp.commands.base.enrich.requests.get", {"job_status": JOB_STATUS}),
+        ("enrich ig.com", {"job_status": JOB_STATUS}),
         # older endpoints wrap it in "response"
-        ("score ig.com", "sp.commands.score.requests.get", {"response": {"job_status": JOB_STATUS}}),
+        ("score ig.com", {"response": {"job_status": JOB_STATUS}}),
     ],
 )
-def test_job_response_shows_job_command(app, command, target, body):
-    with patch(target, return_value=mocked_response(body)):
+def test_job_response_shows_job_command(app, command, body):
+    with patch(API_REQUEST, return_value=mocked_response(body)):
         out = app.app_cmd(command)
     assert JOB_WARNING in out.stderr
-    assert json.loads(out.stdout) == JOB_STATUS
+    assert out.stdout == ""
 
 
 def test_job_command_calls_job_endpoint(app):
-    with patch("sp.commands.base.job.requests.get", return_value=mocked_response({"records": []})) as get:
+    with patch(API_REQUEST, return_value=mocked_response({"records": []})) as request:
         out = app.app_cmd(f"job {JOB_ID}")
-    assert get.call_args.args[0].endswith(f"v1/explore/job/{JOB_ID}/")
+    assert request.call_args.args[1].endswith(f"v1/explore/job/{JOB_ID}/")
     assert json.loads(out.stdout) == {"records": []}
 
 
@@ -44,7 +44,6 @@ def test_job_command_requires_job_id(app):
 
 @pytest.mark.live
 def test_live_test_is_skipped_when_api_returns_job(app):
-    with patch("sp.commands.score.requests.get",
-               return_value=mocked_response({"response": {"job_status": JOB_STATUS}})):
+    with patch(API_REQUEST, return_value=mocked_response({"response": {"job_status": JOB_STATUS}})):
         app.app_cmd("score ig.com -v")
     pytest.fail("a live test should be skipped when the API returns a job")

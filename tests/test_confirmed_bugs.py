@@ -4,8 +4,10 @@ import subprocess
 import sys
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from sp.main import main
-from tests.fixtures.app import app
+from tests.fixtures.app import API_REQUEST, app
 
 
 def test_add_list_of_iocs_to_cache(app):
@@ -33,6 +35,22 @@ def test_spql_command_without_query():
     main(["websearch"])  # used to raise IndexError
 
 
+@pytest.mark.parametrize("command", ["websearch", "feedsearch"])
+def test_spql_command_without_query_shows_message(app, command):
+    app.interactive = False
+    with patch(API_REQUEST) as request:
+        out = app.app_cmd(f"{command}\n")
+    request.assert_not_called()
+    assert out.stdout == ""
+    assert out.stderr == "You need to specify a query\n"  # used to raise ValueError
+
+
+def test_single_command_does_not_wait_for_multiline_input():
+    with patch("sp.main.App.onecmd_plus_hooks", autospec=True) as onecmd:
+        main(["websearch", 'domain="ig.com"'])
+    assert onecmd.call_args.args[1].endswith("\n")  # without it, cmd2 shows a "> " prompt
+
+
 def test_help_works_without_api_key():
     env = {k: v for k, v in os.environ.items() if k != "SILENT_PUSH_API_KEY"}
     result = subprocess.run(
@@ -44,16 +62,17 @@ def test_help_works_without_api_key():
 
 def test_command_without_api_key_shows_message(app, monkeypatch):
     monkeypatch.setattr("sp.settings.API_KEY", None)
-    with patch("sp.commands.score.requests.get") as get:
+    with patch(API_REQUEST) as request:
         out = app.app_cmd("score ig.com")
-    get.assert_not_called()
+    request.assert_not_called()
     assert "SILENT_PUSH_API_KEY" in out.stderr
+    assert "EXCEPTION" not in out.stderr
 
 
 def test_score_ip_with_empty_result(app):
     content = json.dumps({"response": {"ip2asn": []}}).encode()
     response = MagicMock(status_code=200, content=content)
-    with patch("sp.commands.score.requests.get", return_value=response):
+    with patch(API_REQUEST, return_value=response):
         out = app.app_cmd("score 1.2.3.4")
     assert "Can't parse command response" in out.stderr
     assert "AttributeError" not in out.stderr
@@ -61,7 +80,7 @@ def test_score_ip_with_empty_result(app):
 
 def test_threatcheck_with_empty_result(app):
     response = MagicMock(status_code=200, content=b'{"listed_details": []}')
-    with patch("sp.commands.base.threatcheck.requests.get", return_value=response):
+    with patch(API_REQUEST, return_value=response):
         out = app.app_cmd("threatcheck ig.com")
     assert "Can't parse command response" in out.stderr
     assert "AttributeError" not in out.stderr
@@ -71,9 +90,9 @@ def test_websearch_default_sort(app):
     app.interactive = False
     content = json.dumps({"response": {"scandata_raw": []}}).encode()
     response = MagicMock(status_code=200, content=content)
-    with patch("sp.commands.base.spql.requests.post", return_value=response) as post:
+    with patch(API_REQUEST, return_value=response) as request:
         app.app_cmd("websearch 'domain=\"ig.com\"'\n")
-    assert post.call_args.kwargs["json"]["sorting"] == ["scan_date/desc"]
+    assert request.call_args.args[2]["sorting"] == ["scan_date/desc"]
 
 
 def test_load_unload_load_again(app):
@@ -88,7 +107,7 @@ def test_load_unload_load_again(app):
 def test_api_error_stops_command(app):
     content = json.dumps({"errors": [{"code": "not_authenticated"}]}).encode()
     response = MagicMock(status_code=401, content=content)
-    with patch("sp.commands.score.requests.get", return_value=response):
+    with patch(API_REQUEST, return_value=response):
         out = app.app_cmd("score ig.com")
     assert out.stdout == ""  # used to print the error body as if it was the result
     assert "Something went wrong :(" in out.stderr

@@ -1,10 +1,10 @@
 import json
 
-import requests
 from cmd2 import CommandSet, Statement
 
 from sp.commands.base.BaseCommand import BaseCommand
-from sp.settings import API_KEY, API_URL
+from sp.common.exceptions import CommandError, ResponseParseError
+from sp.settings import API_URL
 
 
 class BaseSPQL(BaseCommand):
@@ -43,8 +43,6 @@ class BaseSPQL(BaseCommand):
         :param command_set: The CommandSet object related to the command
         """
         self.query = params.query
-        if not self.query:
-            raise ValueError("need a query!")
         self.datasource = params.datasource or self.datasource
         self.fields = params.fields or self.fields
         self.sort = params.sort or self.sort
@@ -53,6 +51,11 @@ class BaseSPQL(BaseCommand):
         super().__init__(params, command_set)
 
     def __enter__(self):
+        """
+        Overrides BaseCommand.__enter__: sets the feedback message
+
+        :return: BaseSPQL
+        """
         self._feedback = "executing query"
         return super().__enter__()
 
@@ -71,21 +74,17 @@ class BaseSPQL(BaseCommand):
         """
         The SPQL main command logic
 
-        :return: True if the API returned a job instead of the results
+        :return: None
         """
         if not self.query:
-            self._commandSet._cmd.perror("You need to specify a query")
-            return
+            raise CommandError("You need to specify a query")
         self.payload = {
             "query": self._get_query(),
             # "fields": self.fields,  # @TODO: not supported yet
             "sorting": self.sort,
             "limit": self.limit,
         }
-        self._response = requests.post(
-            self._URL, json=self.payload, headers={"x-api-key": API_KEY}
-        )
-        return self.check_response()
+        self.call_api("POST", self.payload)
 
 
 class WebScan(BaseSPQL):
@@ -96,8 +95,12 @@ class WebScan(BaseSPQL):
     """The default sort, first_seen_on is a feed field, not a webscan one"""
 
     def scan(self):
-        if super().scan():
-            return
+        """
+        Overrides BaseSPQL.scan: extracts the webscan results from the response
+
+        :return: None
+        """
+        super().scan()
         self._response = (
                 json.loads(self._response.content).get("response", {}) or {}
         ).get("scandata_raw")
@@ -109,8 +112,12 @@ class FeedScan(BaseSPQL):
     """The SPQL data source which to query for"""
 
     def scan(self):
-        if super().scan():
-            return
+        """
+        Overrides BaseSPQL.scan: extracts the feed results from the response
+
+        :return: None
+        """
+        super().scan()
         try:
             if self.verbose:
                 self._response = json.loads(self._response.content).get("response")
@@ -119,4 +126,4 @@ class FeedScan(BaseSPQL):
                         json.loads(self._response.content).get("response", {}) or {}
                 ).get("data")
         except json.JSONDecodeError as e:
-            self._commandSet._cmd.perror(f"Can't parse command response: {e.msg}")
+            raise ResponseParseError(e)

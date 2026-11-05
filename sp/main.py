@@ -137,7 +137,9 @@ def main(argv=None):
                 app.pwarning("Please use double quotes with SPQL!")
                 args.command_args[0] = f'"{args.command_args[0]}"'
         new_args = " ".join(args.command_args)
-        app.onecmd_plus_hooks("{} {}".format(args.command, new_args))
+        # the line break ends multiline commands, otherwise cmd2 waits for more input
+        app.onecmd_plus_hooks("{} {}\n".format(args.command, new_args))
+        exit_code = app.exit_code
     else:
         app.interactive = True
         exit_code = app.cmdloop()

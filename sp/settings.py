@@ -12,6 +12,8 @@ API_URL = os.environ.get("SILENT_PUSH_API_URL", "https://api.silentpush.com/api/
 """The Silent Push API URL, you can export it to your prompt if needs to change or use .env"""
 API_KEY = os.environ.get("SILENT_PUSH_API_KEY")
 """Your Silent Push API key"""
+API_TIMEOUT = float(os.environ.get("SILENT_PUSH_API_TIMEOUT", 30))
+"""Seconds to wait for the API before giving up"""
 
 if API_URL is None:
     raise EnvironmentError(

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from sp.common.utils import (
     encode_path_segment, encode_query_params, encode_query_value,
 )
-from tests.fixtures.app import app
+from tests.fixtures.app import API_REQUEST, app
 
 
 def test_encode_path_segment_keeps_plain_iocs():
@@ -29,8 +29,8 @@ def test_encode_query_params():
 
 def test_threatcheck_url_is_encoded(app):
     response = MagicMock(status_code=200, content=b'{"listed_details": [{}]}')
-    with patch("sp.commands.base.threatcheck.requests.get", return_value=response) as get:
+    with patch(API_REQUEST, return_value=response) as request:
         app.app_cmd("threatcheck ig.com")
-    url = get.call_args[0][0]
+    url = request.call_args.args[1]
     assert "query=ig.com&" in url
     assert "data_source=iofa&query_type=name&" in url

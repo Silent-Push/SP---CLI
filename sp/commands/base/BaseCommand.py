@@ -1,10 +1,14 @@
 import json
+from typing import Optional
 
 import pandas
+import requests
 from cmd2 import CommandSet, Statement
 from cmd2.ansi import style_success
 
 from sp import settings
+from sp.common.api import api
+from sp.common.exceptions import ApiConnectionError, ApiError, ApiTimeoutError, CommandError, JobPending
 from sp.common.utils import (
     PandasDataFrameTSV, encode_query_params, flatten_dict, flatten_list,
 )
@@ -36,7 +40,7 @@ class BaseCommand:
         :param command_set: The CommandSet object related to the command
         """
         if not settings.API_KEY:
-            raise EnvironmentError(settings.MISSING_API_KEY_MESSAGE)
+            raise CommandError(settings.MISSING_API_KEY_MESSAGE)
         self._commandSet = command_set
         self._params = params
 
@@ -69,7 +73,7 @@ class BaseCommand:
         :param exc_tb:
         :return: None
         """
-        if self._response is None:
+        if exc_type:  # the command failed, there's nothing to output
             return
         flattened = self._response
         if isinstance(self._response, dict):
@@ -103,67 +107,40 @@ class BaseCommand:
         self._commandSet._cmd.last_result = self._output
         # self._commandSet._cmd.pfeedback(f"\t*{self._feedback}")
 
-    def check_response(self) -> bool:
+    def call_api(self, method: str = "GET", payload: dict = None) -> None:
         """
-        Checks the API response for errors or long running jobs, call it right after the request
+        Calls the command URL, the single entry point to the API for all commands
 
-        >>> if self.check_response():
-        ...     return
-
-        :return: True if the command should stop, there are no results to parse
+        :param method: GET or POST
+        :param payload: The JSON body for POST requests
+        :return: None
+        :raises CommandError: When there are no results to parse, which stops the command
         """
-        if self.check_error():
-            self._response = None
-            return True
-        return self.check_job()
+        try:
+            self._response = api.request(method, self._URL, payload)
+        except requests.Timeout:
+            raise ApiTimeoutError(settings.API_TIMEOUT)
+        except requests.RequestException as e:
+            raise ApiConnectionError(e)
+        if self._response.status_code != 200:
+            raise ApiError(self._response)
+        job_id = self.get_job_id()
+        if job_id:
+            raise JobPending(job_id)
 
-    def check_job(self) -> bool:
+    def get_job_id(self) -> Optional[str]:
         """
-        Long running tasks return a job instead of the result, warns how to get it later with the job command
+        Long running tasks return a job instead of the result
 
-        :return: True if the response is a job, so the command can stop parsing it
+        :return: The job ID if the response is a job
         """
         try:
             content = json.loads(self._response.content)
-        except (json.JSONDecodeError, AttributeError, TypeError):
-            return False
+        except (json.JSONDecodeError, TypeError):
+            return None
         if not isinstance(content, dict):
-            return False
+            return None
         # newer endpoints return the job at the top level, older ones wrap it in "response"
         response = content.get("response")
         job_status = content.get("job_status") or (response.get("job_status") if isinstance(response, dict) else None)
-        if not job_status:
-            return False
-        self._commandSet._cmd.pwarning(
-            f"This command is taking too long, try again later using the command: `job {job_status.get('job_id')}`"
-        )
-        self._response = job_status
-        return True
-
-    def check_error(self) -> bool:
-        """
-        Tries to extract as much error from the response payload as possible
-
-        :return: True if the API returned an error
-        """
-        if not self._response.status_code == 200:
-            import json
-            import re
-
-            # try to extract the error from the API response
-            content = self._response.content.decode()
-            try:
-                json_error = json.loads(content).get("errors")
-            except (json.JSONDecodeError, TypeError):
-                json_error = ""
-            strip = re.compile("<.*?>|\n")
-            error = re.sub(strip, " ", content[content.find("<body"):])
-            error = re.sub(' +', ' ', error)
-            error += json_error.__str__()
-            self._commandSet._cmd.perror("Something went wrong :(")
-            self._commandSet._cmd.perror(
-                f"Status Code {self._response.status_code}: {error[:100]}..."
-            )
-            self._commandSet._cmd.pwarning("Is your API key correct?")
-            return True
-        return False
+        return job_status.get("job_id") if job_status else None

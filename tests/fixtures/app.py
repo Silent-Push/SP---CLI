@@ -6,8 +6,11 @@ import pytest
 from sp.common.utils import AppFileManager
 from sp.main import App
 
+API_REQUEST = "sp.common.api.api.request"
+"""Patch target to mock every API call, i.e.: patch(API_REQUEST, return_value=response)"""
+
 JOB_HINT = re.compile(r"`job (\S+)`")
-"""The hint shown by BaseCommand.check_job when the API returns a job instead of results"""
+"""The hint shown by JobPending when the API returns a job instead of results"""
 
 
 class AppTester(cmd2_ext_test.ExternalTestMixin, App):

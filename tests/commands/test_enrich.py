@@ -5,7 +5,7 @@ import jsonschema
 import pytest
 from cmd2 import CommandResult
 
-from tests.fixtures.app import app
+from tests.fixtures.app import API_REQUEST, app
 
 enrich_domain_result_schema = {
     "type": "object",
@@ -125,10 +125,10 @@ def test_invalid_ioc(app):
     assert error_result == 'Not a valid IoC\n'
 
 
-@patch("sp.commands.base.enrich.requests.get")
-def test_error_handling(mocked_get, app):
-    mocked_get.return_value.status_code = 400
-    mocked_get.return_value.content = b"error"
+@patch(API_REQUEST)
+def test_error_handling(mocked_request, app):
+    mocked_request.return_value.status_code = 400
+    mocked_request.return_value.content = b"error"
     out = app.app_cmd("enrich ig.com")
     assert isinstance(out, CommandResult)
     error_result = out.stderr

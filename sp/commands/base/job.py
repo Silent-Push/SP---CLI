@@ -1,10 +1,9 @@
 import json
 
-import requests
-
 from sp.commands.base.BaseCommand import BaseCommand
+from sp.common.exceptions import ResponseParseError
 from sp.common.utils import encode_path_segment
-from sp.settings import API_KEY, API_URL
+from sp.settings import API_URL
 
 
 class Job(BaseCommand):
@@ -17,7 +16,7 @@ class Job(BaseCommand):
 
     def __enter__(self):
         """
-        The logic before executing the command
+        Overrides BaseCommand.__enter__: the logic before executing the command
 
         :return: Job
         """
@@ -25,16 +24,22 @@ class Job(BaseCommand):
         super().__enter__()
         return self
 
+    def get_job_id(self) -> None:
+        """
+        Overrides BaseCommand.get_job_id: the job command doesn't need it
+
+        :return: None, never stops the job command
+        """
+        return None
+
     def status(self):
         """
         The command main logic
 
         :return: None
         """
-        self._response = requests.get(self._URL, headers={"x-api-key": API_KEY})
-        if self.check_error():
-            return
+        self.call_api()
         try:
             self._response = json.loads(self._response.content)
         except json.JSONDecodeError as e:
-            self._commandSet._cmd.perror(f"Can't parse command response: {e.msg}")
+            raise ResponseParseError(e)
