@@ -280,13 +280,13 @@ class BaseCommandSet(CommandSet):
         from sp.settings import WEBSCAN_FIELDS
 
         websearch_parser = BaseCommandSet._get_spql_arg_parser()
-        websearch_parser.add_argument(
-            "-f",
-            "--fields",
-            nargs="*",
-            choices_provider=(lambda field: WEBSCAN_FIELDS),
-            help="the fields to be output",
-        )
+        # websearch_parser.add_argument(
+        #     "-f",
+        #     "--fields",
+        #     nargs="*",
+        #     choices_provider=(lambda field: WEBSCAN_FIELDS),
+        #     help="the fields to be output",
+        # )
         websearch_parser.add_argument(
             "-s",
             "--sort",
@@ -308,13 +308,13 @@ class BaseCommandSet(CommandSet):
         from sp.settings import FEEDSCAN_FIELDS
 
         feedsearch_parser = BaseCommandSet._get_spql_arg_parser()
-        feedsearch_parser.add_argument(
-            "-f",
-            "--fields",
-            nargs="*",
-            choices_provider=(lambda field: FEEDSCAN_FIELDS),
-            help="the fields to be output",
-        )
+        # feedsearch_parser.add_argument(
+        #     "-f",
+        #     "--fields",
+        #     nargs="*",
+        #     choices_provider=(lambda field: FEEDSCAN_FIELDS),
+        #     help="the fields to be output",
+        # )
         feedsearch_parser.add_argument(
             "-s",
             "--sort",

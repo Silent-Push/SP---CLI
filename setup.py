@@ -21,11 +21,6 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 with open(f"{here}/requirements.txt") as fd:
     required = fd.read().splitlines()
 
-for not_required in ["pytest", "packaging", "tomli", "cx_Freeze"]:
-    required = list(
-        set(required) - set(r for r in required if r.find(not_required) > -1)
-    )
-
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
 

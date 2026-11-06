@@ -1,5 +1,6 @@
 -r requirements.txt
 cmd2-ext-test==2.0.0
+jsonschema==4.17.3
 pytest==8.0.0
 ruff==0.17.3
 sphinx==7.1.2

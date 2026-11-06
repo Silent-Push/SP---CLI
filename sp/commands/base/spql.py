@@ -42,7 +42,7 @@ class BaseSPQL(BaseCommand):
         """
         self.query = params.query
         self.datasource = params.datasource or self.datasource
-        self.fields = params.fields or self.fields
+        # self.fields = params.fields or self.fields
         self.sort = params.sort or self.sort
         self.limit = params.limit or 100
         self.verbose = params.verbose or False

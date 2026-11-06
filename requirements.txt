@@ -1,22 +1,13 @@
-attrs>=22.2.0
 cmd2==2.7.0
-cx_Freeze>=6.13.2
 gnureadline>=8.1.2; sys_platform!='win32' and sys_platform!='win_amd64'
 # Windows requires this package
 pyreadline3>=3.4.1; sys_platform=='win32' or sys_platform=='win_amd64'
-iniconfig>=1.1.1
-jsonschema==4.17.3
-packaging>=21.3
 pandas>=2.0.3; sys_platform!='win32' and sys_platform!='win_amd64'
 pandas==2.0.0; sys_platform=='win32' or sys_platform=='win_amd64'
 numpy==1.26.4; sys_platform=='win32' or sys_platform=='win_amd64'
-pluggy>=1.0.0
-pyparsing==3.1.1
-pyperclip==1.8.2
 python-dotenv>=0.20.0
 requests>=2.27.1
 tldextract>=3.1.2
-tomli>=1.2.3
+urllib3>=1.26.0
 validators>=0.20.0
-wcwidth==0.2.13
 xdg==5.1.1
