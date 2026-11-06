@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,7 @@ version = "2.0.0"
 description = "Silent Push - Command Line Interface"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "https://www.silentpush.com/terms-of-use/" }
+license-files = ["LICENSE.txt"]
 authors = [{ name = "Integrations", email = "integrations@silentpush.com" }]
 keywords = ["cyber security", "passive DNS"]
 classifiers = [
@@ -52,6 +52,7 @@ sp = "sp.main:main"
 
 [project.urls]
 Homepage = "https://www.silentpush.com"
+"Terms of Use" = "https://www.silentpush.com/terms-of-use/"
 
 [tool.setuptools.packages.find]
 include = ["sp*"]

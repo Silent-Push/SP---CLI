@@ -19,7 +19,7 @@
 - `whoislive` command: real-time whois information for a domain.
 - `job` command: gets the status or the result of a long running task.
 - `sp --version`.
-- Requests time out after 30 seconds, change it with `SILENT_PUSH_API_TIMEOUT`.
+- Requests time out after 30 seconds.
 - Requests are retried on rate limits and server errors.
 - `-f/--fields` on `websearch` and `feedsearch` is sent to the API.
 
@@ -27,7 +27,6 @@
 
 - API endpoints migrated to the newer versions.
 - Error messages depend on the API status: API key, not found, rate limited or server problems.
-- All requests share one connection and send a `SP-CLI/<version>` User-Agent.
 
 ### Fixed
 
@@ -42,6 +41,4 @@
 
 ### Internal
 
-- Packaging moved from `setup.py` to `pyproject.toml`, development uses [uv](https://docs.astral.sh/uv/).
 - Removed the `pandas` and `numpy` dependencies, and other unused packages.
-- Added [ruff](https://docs.astral.sh/ruff/) linting, on GitLab CI and as a pre-commit hook.
