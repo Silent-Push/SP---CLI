@@ -30,6 +30,8 @@ The Silent Push CLI (Command Line Interface)
 
   - [Using the library](#using-the-library)
 
+  - [Linting](#linting)
+
 - [Support](#support)
 
 ## Requirements
@@ -106,11 +108,15 @@ sp padns query a ig.com limit=2 sort=last_seen/- -t
     - soahash
     - txt
     - txthash
+  - search
+    - ipdiversity
 - spql (multiline commands)
   - feedsearch
   - websearch
 - threatcheck
 - bulk_threatcheck
+- whoislive
+- job
 - load
 - unload
 ### Options
@@ -120,9 +126,16 @@ sp padns query a ig.com limit=2 sort=last_seen/- -t
   - **-t, --tsv**: TSV output
   - **-h, --help**: show help
   - **-v, --verbose**: verbosity output
+
+The output options can't be combined. `sp --version` shows the installed version.
+
 - enrich/bulk_enrich
   - **-e, --explain**: show details of data used to calculate the different scores in the response
   - **-s, --scan_data**: show details of data collected from host scanning
+- threatcheck/bulk_threatcheck
+  - **-d, --datasource**: the datasource to threat check, default to 'iofa'
+  - **-q, --qtype**: the query type, default to 'name'
+  - **-n, --with_cnames**: includes CNAME records in the threat check
 
 ## Interactive mode
 We also have an interactive console, If you type 'sp' alone, it will enter the 'sp console' and you can type commands without preceding 'sp', example:
@@ -201,7 +214,7 @@ use semicolon to finish it, example in interactive mode:
 
 ```shell
 SP# websearch 'domain="ibm.com"
-  AND scan_date > "2025-01-01"' limit=2 -tv;
+  AND scan_date > "2025-01-01"' -l 2 -tv;
 [
   {
     "HHV": "8c95d8a118b637509273f7a5d3",
@@ -216,7 +229,7 @@ SP# websearch 'domain="ibm.com"
 The same example but in a single line:
 
 ```shell
-websearch 'domain="ibm.com" AND scan_date > "2025-01-01"' limit=2 -tv;
+websearch 'domain="ibm.com" AND scan_date > "2025-01-01"' -l 2 -tv;
 ```
 
 ## Scripting
@@ -260,7 +273,8 @@ since the command will depend on the type of enrichment being executed.
 
 ## For Devs
 ### Using the library
-I you need to use the library on your own, here some examples:
+
+If you need to use the library on your own, here some examples:
 ```python
 from sp.main import main as sp
 
@@ -290,4 +304,5 @@ git config core.hooksPath .githooks
 ```
 
 ## Support
-Don't hesitate to contact me at [jorgeley@silentpush.com](jorgeley@silentpush.com) if you need any help
+
+Don't hesitate to contact me at [jorgeley@silentpush.com](mailto:jorgeley@silentpush.com) if you need any help

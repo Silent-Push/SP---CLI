@@ -9,7 +9,7 @@ from cmd2 import CommandSetRegistrationError, Fg, style, with_argparser, with_ca
 
 from sp.commands.base.BaseCmdApp import BaseCmdApp
 from sp.common.utils import AppFileManager, categorize_subcommands
-from sp.settings import SPQL_COMMANDS
+from sp.settings import SPQL_COMMANDS, VERSION
 
 
 class App(BaseCmdApp):
@@ -118,6 +118,7 @@ def main(argv=None):
     app_man.create_hist_dir()  # Create history and cache directories
     app = App(application_manager=app_man)
     parser = argparse.ArgumentParser(prog="sp")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     command_help = "command: score/enrich/padns (if none, enter interactive shell)"
     parser.add_argument("command", nargs="?", help=command_help)
     arg_help = "optional arguments for command: -j/-c/-t"

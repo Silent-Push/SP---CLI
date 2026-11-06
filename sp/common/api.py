@@ -1,15 +1,10 @@
-from importlib.metadata import PackageNotFoundError, version
-
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from sp import settings
 
-try:
-    USER_AGENT = f"SP-CLI/{version('SilentPushCLI')}"
-except PackageNotFoundError:  # running from the source folder, not installed
-    USER_AGENT = "SP-CLI/dev"
+USER_AGENT = f"SP-CLI/{settings.VERSION}"
 """Sent on every request so the API team can see CLI traffic"""
 
 RETRY_STATUSES = (429, 500, 502, 503, 504)

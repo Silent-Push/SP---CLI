@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from sp import settings
 from sp.main import main
 from tests.fixtures.app import API_REQUEST
 
@@ -112,3 +113,17 @@ def test_api_error_stops_command(app):
     assert out.stdout == ""  # used to print the error body as if it was the result
     assert "Something went wrong :(" in out.stderr
     assert "Can't parse command response" not in out.stderr
+
+
+def test_version(capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main(["--version"])
+    assert exit_info.value.code == 0
+    assert capsys.readouterr().out.strip() == f"sp {settings.VERSION}"
+
+
+def test_output_options_cannot_be_combined(app):
+    with patch(API_REQUEST) as request:
+        out = app.app_cmd("score ig.com -j -c")
+    request.assert_not_called()
+    assert "not allowed with argument" in out.stderr

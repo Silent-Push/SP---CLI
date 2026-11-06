@@ -1,4 +1,5 @@
 import os
+from importlib.metadata import PackageNotFoundError, version
 
 from dotenv import load_dotenv
 from xdg import XDG_CONFIG_HOME
@@ -6,6 +7,11 @@ from xdg import XDG_CONFIG_HOME
 CONFIG_FILE = XDG_CONFIG_HOME.joinpath("SP-CLI", ".env")  # Optional config file, i.e.: ~/.config/SP-CLI/.env
 load_dotenv(CONFIG_FILE)
 
+try:
+    VERSION = version("SilentPushCLI")
+except PackageNotFoundError:  # running from the source folder, not installed
+    VERSION = "dev"
+"""The installed version of the CLI"""
 CRLF = "\r\n"
 """The prompt line break"""
 API_URL = os.environ.get("SILENT_PUSH_API_URL", "https://api.silentpush.com/api/")
@@ -60,9 +66,9 @@ def get_initial_commands() -> set:
     }
 
 
-SPQL_COMMANDS = ["feedsearch", "websearch", "livescan"]
+SPQL_COMMANDS = ["feedsearch", "websearch"]
 
-MULTILINE_COMMANDS = ["feedsearch", "websearch", "livescan"]
+MULTILINE_COMMANDS = ["feedsearch", "websearch"]
 
 FEEDSCAN_FIELDS = [
     "domaininfo.registrar",

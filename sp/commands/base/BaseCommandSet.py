@@ -84,13 +84,14 @@ class BaseCommandSet(CommandSet):
         :return: Cmd2ArgumentParser
         """
         base_arg_parser = Cmd2ArgumentParser()
-        base_arg_parser.add_argument(
+        output_group = base_arg_parser.add_mutually_exclusive_group()
+        output_group.add_argument(
             "-j", "--json", help="Output as JSON", action="store_true"
         )
-        base_arg_parser.add_argument(
+        output_group.add_argument(
             "-c", "--csv", help="Output as CSV", action="store_true"
         )
-        base_arg_parser.add_argument(
+        output_group.add_argument(
             "-t",
             "--tsv",
             help="Output as TSV (tab-separated values)",
@@ -266,7 +267,6 @@ class BaseCommandSet(CommandSet):
             type=int,
             help="The number of records to return",
         )
-        spql_parser.add_argument("-m", "--with-metadata", action="store_true")
         return spql_parser
 
     @staticmethod
