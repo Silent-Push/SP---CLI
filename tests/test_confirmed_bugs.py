@@ -138,3 +138,17 @@ def test_output_options_cannot_be_combined(app):
         out = app.app_cmd("score ig.com -j -c")
     request.assert_not_called()
     assert "not allowed with argument" in out.stderr
+
+
+def test_padns_validates_the_ioc(app):
+    with patch(API_REQUEST) as request:
+        out = app.app_cmd("padns query a !")
+    request.assert_not_called()
+    assert "Not a valid IoC" in out.stderr
+
+
+def test_padns_answer_soa_accepts_wildcards(app):
+    response = MagicMock(status_code=200, content=json.dumps({"response": {"records": []}}).encode())
+    with patch(API_REQUEST, return_value=response) as request:
+        app.app_cmd("padns answer soa jomax.net*20210725")
+    assert "padns/lookup/answer/soa/" in request.call_args.args[1]

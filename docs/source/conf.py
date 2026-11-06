@@ -1,12 +1,15 @@
 import os
 import sys
+import tomllib
 
 sys.path.insert(0, os.path.abspath("../.."))
+
+with open(os.path.join(os.path.dirname(__file__), "../../pyproject.toml"), "rb") as pyproject:
+    version = release = tomllib.load(pyproject)["project"]["version"]
 
 project = "SP - CLI"
 copyright = "2024, Silent Push"
 author = "Integrations<integrations@silentpush.com>"
-version = release = "1.3.0"
 show_authors = True
 
 extensions = [

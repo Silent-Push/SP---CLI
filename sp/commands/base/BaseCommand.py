@@ -1,7 +1,8 @@
+import csv
+import io
 import json
 from typing import Any
 
-import pandas
 import requests
 from cmd2 import CommandSet, Statement
 from cmd2.ansi import style_success
@@ -17,7 +18,6 @@ from sp.common.exceptions import (
     ResponseParseError,
 )
 from sp.common.utils import (
-    PandasDataFrameTSV,
     encode_query_params,
     flatten_dict,
     flatten_list,
@@ -91,18 +91,12 @@ class BaseCommand:
         if self._params.json:
             self._output = json.dumps(self._result, indent=2) + CRLF
         elif self._params.csv:
-            try:
-                dataframe = pandas.DataFrame(flattened, index=[0])
-                dataframe = dataframe.transpose()
-                self._output = dataframe.to_csv(header=False) + CRLF
-            except ValueError:
-                self._output = flattened
+            self._output = self._to_rows(flattened, ",")
         elif self._params.tsv:
-            try:
-                dataframe = PandasDataFrameTSV(flattened, index=[0])
-                self._output = dataframe.to_tsv() + CRLF
-            except ValueError:
-                self._output = flattened
+            if self._commandSet._cmd.stdout.isatty():
+                self._output = self._to_aligned_rows(flattened)
+            else:
+                self._output = self._to_rows(flattened, "\t")
         else:
             try:
                 self._output = json.dumps(self._result, indent=2) + CRLF
@@ -113,6 +107,35 @@ class BaseCommand:
         self._commandSet._cmd.poutput(style_success(self._output))
         # used by the run_script and run_pyscript command
         self._commandSet._cmd.last_result = self._output
+
+    @staticmethod
+    def _to_rows(flattened: Any, delimiter: str) -> Any:
+        """
+        Formats a flattened result as key and value rows, single values like a score stay as they are
+
+        :param flattened: The flattened result
+        :param delimiter: The column delimiter
+        :return: The rows, or the value itself
+        """
+        if not isinstance(flattened, dict):
+            return flattened
+        rows = io.StringIO()
+        csv.writer(rows, delimiter=delimiter, lineterminator="\n").writerows(flattened.items())
+        return rows.getvalue() + CRLF
+
+    @staticmethod
+    def _to_aligned_rows(flattened: Any) -> Any:
+        """
+        Formats a flattened result as readable columns for the terminal, piped output stays real TSV
+
+        :param flattened: The flattened result
+        :return: The rows, or the value itself
+        """
+        if not isinstance(flattened, dict):
+            return flattened
+        width = max(map(len, flattened), default=0)
+        rows = (f"{key:<{width}}  {'' if value is None else value}" for key, value in flattened.items())
+        return "\n".join(rows) + CRLF
 
     def call_api(self, method: str = "GET", payload: dict = None) -> Any:
         """

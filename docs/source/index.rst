@@ -14,4 +14,8 @@ SP - CLI documentation
    sp/score
    sp/padns_query
    sp/padns_answer
+   sp/padns_search
    sp/spql_webscan
+   sp/threatcheck
+   sp/whois
+   sp/job

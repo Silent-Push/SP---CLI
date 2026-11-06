@@ -2,11 +2,15 @@ from cmd2 import CommandSet, Statement
 
 from sp.commands.base.BaseCommand import BaseCommand
 from sp.common.exceptions import CommandError
+from sp.common.parse_ioc import IOCUtils
 from sp.common.utils import encode_path_segment, encode_query_value
 from sp.settings import API_URL
 
 
 class BasePADNS(BaseCommand):
+    validate_ioc: bool = True
+    """If should reject an invalid IoC, off for values like wildcards"""
+
     def lookup(self):
         """
         The PADNS main command logic
@@ -15,6 +19,8 @@ class BasePADNS(BaseCommand):
         """
         if not self._params.ioc:
             raise CommandError("You need to pass the IoC")
+        if self.validate_ioc and not IOCUtils(self._params.ioc).valid:
+            raise CommandError("Not a valid IoC")
         self._result = self.call_api().get("response")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -49,6 +55,7 @@ class PADNSLookup(BasePADNS):
         command_set: CommandSet,
         type: str = "query",
         qtype: str = "any",
+            validate_ioc: bool = True,
     ):
         """
         Context manager class for the PADNS sub commands,
@@ -58,9 +65,11 @@ class PADNSLookup(BasePADNS):
         :param command_set: The CommandSet object related to the command
         :param type: A PADNS query type, i.e.: query
         :param qtype: The sub type of the query, i.e.: any
+        :param validate_ioc: If should reject an invalid IoC, off for values like wildcards
         """
         self._type = type
         self._qtype = qtype
+        self.validate_ioc = validate_ioc
         super().__init__(params, command_set)
 
     def __enter__(self):

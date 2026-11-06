@@ -22,7 +22,8 @@ __pycache__
 .pickle
 /SilentPushSDK.egg-info/**
 /.coverage
-/docs/
+/docs/*
+!/docs/source/
 /CLAUDE.md
 
 # secrets: never commit API keys or tokens

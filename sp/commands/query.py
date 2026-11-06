@@ -9,7 +9,6 @@ from cmd2 import (
 
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.commands.base.padns import PADNSLookup
-from sp.common.parse_ioc import IOCUtils
 
 
 class PADNSQueryCommandSet(BaseCommandSet):
@@ -59,9 +58,6 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="aaaa") as padns:
             padns.lookup()
 
@@ -73,9 +69,6 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="cname") as padns:
             padns.lookup()
 
@@ -87,9 +80,6 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="mx") as padns:
             padns.lookup()
 
@@ -101,9 +91,6 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="ns") as padns:
             padns.lookup()
 
@@ -115,9 +102,6 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="ptr4") as padns:
             padns.lookup()
 
@@ -129,9 +113,6 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="ptr6") as padns:
             padns.lookup()
 
@@ -144,9 +125,6 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="any") as padns:
             padns.lookup()
 
@@ -159,9 +137,6 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="anyipv4") as padns:
             padns.lookup()
 
@@ -174,9 +149,6 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="anyipv6") as padns:
             padns.lookup()
 
@@ -188,9 +160,6 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="soa") as padns:
             padns.lookup()
 
@@ -202,8 +171,5 @@ class PADNSQueryCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, qtype="txt") as padns:
             padns.lookup()

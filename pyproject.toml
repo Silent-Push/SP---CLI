@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SilentPushCLI"
-version = "1.4.0"
+version = "2.0.0"
 description = "Silent Push - Command Line Interface"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -30,9 +30,6 @@ dependencies = [
     "cmd2==2.7.0",
     "gnureadline>=8.1.2; sys_platform != 'win32' and sys_platform != 'win_amd64'",
     "pyreadline3>=3.4.1; sys_platform == 'win32' or sys_platform == 'win_amd64'", # Windows requires this package
-    "pandas>=2.0.3; sys_platform != 'win32' and sys_platform != 'win_amd64'",
-    "pandas==2.0.0; sys_platform == 'win32' or sys_platform == 'win_amd64'",
-    "numpy==1.26.4; sys_platform == 'win32' or sys_platform == 'win_amd64'",
     "python-dotenv>=0.20.0",
     "requests>=2.27.1",
     "tldextract>=3.1.2",

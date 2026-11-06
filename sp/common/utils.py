@@ -1,11 +1,8 @@
-from collections.abc import Callable
 from functools import partial
 from pathlib import Path
 from urllib.parse import quote, urlencode
 
 import cmd2
-import pandas
-from pandas import DataFrame
 from xdg import XDG_DATA_HOME
 
 
@@ -27,15 +24,6 @@ class AppFileManager:
 
     def create_hist_dir(self) -> Path:
         XDG_DATA_HOME.joinpath(self.app_name).mkdir(parents=True, exist_ok=True)
-
-
-class PandasDataFrameTSV(pandas.DataFrame):
-    def to_tsv(self, *args, **kwargs) -> str:
-        return self.transpose().to_string(max_colwidth=200, header=False)
-
-    @property
-    def _constructor(self) -> Callable[..., DataFrame]:
-        return PandasDataFrameTSV
 
 
 def categorize_subcommands(category: str, app: cmd2.Cmd, command_set: cmd2.CommandSet):

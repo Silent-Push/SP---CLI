@@ -1,6 +1,6 @@
-SPQL Webscan command
---------------------
+SPQL commands
+-------------
 
-.. automodule:: sp.commands.webscan
+.. automodule:: sp.commands.spql
     :members:
     :undoc-members:

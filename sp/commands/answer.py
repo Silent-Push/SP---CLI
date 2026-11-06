@@ -9,7 +9,6 @@ from cmd2 import (
 
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.commands.base.padns import PADNSLookup
-from sp.common.parse_ioc import IOCUtils
 
 
 class PADNSAnswerCommandSet(BaseCommandSet):
@@ -49,9 +48,6 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, type="answer", qtype="a") as padns:
             padns.lookup()
 
@@ -63,9 +59,6 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, type="answer", qtype="aaaa") as padns:
             padns.lookup()
 
@@ -77,9 +70,6 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, type="answer", qtype="cname") as padns:
             padns.lookup()
 
@@ -91,9 +81,6 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, type="answer", qtype="mx") as padns:
             padns.lookup()
 
@@ -105,9 +92,6 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, type="answer", qtype="ns") as padns:
             padns.lookup()
 
@@ -119,9 +103,6 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, type="answer", qtype="ptr4") as padns:
             padns.lookup()
 
@@ -133,9 +114,6 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, type="answer", qtype="ptr6") as padns:
             padns.lookup()
 
@@ -147,7 +125,7 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        with PADNSLookup(params, self, type="answer", qtype="soa") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="soa", validate_ioc=False) as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("padns answer", "txt", subcommand_parser)
@@ -158,10 +136,7 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        # if not IOCUtils(params.ioc).valid:
-        #     self._cmd.perror("Not a valid IoC")
-        #     return
-        with PADNSLookup(params, self, type="answer", qtype="txt") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="txt", validate_ioc=False) as padns:
             padns.lookup()
 
     @cmd2.as_subcommand_to("padns answer", "mxhash", subcommand_parser)
@@ -172,9 +147,6 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, type="answer", qtype="mxhash") as padns:
             padns.lookup()
 
@@ -186,9 +158,6 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, type="answer", qtype="nshash") as padns:
             padns.lookup()
 
@@ -200,9 +169,6 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Not a valid IoC")
-            return
         with PADNSLookup(params, self, type="answer", qtype="soahash") as padns:
             padns.lookup()
 
@@ -214,8 +180,5 @@ class PADNSAnswerCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        # if not IOCUtils(params.ioc).valid:
-        #     self._cmd.perror("Not a valid IoC")
-        #     return
-        with PADNSLookup(params, self, type="answer", qtype="txthash") as padns:
+        with PADNSLookup(params, self, type="answer", qtype="txthash", validate_ioc=False) as padns:
             padns.lookup()

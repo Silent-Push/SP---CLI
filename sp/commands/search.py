@@ -9,7 +9,6 @@ from cmd2 import (
 
 from sp.commands.base.BaseCommandSet import BaseCommandSet
 from sp.commands.base.padns import PADNSSearch
-from sp.common.parse_ioc import IOCUtils
 
 
 class PADNSSearchCommandSet(BaseCommandSet):
@@ -48,8 +47,5 @@ class PADNSSearchCommandSet(BaseCommandSet):
         :param params: The passed command parameters
         :return: None
         """
-        if not IOCUtils(params.ioc).valid:
-            self._cmd.perror("Search Not a valid IoC")
-            return
         with PADNSSearch(params, self, type="ipdiversity") as padns:
             padns.lookup()

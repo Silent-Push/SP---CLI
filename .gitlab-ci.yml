@@ -69,7 +69,7 @@ pages:
   stage: pages
   image: python:3.11
   before_script:
-  - python3 -m pip install sphinx
+    - pip install -e ".[dev]"
   script:
     - python3 -m sphinx -b html docs/source public
   pages: true
