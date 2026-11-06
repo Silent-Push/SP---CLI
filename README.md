@@ -30,12 +30,13 @@ The Silent Push CLI (Command Line Interface)
 
   - [Using the library](#using-the-library)
 
-  - [Linting](#linting)
+  - [Development setup](#development-setup)
 
 - [Support](#support)
 
 ## Requirements
-- Python 3.9 or later with pip: https://www.python.org/downloads/
+
+- Python 3.11 or later with pip: https://www.python.org/downloads/
 - Windows users only:
   - Microsoft Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
@@ -288,16 +289,27 @@ app.onecmd_plus_hooks('padns query ns ig.com limit=2')
 print(app.last_result)
 ```
 
-### Linting
+### Development setup
 
-The project uses [ruff](https://docs.astral.sh/ruff/), which also runs on GitLab CI. To lint before every commit, enable
-the git hook once per clone:
+The project uses [uv](https://docs.astral.sh/uv/) to manage its virtual environment and dependencies:
 
 ```bash
-pip install -r requirements-dev.txt
+uv sync --extra dev
+```
+
+Then run the tests, or the [ruff](https://docs.astral.sh/ruff/) linter, which also runs on GitLab CI:
+
+```bash
+uv run pytest tests
+uv run ruff check .
+```
+
+To lint before every commit, enable the git hook once per clone:
+
+```bash
 git config core.hooksPath .githooks
 ```
 
 ## Support
 
-Don't hesitate to contact me at [jorgeley@silentpush.com](mailto:jorgeley@silentpush.com) if you need any help
+Don't hesitate to contact us at [integrations@silentpush.com](mailto:integrations@silentpush.com) if you need any help

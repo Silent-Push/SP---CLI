@@ -3,71 +3,75 @@ SP - CLI
 
 The Silent Push CLI (Command Line Interface)
 
--  `Requirements <#Requirements>`__
+- `Requirements <#Requirements>`__
 
--  `Installation <#Installation>`__
+- `Installation <#Installation>`__
 
--  `Usage <#Usage>`__
+- `Usage <#Usage>`__
 
-   -  `Supported commands and sub-commands so
-      far <#supported-commands-and-sub-commands-so-far>`__
+  - `Supported commands and sub-commands so
+    far <#supported-commands-and-sub-commands-so-far>`__
 
-   -  `Options <#options>`__
+  - `Options <#options>`__
 
--  `Interactive mode <#interactive-mode>`__
+- `Interactive mode <#interactive-mode>`__
 
-   -  `The load/unload command <#the-load-and-unload-command>`__
+  - `The load/unload command <#the-load-and-unload-command>`__
 
--  `Scripting <#scripting>`__
+- `SPQL Commands <#spql-commands>`__
 
-   -  `run_pyscript command <#runpyscript-command>`__
+- `Scripting <#scripting>`__
 
-   -  `run_script command <#runscript-command>`__
+  - `run_pyscript command <#runpyscript-command>`__
 
-   -  `Batch execution tips <#batch-execution-tips>`__
+  - `run_script command <#runscript-command>`__
 
--  `For Devs <#for-devs>`__
+  - `Batch execution tips <#batch-execution-tips>`__
 
-   -  `Using the library <#using-the-library>`__
+- `For Devs <#for-devs>`__
 
--  `Support <#support>`__
+  - `Using the library <#using-the-library>`__
+
+  - `Development setup <#development-setup>`__
+
+- `Support <#support>`__
 
 Requirements
 ------------
 
--  Python 3.9 or later with pip: https://www.python.org/downloads/
--  Windows users only:
+- Python 3.11 or later with pip: https://www.python.org/downloads/
+- Windows users only:
 
-   -  Microsoft Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+  - Microsoft Build Tools:
+    https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
 Installation
 ------------
 
-.. code:: shell
-
-    python3 -m pip install SilentPushCLI
-
-Linux and MacOS users
----------------------
+``python3 -m pip install SilentPushCLI``
 
 After installed, export your Silent Push API key to your terminal:
+
+Linux and MacOS users
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: shell
 
    export SILENT_PUSH_API_KEY=YOUR-API-KEY
 
 Windows Users
--------------
-
-After installed, export your Silent Push API key to your terminal:
+~~~~~~~~~~~~~
 
 .. code:: shell
 
-    setx /m SILENT_PUSH_API_KEY YOUR-API-KEY
+   setx /m SILENT_PUSH_API_KEY YOUR-API-KEY
 
 Restart your CMD - Command Prompt
 
-There's a demo video if you need more detailed instructions https://labs.silentpush.com/jorgeley/SP%20CLI%20-%20demo.mov
+There's a demo video if you need more detailed instructions
+https://youtu.be/d4WApEZcXFg
+
+``sp --version`` shows the installed version.
 
 Usage
 -----
@@ -78,17 +82,18 @@ Syntax:
 
    sp COMMAND [SUB-COMMAND...] IOC [PARAMETER=VALUE...] [OPTION...]
 
-Use the help verbose command to get a detailed list of the available commands:
+Use the help verbose command to get a detailed list of the available
+commands:
 
 .. code:: shell
 
-    sp help -v
+   sp help -v
 
 Use the help flag on any command to get more details:
 
 .. code:: shell
 
-    sp padns query a --help
+   sp padns query a --help
 
 Examples:
 
@@ -102,70 +107,90 @@ Examples:
 Supported commands and sub-commands so far
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  score
--  enrich
--  bulk_enrich
--  padns
+- score
+- enrich
+- bulk_enrich
+- padns
 
-   -  query
+  - query
 
-      -  any
-      -  anyipv4
-      -  anyipv6
-      -  a
-      -  aaaa
-      -  cname
-      -  mx
-      -  ns
-      -  ptr4
-      -  ptr6
-      -  soa
-      -  txt
+    - any
+    - anyipv4
+    - anyipv6
+    - a
+    - aaaa
+    - cname
+    - mx
+    - ns
+    - ptr4
+    - ptr6
+    - soa
+    - txt
 
-   -  answer
+  - answer
 
-      -  a
-      -  aaaa
-      -  cname
-      -  mx
-      -  mxhash
-      -  ns
-      -  nshash
-      -  ptr4
-      -  ptr6
-      -  soa
-      -  soahash
-      -  txt
-      -  txthash
+    - a
+    - aaaa
+    - cname
+    - mx
+    - mxhash
+    - ns
+    - nshash
+    - ptr4
+    - ptr6
+    - soa
+    - soahash
+    - txt
+    - txthash
 
-   -  spql
-      -  feescan
-      -  webscan
+  - search
 
--  load
--  unload
+    - ipdiversity
+
+- spql (multiline commands)
+
+  - feedsearch
+  - websearch
+
+- threatcheck
+- bulk_threatcheck
+- whoislive
+- job
+- load
+- unload
 
 Options
 ~~~~~~~
--  all commands
 
-   -  **-j, –json**: JSON output (default)
-   -  **-c, –csv**: CSV output
-   -  **-t, –tsv**: TSV output
-   -  **-h, –help**: show help
+- all commands
 
--  enrich/bulk_enrich
+  - **-j, --json**: JSON output (default)
+  - **-c, --csv**: CSV output
+  - **-t, --tsv**: TSV output
+  - **-h, --help**: show help
+  - **-v, --verbose**: verbosity output
 
-   -  **-e, –explain**: show details of data used to calculate the
-      different scores in the response
-   -  **-s, –scan_data**: show details of data collected from host
-      scanning
+The output options can't be combined.
+
+- enrich/bulk_enrich
+
+  - **-e, --explain**: show details of data used to calculate the
+    different scores in the response
+  - **-s, --scan_data**: show details of data collected from host
+    scanning
+
+- threatcheck/bulk_threatcheck
+
+  - **-d, --datasource**: the datasource to threat check, default to
+    'iofa'
+  - **-q, --qtype**: the query type, default to 'name'
+  - **-n, --with_cnames**: includes CNAME records in the threat check
 
 Interactive mode
 ----------------
 
-We also have an interactive console, If you type ‘sp’ alone, it will
-enter the ‘sp console’ and you can type commands without preceding ‘sp’,
+We also have an interactive console, If you type 'sp' alone, it will
+enter the 'sp console' and you can type commands without preceding 'sp',
 example:
 
 .. code:: shell
@@ -193,14 +218,12 @@ example:
      ]
    }
 
-   SP#
-
 The load and unload command
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This command gives you the ability of switching the console to a
 specific context and loading that group of commands. As an example,
-‘padns’ contains various sub-commands, so you can do like:
+'padns' contains various sub-commands, so you can do like:
 
 .. code:: shell
 
@@ -240,9 +263,25 @@ specific context and loading that group of commands. As an example,
 
    SP (PADNS)# unload padns
    PADNS unloaded
-   SP#
 
 You still can use any other command normally.
+
+SPQL Commands
+-------------
+
+SPQL commands are multiline, since they can be quite complex. Use single
+quotes to span the query along the lines, example in interactive mode:
+
+.. code:: shell
+
+   SP# websearch 'domain="ibm.com"
+     AND scan_date > "2025-01-01"' -l 2 -tv
+
+The same example but in a single line:
+
+.. code:: shell
+
+   websearch 'domain="ibm.com" AND scan_date > "2025-01-01"' -l 2 -tv
 
 Scripting
 ---------
@@ -250,8 +289,8 @@ Scripting
 run_pyscript command
 ~~~~~~~~~~~~~~~~~~~~
 
-There are 2 special commands for executing scripts using the ‘sp’
-command, so you can easily use it in your projects, here’s a simple
+There are 2 special commands for executing scripts using the 'sp'
+command, so you can easily use it in your projects, here's a simple
 python script example:
 
 .. code:: python
@@ -270,13 +309,13 @@ run_script command
 ~~~~~~~~~~~~~~~~~~
 
 Also, you can create a file with batch commands one per line and easily
-execute them, let’s suppose we have this file:
+execute them, let's suppose we have this file:
 
 .. code:: text
 
    # my_script.txt
    padns query mx ig.com limit=2
-   score ig.com -c 
+   score ig.com -c
 
 and then you can execute this batch commands file with:
 
@@ -293,17 +332,17 @@ or you can simply redirect the input (like importing a database):
 Batch execution tips
 ~~~~~~~~~~~~~~~~~~~~
 
-As you might know already, the greatest feature of shell scripting is
-the ability of loading batch parameters from files. Here’s one idea for
+As you might know already, one of the greatest joy of shell scripting is
+the ability of loading batch parameters from files. Here's one idea for
 the bulk_enrich command:
 
 .. code:: shell
 
    cat to_enrich.txt | xargs sp bulk_enrich
 
-Everything in to_enrich.txt file will be treated as one parameter for
-the bulk_enrich command, don’t mix domains with IPs though, since the
-command will depend on the type of enrichment being executed.
+Everything inside to_enrich.txt file will be treated as one parameter
+for the bulk_enrich command, don't mix domains with IPs though, since
+the command will depend on the type of enrichment being executed.
 
 For Devs
 --------
@@ -311,7 +350,7 @@ For Devs
 Using the library
 ~~~~~~~~~~~~~~~~~
 
-I you need to use the library on your own, here some examples:
+If you need to use the library on your own, here some examples:
 
 .. code:: python
 
@@ -333,9 +372,32 @@ another way of doing the same
    app.onecmd_plus_hooks('padns query ns ig.com limit=2')
    print(app.last_result)
 
+Development setup
+~~~~~~~~~~~~~~~~~
+
+The project uses `uv <https://docs.astral.sh/uv/>`__ to manage its
+virtual environment and dependencies:
+
+.. code:: bash
+
+   uv sync --extra dev
+
+Then run the tests, or the `ruff <https://docs.astral.sh/ruff/>`__
+linter, which also runs on GitLab CI:
+
+.. code:: bash
+
+   uv run pytest tests
+   uv run ruff check .
+
+To lint before every commit, enable the git hook once per clone:
+
+.. code:: bash
+
+   git config core.hooksPath .githooks
+
 Support
 -------
 
-Don’t hesitate to contact me at
-`jorgeley@silentpush.com <jorgeley@silentpush.com>`__ if you need any
-help
+Don't hesitate to contact us at integrations@silentpush.com if you need
+any help

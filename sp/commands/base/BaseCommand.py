@@ -1,5 +1,5 @@
 import json
-from typing import Any, Optional
+from typing import Any
 
 import pandas
 import requests
@@ -140,7 +140,7 @@ class BaseCommand:
             raise JobPending(job_id)
         return content
 
-    def get_job_id(self, content: Any) -> Optional[str]:
+    def get_job_id(self, content: Any) -> str | None:
         """
         Long running tasks return a job instead of the result
 

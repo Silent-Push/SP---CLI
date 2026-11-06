@@ -25,3 +25,9 @@ def test_feedsearch(app):
     assert "vendor" in properties
     assert "indicator" in properties
     assert "feed" in properties
+
+
+def test_feedsearch_limit(app):
+    app.interactive = False
+    out = app.app_cmd("feedsearch 'type=\"domain\"' -l 2\n")
+    assert len(json.loads(out.stdout)) == 2

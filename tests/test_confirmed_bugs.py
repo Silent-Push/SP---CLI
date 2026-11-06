@@ -96,6 +96,17 @@ def test_websearch_default_sort(app):
     assert request.call_args.args[2]["sorting"] == ["scan_date/desc"]
 
 
+def test_limit_option_reaches_both_spql_endpoints(app):
+    app.interactive = False
+    content = json.dumps({"response": {}}).encode()
+    response = MagicMock(status_code=200, content=content)
+    with patch(API_REQUEST, return_value=response) as request:
+        app.app_cmd("websearch 'domain=\"ig.com\"' -l 2\n")
+        assert "&limit=2" in request.call_args.args[1]
+        app.app_cmd("feedsearch 'type=\"domain\"' -l 2\n")
+        assert request.call_args.args[2]["limit"] == 2
+
+
 def test_load_unload_load_again(app):
     app.app_cmd("load padns")
     app.app_cmd("unload padns")

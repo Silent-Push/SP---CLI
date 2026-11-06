@@ -26,3 +26,9 @@ def test_websearch(app):
     assert "port" in properties
     assert "ip" in properties
     assert "hostname" in properties
+
+
+def test_websearch_limit(app):
+    app.interactive = False
+    out = app.app_cmd("websearch 'domain=\"microsoft.com\"' -l 2\n")
+    assert len(json.loads(out.stdout)) == 2

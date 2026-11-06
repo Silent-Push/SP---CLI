@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SilentPushCLI"
+version = "1.4.0"
+description = "Silent Push - Command Line Interface"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "https://www.silentpush.com/terms-of-use/" }
+authors = [{ name = "Integrations", email = "integrations@silentpush.com" }]
+keywords = ["cyber security", "passive DNS"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Topic :: Internet :: Name Service (DNS)",
+    "Topic :: Security",
+    "Topic :: System :: Networking :: Firewalls",
+    "Topic :: System :: System Shells",
+    "Topic :: Terminals",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = [
+    "cmd2==2.7.0",
+    "gnureadline>=8.1.2; sys_platform != 'win32' and sys_platform != 'win_amd64'",
+    "pyreadline3>=3.4.1; sys_platform == 'win32' or sys_platform == 'win_amd64'", # Windows requires this package
+    "pandas>=2.0.3; sys_platform != 'win32' and sys_platform != 'win_amd64'",
+    "pandas==2.0.0; sys_platform == 'win32' or sys_platform == 'win_amd64'",
+    "numpy==1.26.4; sys_platform == 'win32' or sys_platform == 'win_amd64'",
+    "python-dotenv>=0.20.0",
+    "requests>=2.27.1",
+    "tldextract>=3.1.2",
+    "urllib3>=1.26.0",
+    "validators>=0.20.0",
+    "xdg==5.1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "cmd2-ext-test==2.0.0",
+    "jsonschema==4.17.3",
+    "pytest==8.0.0",
+    "ruff==0.17.3",
+    "sphinx==7.1.2",
+]
+
+[project.scripts]
+sp = "sp.main:main"
+
+[project.urls]
+Homepage = "https://www.silentpush.com"
+
+[tool.setuptools.packages.find]
+include = ["sp*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = ["build", "dist", "docs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]  # package exports

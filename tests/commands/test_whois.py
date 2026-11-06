@@ -32,6 +32,8 @@ def mocked_response(whois: dict) -> MagicMock:
 def test_whoislive(app):
     out = app.app_cmd("whoislive silentpush.com")
     assert isinstance(out, CommandResult)
+    if "No whois information found" in out.stderr:
+        pytest.skip("The API intermittently returns no whois data")
     whois_result = json.loads(out.stdout)
     jsonschema.validate(instance=whois_result, schema=whois_result_schema)
     assert whois_result["domain"] == "silentpush.com"

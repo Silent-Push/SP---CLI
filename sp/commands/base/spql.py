@@ -15,7 +15,6 @@ class BaseSPQL(BaseCommand):
     query: str = ""
     """The SPQL query string i.e.: 'domain=ig.com'"""
     datasource: list = ["webscan"]
-    # TODO: fields is accepted in SPQL https://silentpush.atlassian.net/wiki/spaces/TI/pages/1576075279/Example+Web+Scanner+Queries+Other+Search+Tips
     """The SPQL data source which to query for"""
     fields: list = []
     """The output fields parameter"""
@@ -42,7 +41,7 @@ class BaseSPQL(BaseCommand):
         """
         self.query = params.query
         self.datasource = params.datasource or self.datasource
-        # self.fields = params.fields or self.fields
+        self.fields = params.fields or self.fields
         self.sort = params.sort or self.sort
         self.limit = params.limit or 100
         self.verbose = params.verbose or False
@@ -69,7 +68,7 @@ class BaseSPQL(BaseCommand):
             raise CommandError("You need to specify a query")
         self.payload = {
             "query": self._get_query(),
-            # "fields": self.fields,  # @TODO: not supported yet
+            "fields": self.fields,
             "sorting": self.sort,
             "limit": self.limit,
         }
@@ -82,6 +81,16 @@ class WebScan(BaseSPQL):
     """The SPQL data source which to query for"""
     sort: list = ["scan_date/desc"]
     """The default sort, first_seen_on is a feed field, not a webscan one"""
+
+    def __enter__(self):
+        """
+        Overrides BaseCommand.__enter__: the webscan endpoint reads the limit from the URL, not from the payload
+
+        :return: WebScan
+        """
+        if self._params.limit:
+            self._URL += f"&limit={self._params.limit}"
+        return super().__enter__()
 
     def scan(self):
         """
