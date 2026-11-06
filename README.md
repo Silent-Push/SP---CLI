@@ -42,19 +42,21 @@ The Silent Push CLI (Command Line Interface)
 ## Installation
 
 `python3 -m pip install SilentPushCLI`
-### Linux and MacOS users
+
 After installed, export your Silent Push API key to your terminal:
+### Linux and MacOS users
 ```shell
 export SILENT_PUSH_API_KEY=YOUR-API-KEY
 ```
 ### Windows Users
-After installed, export your Silent Push API key to your terminal:
 ```shell
 setx /m SILENT_PUSH_API_KEY YOUR-API-KEY
 ```
 Restart your CMD - Command Prompt
 
 There's a demo video if you need more detailed instructions https://youtu.be/d4WApEZcXFg
+
+`sp --version` shows the installed version.
 
 ## Usage
 Syntax:
@@ -127,7 +129,7 @@ sp padns query a ig.com limit=2 sort=last_seen/- -t
   - **-h, --help**: show help
   - **-v, --verbose**: verbosity output
 
-The output options can't be combined. `sp --version` shows the installed version.
+The output options can't be combined.
 
 - enrich/bulk_enrich
   - **-e, --explain**: show details of data used to calculate the different scores in the response
@@ -209,27 +211,18 @@ You still can use any other command normally.
 
 ## SPQL Commands
 
-SPQL commands are multiline, since they can be quite complex. Use single quotes to span the query along the lines and
-use semicolon to finish it, example in interactive mode:
+SPQL commands are multiline, since they can be quite complex. Use single quotes to span the query along the lines,
+example in interactive mode:
 
 ```shell
 SP# websearch 'domain="ibm.com"
-  AND scan_date > "2025-01-01"' -l 2 -tv;
-[
-  {
-    "HHV": "8c95d8a118b637509273f7a5d3",
-    "adtech": {
-      "ads_txt": false,
-      "app_ads_txt": false,
-      "sellers_json": false
-    },
-... (lots of results)
+  AND scan_date > "2025-01-01"' -l 2 -tv
 ```
 
 The same example but in a single line:
 
 ```shell
-websearch 'domain="ibm.com" AND scan_date > "2025-01-01"' -l 2 -tv;
+websearch 'domain="ibm.com" AND scan_date > "2025-01-01"' -l 2 -tv
 ```
 
 ## Scripting
@@ -261,7 +254,9 @@ or you can simply redirect the input (like importing a database):
 sp < my_script.txt
 ```
 ### Batch execution tips
-As you might know already, one of the greatest feature of shell scripting is the ability of loading batch parameters from files.
+
+As you might know already, one of the greatest joy of shell scripting is the ability of loading batch parameters from
+files.
 Here's one idea for the bulk_enrich command:
 ```shell
 cat to_enrich.txt | xargs sp bulk_enrich
