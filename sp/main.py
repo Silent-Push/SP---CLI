@@ -136,7 +136,7 @@ def main(argv=None):
             elif args.command_args[0].find('"') >= 0:
                 args.command_args[0] = f"'{args.command_args[0]}'"
             elif args.command_args[0].find("'") >= 0:
-                app.pwarning("Please use double quotes with SPQL!")
+                app.pwarning("Please use single quotes with SPQL! i.e.: 'vendor=\"Silent Push\"'")
                 args.command_args[0] = f'"{args.command_args[0]}"'
         new_args = " ".join(args.command_args)
         # the line break ends multiline commands, otherwise cmd2 waits for more input
@@ -153,4 +153,4 @@ if __name__ == "__main__":
 
     sys.exit(main())
 
-# @TODO: verbose, version, ASN enrichment, whois, load spql, --transpose, recipe (fill form) --save --blank
+# @TODO: ASN enrichment, load spql, --transpose, recipe (fill form) --save --blank

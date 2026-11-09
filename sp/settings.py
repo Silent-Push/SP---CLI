@@ -20,14 +20,12 @@ API_KEY = os.environ.get("SILENT_PUSH_API_KEY")
 """Your Silent Push API key"""
 API_TIMEOUT = float(os.environ.get("SILENT_PUSH_API_TIMEOUT", 30))
 """Seconds to wait for the API before giving up"""
-
 if API_URL is None:
     raise OSError(
         "Please set the Silent Push API URL in your environment.\n"
         '\texport SILENT_PUSH_API_URL="'
-        'https://app.silentpush.com/api/"'
+        'https://api.silentpush.com/api/"'
     )
-
 MISSING_API_KEY_MESSAGE = (
     "Please set your Silent Push API key in your environment.\n"
     '\texport SILENT_PUSH_API_KEY="YOUR-API-KEY"'
@@ -51,7 +49,6 @@ def get_initial_commands() -> set:
         ThreatCheckCommandSet,
         WhoisCommandSet,
     )
-
     # the available initial commands
     return {
         EnrichCommandSet(),
